@@ -40,3 +40,17 @@ de instalar dependências e pediu posteriormente a continuidade na nuvem.
 8. Documentar a entrega completa, validar os 20 critérios e parar na Fase 1.
 
 A especificação original é a fonte de verdade. Este resumo não reduz seu escopo.
+
+## Diagnóstico de continuidade no chat Cloud
+
+Em 01/10/2026 foi verificada a execução no Linux remoto do chat. O conector GitHub
+funciona, porém o shell não tem autenticação Git. Dependências foram baixadas e o
+cliente Prisma gerado, mas a instalação pelo wrapper terminou com erro. Não há
+PostgreSQL disponível nem conexão externa; a troca para UID sem privilégios falhou.
+O build Next.js também falhou por recurso de sistema indisponível
+(uv_resident_set_memory). Typecheck direto passou; lint falhou e não há testes.
+
+Fase 1 continua incompleta. Nenhuma migration, seed ou conta foi criada.
+Detalhes, comandos e matriz dos 20 critérios: [CLOUD-EXECUCAO.md](CLOUD-EXECUCAO.md).
+A branch codex/phase-1-cloud contém preparação e diagnóstico, não implementação
+completa. Criar/selecionar ambiente de execução adequado seguindo NUVEM.md.
