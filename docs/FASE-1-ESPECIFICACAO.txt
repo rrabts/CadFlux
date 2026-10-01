@@ -1,0 +1,1152 @@
+Você vai iniciar o desenvolvimento do projeto CadFlux V1.1.
+
+IMPORTANTE:
+Não tente implementar o sistema inteiro nesta etapa.
+Trabalhe SOMENTE na FASE 1 descrita neste documento.
+Não avance para atendimentos, CPF oficial, fechamento semanal, documentos oficiais ou encaminhamentos até receber autorização explícita.
+
+==================================================
+1. VISÃO DO PRODUTO
+==================================================
+
+O CadFlux é uma aplicação web operacional para registro, acompanhamento, validação, consolidação e fechamento de atendimentos relacionados ao Cadastro Único.
+
+O objetivo final do sistema será transformar o fluxo:
+
+Atendimento
+→ Registro
+→ Validação
+→ Indicadores
+→ Conferência
+→ Fechamento
+→ Documento oficial
+
+A V1.1 deverá ser simples, institucional, segura e rápida de utilizar.
+
+O produto NÃO deve parecer:
+- um formulário genérico;
+- um dashboard de startup;
+- um sistema excessivamente burocrático.
+
+A aparência desejada é:
+“software administrativo moderno, silencioso, institucional e confiável”.
+
+==================================================
+2. TECNOLOGIAS
+==================================================
+
+Utilize preferencialmente:
+
+- Next.js
+- TypeScript
+- PostgreSQL
+- Prisma ORM
+- Tailwind CSS
+- componentes acessíveis
+- arquitetura monolítica modular
+
+Evite microserviços.
+
+Estrutura conceitual:
+
+Frontend Web
+    ↓
+Backend/API
+    ↓
+PostgreSQL
+
+Integrações externas e armazenamento de documentos existirão futuramente, mas NÃO serão implementados nesta fase.
+
+==================================================
+3. PRINCÍPIOS DE ARQUITETURA
+==================================================
+
+O CadFlux deve nascer preparado para:
+
+- controle de acesso no backend;
+- auditoria;
+- versionamento;
+- segurança;
+- isolamento entre usuários;
+- histórico;
+- evolução modular.
+
+Nunca confiar apenas no frontend para permissões.
+
+Esconder um botão NÃO equivale a impedir uma ação.
+
+Toda autorização deve ser validada pelo servidor.
+
+==================================================
+4. PERFIS DE ACESSO
+==================================================
+
+Existem exatamente três perfis:
+
+1. ENTREVISTADOR
+2. ENCAMINHADOR
+3. DIREÇÃO
+
+Perfil de acesso é diferente de categoria profissional.
+
+Categorias profissionais iniciais:
+
+- Entrevistador
+- Assistente Social
+- Coordenação
+- Visitador
+
+Exemplo:
+
+Perfil: DIREÇÃO
+Categoria profissional: Coordenação
+
+==================================================
+5. REGRAS DE VISIBILIDADE
+==================================================
+
+ENTREVISTADOR:
+- futuramente verá apenas seus próprios atendimentos;
+- poderá visualizar totais agregados da própria unidade;
+- nunca poderá consultar dados individuais dos colegas.
+
+ENCAMINHADOR:
+- futuramente verá apenas seus próprios encaminhamentos.
+
+DIREÇÃO:
+- terá visão administrativa global;
+- poderá administrar usuários;
+- unidades;
+- perfis;
+- categorias;
+- fechamentos;
+- auditoria.
+
+Nesta fase, implemente apenas a estrutura necessária para essas permissões.
+
+==================================================
+6. IDENTIDADE VISUAL
+==================================================
+
+Criar uma interface minimalista e institucional.
+
+Paleta principal modo claro:
+
+Azul-marinho principal:
+#12304A
+
+Azul de interação:
+#1A4568
+
+Fundo:
+#FFFFFF
+
+Fundo secundário:
+#F5F7F9
+
+Bordas:
+#DCE2E7
+
+Texto principal:
+#18222C
+
+Texto secundário:
+#687580
+
+Evitar:
+- gradientes;
+- sombras fortes;
+- elementos chamativos;
+- excesso de cores.
+
+Cores semânticas podem existir:
+- verde: sucesso;
+- amarelo/âmbar: alerta;
+- vermelho: erro;
+- azul: informação.
+
+==================================================
+7. MODO ESCURO
+==================================================
+
+Implementar desde a Fase 1.
+
+Paleta sugerida:
+
+Fundo:
+#0B1219
+
+Painéis:
+#111B24
+
+Superfície elevada:
+#16232E
+
+Bordas:
+#283743
+
+Texto principal:
+#F4F7F9
+
+Texto secundário:
+#AAB5BE
+
+O usuário deve poder escolher:
+
+- Claro
+- Escuro
+- Sistema
+
+A preferência deverá ser persistida.
+
+Deve existir botão visível de tema na barra superior.
+
+==================================================
+8. LOGO
+==================================================
+
+Criar uma logo simples para uso interno.
+
+Características:
+
+- nome “CadFlux”;
+- símbolo geométrico simples;
+- referência abstrata a fluxo, organização ou documento;
+- sem excesso de detalhes;
+- adequada para sidebar;
+- adequada para tela de login.
+
+Não criar identidade extravagante.
+
+==================================================
+9. LAYOUT GERAL
+==================================================
+
+Desktop é prioridade.
+
+Utilizar:
+
+SIDEBAR RECOLHÍVEL
++
+TOPBAR
++
+CONTEÚDO PRINCIPAL
+
+A sidebar deve ficar aberta por padrão, mas o usuário pode recolhê-la.
+
+Quando recolhida, mostrar somente ícones.
+
+A topbar deverá mostrar discretamente:
+
+- nome do usuário;
+- matrícula;
+- unidade atual;
+- indicador sutil de pendências;
+- seletor claro/escuro;
+- menu do perfil.
+
+Nada extravagante.
+
+==================================================
+10. TELA DE LOGIN
+==================================================
+
+A tela de login deve possuir aparência institucional.
+
+Exibir:
+
+- identidade do CadFlux;
+- identificação institucional discreta;
+- usuário/e-mail;
+- senha;
+- mostrar/ocultar senha;
+- botão Entrar;
+- recuperação de senha.
+
+Não colocar os logotipos institucionais permanentemente dentro do sistema.
+
+Eles poderão aparecer no login e futuramente nos documentos oficiais.
+
+==================================================
+11. AUTENTICAÇÃO
+==================================================
+
+Construir autenticação real.
+
+Não usar apenas estado local ou mocks de frontend.
+
+Preparar:
+
+- login;
+- logout;
+- sessão;
+- proteção de rotas;
+- usuário ativo/inativo;
+- alteração de senha futura;
+- recuperação de senha preparada arquiteturalmente.
+
+Senhas devem ser armazenadas somente por hash seguro.
+
+Nunca armazenar senha em texto puro.
+
+==================================================
+12. MFA
+==================================================
+
+A arquitetura deve prever MFA.
+
+Para usuários de perfil DIREÇÃO, o MFA será obrigatório futuramente.
+
+Nesta Fase 1:
+
+- preparar estrutura de dados;
+- preparar serviços/interfaces;
+- não é obrigatório finalizar integração de MFA externa se isso aumentar excessivamente o escopo.
+
+Mas a arquitetura não pode impedir a implementação posterior.
+
+==================================================
+13. USUÁRIOS
+==================================================
+
+Criar entidade User.
+
+Campos sugeridos:
+
+id
+name
+email/login
+passwordHash
+registrationNumber (matrícula)
+cpf ou identificador funcional, se necessário
+accessProfile
+professionalCategoryId
+primaryUnitId
+status
+createdAt
+updatedAt
+lastLoginAt
+
+Status:
+
+ACTIVE
+INACTIVE
+
+Nunca apagar usuários fisicamente se futuramente possuírem histórico.
+
+==================================================
+14. PERFIS
+==================================================
+
+Criar enum ou estrutura equivalente:
+
+INTERVIEWER
+REFERRAL_OPERATOR
+DIRECTION
+
+Não permitir strings livres espalhadas pelo código.
+
+Centralizar a definição.
+
+==================================================
+15. CATEGORIA PROFISSIONAL
+==================================================
+
+Criar entidade ProfessionalCategory.
+
+Exemplos seed:
+
+Entrevistador
+Assistente Social
+Coordenação
+Visitador
+
+Campos:
+
+id
+name
+active
+createdAt
+updatedAt
+
+A categoria é independente do perfil de acesso.
+
+==================================================
+16. UNIDADES
+==================================================
+
+Criar entidade Unit.
+
+Campos:
+
+id
+name
+code
+active
+timezone
+createdAt
+updatedAt
+
+Timezone inicial padrão:
+
+America/Sao_Paulo
+
+Unidades nunca deverão ser apagadas fisicamente futuramente se possuírem histórico.
+
+==================================================
+17. VÍNCULO DO USUÁRIO À UNIDADE
+==================================================
+
+Todo usuário terá:
+
+primaryUnitId
+
+A arquitetura também deve permitir futuramente que determinado usuário possua autorização para operar em unidades adicionais.
+
+Não precisa implementar a interface completa disso agora, mas não crie uma modelagem que impeça essa evolução.
+
+==================================================
+18. SEGURANÇA DE AUTORIZAÇÃO
+==================================================
+
+Criar camada central de autorização.
+
+Exemplo conceitual:
+
+can(user, action, resource)
+
+ou estrutura equivalente.
+
+Não espalhar verificações manuais inconsistentes pelo projeto.
+
+A API deve verificar:
+
+- usuário autenticado;
+- status ativo;
+- perfil;
+- acesso ao recurso.
+
+Nunca confiar em valores de perfil enviados pelo frontend.
+
+==================================================
+19. DIREÇÃO — GESTÃO DE USUÁRIOS
+==================================================
+
+Na Fase 1, implementar o módulo de Gestão de Usuários para o perfil DIREÇÃO.
+
+A Direção poderá:
+
+- listar usuários;
+- pesquisar usuários;
+- criar usuário;
+- editar usuário;
+- alterar perfil;
+- alterar categoria;
+- alterar unidade;
+- ativar;
+- inativar;
+- visualizar histórico básico.
+
+Não permitir delete físico.
+
+==================================================
+20. TELA DE GESTÃO DE USUÁRIOS
+==================================================
+
+Layout:
+
+Título:
+GESTÃO DE USUÁRIOS
+
+Busca:
+
+Nome
+CPF/identificador
+Matrícula
+
+Filtros:
+
+Perfil
+Categoria
+Unidade
+Status
+
+Ações:
+
++ Novo usuário
+Importar usuários
+
+Tabela:
+
+Nome
+Matrícula
+Perfil
+Categoria
+Unidade
+Status
+Ações
+
+==================================================
+21. DETALHE DO USUÁRIO
+==================================================
+
+Ao abrir um usuário:
+
+Cabeçalho:
+
+Nome
+Matrícula
+Status
+
+Abas:
+
+1. Dados pessoais
+2. Acesso e perfil
+3. Unidade
+4. Histórico
+
+==================================================
+22. IMPORTAÇÃO DE USUÁRIOS
+==================================================
+
+Implementar estrutura inicial de importação em massa.
+
+Formatos permitidos:
+
+- XLSX
+- CSV
+
+NÃO aceitar SQL.
+
+NUNCA executar código ou queries fornecidas pelo arquivo.
+
+Fluxo:
+
+1. Arquivo
+2. Validação
+3. Revisão
+4. Confirmação
+
+==================================================
+23. TEMPLATE DE IMPORTAÇÃO
+==================================================
+
+Disponibilizar um modelo para download.
+
+Colunas:
+
+nome
+cpf_ou_identificador
+email
+matricula
+perfil
+categoria
+unidade
+status
+
+Senha NÃO entra no arquivo.
+
+==================================================
+24. VALIDAÇÃO DA IMPORTAÇÃO
+==================================================
+
+Antes de criar qualquer usuário:
+
+- validar campos obrigatórios;
+- detectar duplicidade;
+- validar perfil;
+- validar categoria;
+- validar unidade;
+- validar e-mail/login;
+- validar CPF estruturalmente, caso informado;
+- detectar duplicidades dentro do próprio arquivo.
+
+Mostrar:
+
+quantidade total;
+válidos;
+inválidos;
+duplicados;
+motivos dos erros.
+
+Nenhuma gravação deverá ocorrer antes da confirmação.
+
+==================================================
+25. SEGURANÇA DE UPLOAD
+==================================================
+
+Aplicar:
+
+- limite de tamanho;
+- limite de linhas;
+- validação real do formato;
+- nome de arquivo sanitizado;
+- proteção contra conteúdo inesperado;
+- neutralização de fórmulas potencialmente perigosas em CSV/XLSX;
+- processamento controlado.
+
+==================================================
+26. SENHA DE NOVO USUÁRIO
+==================================================
+
+Não permitir senha em CSV/XLSX.
+
+Arquitetura deverá permitir:
+
+A) convite para criação de senha;
+
+ou
+
+B) senha temporária com troca obrigatória.
+
+Na Fase 1 pode ser utilizada senha temporária em ambiente de desenvolvimento, desde que:
+
+- seja gerada de forma segura;
+- seja marcada como temporária;
+- usuário seja obrigado a alterá-la posteriormente.
+
+==================================================
+27. AUDITORIA
+==================================================
+
+Criar base de auditoria desde agora.
+
+Entidade AuditLog.
+
+Campos conceituais:
+
+id
+actorUserId
+action
+entityType
+entityId
+previousValue
+newValue
+metadata
+createdAt
+
+Auditoria deverá ser append-only.
+
+Não criar interface de edição ou exclusão desses registros.
+
+==================================================
+28. AÇÕES A AUDITAR NESTA FASE
+==================================================
+
+No mínimo:
+
+- criação de usuário;
+- alteração de usuário;
+- mudança de perfil;
+- mudança de categoria;
+- mudança de unidade;
+- ativação;
+- inativação;
+- login;
+- importação em massa.
+
+==================================================
+29. AUTOALTERAÇÃO DE PRIVILÉGIOS
+==================================================
+
+Um usuário da Direção não deve conseguir elevar silenciosamente seus próprios privilégios.
+
+Implemente uma regra inicial impedindo que ele altere o próprio perfil para uma condição mais privilegiada.
+
+Deixar arquitetura preparada para aprovação por outro administrador no futuro.
+
+==================================================
+30. DASHBOARD DO ENTREVISTADOR
+==================================================
+
+Nesta fase, construir a aparência e estrutura.
+
+Não implementar ainda dados reais de atendimentos.
+
+Dashboard terá:
+
+- botão grande “Novo atendimento”;
+- card Atendimentos hoje;
+- card Esta semana;
+- card Este mês;
+- card Pendências;
+- Resumo da semana;
+- Total da unidade;
+- últimos atendimentos.
+
+Como atendimentos ainda não existem nesta fase, usar estados vazios ou dados de desenvolvimento claramente identificados.
+
+Não implementar a regra real dos atendimentos ainda.
+
+==================================================
+31. DASHBOARD DA DIREÇÃO
+==================================================
+
+Criar estrutura visual:
+
+Cards:
+
+- Hoje
+- Semana
+- Mês
+- Unidades ativas
+
+Seção:
+
+Atendimentos por unidade
+
+Seção:
+
+Situação dos fechamentos
+
+Como esses módulos ainda não existem, utilizar estados vazios.
+
+Não inventar lógica de negócio.
+
+==================================================
+32. DASHBOARD DO ENCAMINHADOR
+==================================================
+
+Estrutura:
+
+Hoje
+Semana
+Mês
+Pendências
+
+Botão:
+
++ Novo encaminhamento
+
+Lista:
+
+Últimos encaminhamentos
+
+Ainda em estado vazio.
+
+==================================================
+33. MENUS
+==================================================
+
+ENTREVISTADOR:
+
+INÍCIO
+- Visão Geral
+
+ATENDIMENTOS
+- Novo Atendimento
+- Meus Atendimentos
+
+FECHAMENTO
+- Semana Atual
+- Histórico
+
+DOCUMENTOS
+- Documentos Gerados
+
+PENDÊNCIAS
+- Minhas Pendências
+
+CONTA
+- Meu Perfil
+
+--------------------------------
+
+ENCAMINHADOR:
+
+INÍCIO
+- Visão Geral
+
+ENCAMINHAMENTOS
+- Novo Encaminhamento
+- Meus Encaminhamentos
+
+PENDÊNCIAS
+- Minhas Pendências
+
+CONTA
+- Meu Perfil
+
+--------------------------------
+
+DIREÇÃO:
+
+INÍCIO
+- Visão Geral
+
+ATENDIMENTOS
+
+ENCAMINHAMENTOS
+
+FECHAMENTOS
+
+PENDÊNCIAS
+
+GESTÃO
+- Gestão de Usuários
+- Unidades
+- Benefícios
+- Tipos de Atendimento
+- Categorias Profissionais
+
+AUDITORIA
+
+CONFIGURAÇÕES
+
+Nesta fase, algumas rotas podem mostrar tela “Em desenvolvimento”, mas a navegação e permissões devem estar corretas.
+
+==================================================
+34. PENDÊNCIAS
+==================================================
+
+Preparar estrutura conceitual para futura área de Pendências.
+
+Categorias futuras:
+
+- CPF aguardando verificação;
+- conflito documental;
+- registro incompleto;
+- possível duplicidade;
+- erro de fechamento;
+- problema de importação.
+
+Entrevistador verá somente suas pendências.
+
+Na Fase 1, implemente somente a estrutura visual e modelo básico se necessário.
+
+==================================================
+35. COMPONENTES DE UI
+==================================================
+
+Criar design system reutilizável.
+
+Componentes sugeridos:
+
+Button
+Input
+Select
+Checkbox
+Card
+Badge
+Table
+Modal
+Tabs
+Dropdown
+Tooltip
+Alert
+Toast
+Skeleton
+EmptyState
+PageHeader
+Sidebar
+Topbar
+FilterBar
+ConfirmDialog
+
+Não duplicar estilos manualmente em cada tela.
+
+==================================================
+36. TRANSIÇÕES
+==================================================
+
+Transições leves.
+
+Duração aproximada:
+
+150ms a 220ms.
+
+Aplicar em:
+
+- sidebar;
+- tabs;
+- modal;
+- dropdown;
+- campos condicionais;
+- feedback de salvamento.
+
+Não usar animações exageradas.
+
+==================================================
+37. FEEDBACK
+==================================================
+
+Toda ação deve possuir estado visual.
+
+Exemplo:
+
+Salvar
+→ Salvando...
+→ Salvo
+
+ou:
+
+→ Falha ao salvar
+
+Utilizar toast e mensagens contextuais.
+
+==================================================
+38. ACESSIBILIDADE
+==================================================
+
+Obrigatório:
+
+- navegação por teclado;
+- foco visível;
+- labels corretos;
+- contraste adequado;
+- mensagens de erro textuais;
+- aria attributes quando aplicáveis;
+- não depender somente de cor;
+- componentes semanticamente corretos.
+
+==================================================
+39. RESPONSIVIDADE
+==================================================
+
+Desktop/notebook é prioridade.
+
+Mobile é secundário, mas deve funcionar.
+
+No mobile:
+
+- sidebar vira drawer/menu;
+- cards empilham;
+- tabelas devem permanecer utilizáveis;
+- topbar deve simplificar.
+
+Não criar aplicativo mobile.
+
+==================================================
+40. DADOS DE DESENVOLVIMENTO
+==================================================
+
+Criar apenas dados totalmente fictícios.
+
+NÃO usar:
+
+- CPF real;
+- nome de usuário real;
+- famílias reais;
+- dados reais de beneficiários.
+
+Criar seed de demonstração.
+
+Sugestão:
+
+DIREÇÃO:
+direcao@cadflux.local
+
+ENTREVISTADOR:
+entrevistador@cadflux.local
+
+ENCAMINHADOR:
+encaminhador@cadflux.local
+
+Utilizar senhas apenas de desenvolvimento e documentá-las claramente no README como dados fictícios e não apropriados para produção.
+
+==================================================
+41. ESTRUTURA DE PASTAS
+==================================================
+
+Organizar por módulos/domínios.
+
+Exemplo conceitual:
+
+src/
+  modules/
+    auth/
+    users/
+    units/
+    professional-categories/
+    audit/
+    permissions/
+  components/
+  layouts/
+  lib/
+  database/
+
+Não é obrigatório seguir exatamente estes nomes, mas preserve separação de responsabilidades.
+
+==================================================
+42. QUALIDADE DO CÓDIGO
+==================================================
+
+Exigir:
+
+- TypeScript estrito;
+- lint;
+- formatter;
+- tratamento centralizado de erros;
+- validação de entrada;
+- schemas compartilhados quando fizer sentido;
+- nomes claros;
+- funções pequenas;
+- baixo acoplamento;
+- documentação apenas onde necessária.
+
+Evitar abstrações prematuras.
+
+==================================================
+43. TESTES DA FASE 1
+==================================================
+
+Criar testes para:
+
+AUTENTICAÇÃO
+- login válido;
+- login inválido;
+- usuário inativo;
+- rota protegida.
+
+PERMISSÕES
+- entrevistador não acessa Gestão de Usuários;
+- encaminhador não acessa Gestão de Usuários;
+- Direção acessa;
+- usuário inativo perde acesso.
+
+GESTÃO
+- criar usuário;
+- editar;
+- inativar;
+- trocar unidade;
+- trocar categoria;
+- trocar perfil.
+
+IMPORTAÇÃO
+- arquivo válido;
+- perfil inválido;
+- unidade inexistente;
+- duplicidade;
+- arquivo inválido.
+
+AUDITORIA
+- mudanças relevantes geram log.
+
+==================================================
+44. CRITÉRIOS DE ACEITE DA FASE 1
+==================================================
+
+A Fase 1 somente será considerada concluída se:
+
+1. projeto rodar localmente;
+2. banco estiver configurado;
+3. migrations funcionarem;
+4. seed funcionar;
+5. login funcionar;
+6. logout funcionar;
+7. proteção de rotas funcionar;
+8. os três perfis existirem;
+9. menus forem diferentes por perfil;
+10. autorização existir no backend;
+11. modo claro/escuro funcionar;
+12. preferência do tema persistir;
+13. layout responsivo funcionar;
+14. Direção conseguir gerenciar usuários;
+15. usuário puder ser inativado;
+16. histórico básico existir;
+17. importação CSV/XLSX possuir validação e prévia;
+18. auditoria registrar ações;
+19. testes críticos passarem;
+20. README explicar instalação e execução.
+
+==================================================
+45. NÃO IMPLEMENTAR AINDA
+==================================================
+
+PROIBIDO avançar nesta tarefa para:
+
+- registro real de atendimentos;
+- consulta oficial de CPF;
+- pessoas/famílias;
+- benefícios funcionais de atendimento;
+- fechamento semanal;
+- documentos oficiais;
+- PDF;
+- Word;
+- encaminhamentos reais;
+- indicadores reais;
+- API SERPRO/Receita;
+- BI;
+- IA;
+- WhatsApp;
+- notificações externas.
+
+Pode criar placeholders de interface, mas NÃO implementar a lógica desses módulos.
+
+==================================================
+46. PREPARAÇÃO PARA FASES FUTURAS
+==================================================
+
+A arquitetura deve permitir posteriormente:
+
+FASE 2:
+Usuários e unidades refinados.
+
+FASE 3:
+Atendimentos.
+
+FASE 4:
+Indicadores.
+
+FASE 5:
+Consulta oficial de CPF.
+
+FASE 6:
+Fechamento semanal.
+
+FASE 7:
+Documentos oficiais.
+
+FASE 8:
+Encaminhamentos.
+
+FASE 9:
+Hardening, backup e monitoramento.
+
+Não implementar essas fases agora.
+
+==================================================
+47. FORMA DE TRABALHO
+==================================================
+
+Antes de programar:
+
+1. examine a estrutura existente do repositório;
+2. informe resumidamente o plano;
+3. identifique dependências;
+4. preserve o que já existir e estiver correto;
+5. implemente em etapas pequenas.
+
+Durante o desenvolvimento:
+
+- rode migrations;
+- rode lint;
+- rode typecheck;
+- rode testes;
+- corrija os problemas encontrados.
+
+Não deixe erros conhecidos para depois sem documentá-los.
+
+==================================================
+48. ENTREGA
+==================================================
+
+Ao terminar a Fase 1, forneça:
+
+1. resumo do que foi implementado;
+2. arquitetura criada;
+3. migrations;
+4. entidades do banco;
+5. contas fictícias disponíveis;
+6. rotas existentes;
+7. matriz de permissões implementada;
+8. testes executados;
+9. resultados dos testes;
+10. limitações conhecidas;
+11. decisões técnicas tomadas;
+12. instruções para rodar localmente;
+13. itens que ficaram preparados para a Fase 2.
+
+Não avance sozinho para a próxima fase.
+
+Pare e aguarde autorização.
