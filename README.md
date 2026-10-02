@@ -28,3 +28,11 @@ Os comandos acima não constituem evidência de funcionamento.
 Contas de demonstração previstas: direcao@cadflux.local,
 entrevistador@cadflux.local e encaminhador@cadflux.local. Ainda não criadas/validadas.
 Usar somente dados fictícios e senhas de desenvolvimento, nunca em produção.
+
+## Continuidade em ambiente Cloud
+
+A Fase 1 permanece incompleta. O diagnóstico do executor do chat, comandos,
+limitações e situação dos 20 critérios estão em [docs/CLOUD-EXECUCAO.md](docs/CLOUD-EXECUCAO.md).
+O caminho para selecionar/preparar um ambiente capaz de executar PostgreSQL e Next.js
+está em [docs/NUVEM.md](docs/NUVEM.md). Não há contas operacionais nem migration/seed
+validados nesta retomada.

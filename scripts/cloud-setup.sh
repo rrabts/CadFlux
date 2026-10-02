@@ -5,16 +5,20 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if (major < 22 || (major === 22 && minor < 12)) throw new Error("Node.js 22.12+ necessário");'
 
-if ! command -v pnpm >/dev/null 2>&1; then
-  if command -v corepack >/dev/null 2>&1; then
-    corepack enable
-    corepack prepare pnpm@10.28.2 --activate
-  else
-    npm install --global pnpm@10.28.2
-  fi
+# Respect packageManager even when the executor provides another pnpm version.
+# npm exec avoids modifying the executor's global runtime installation.
+if command -v pnpm >/dev/null 2>&1 && [[ "$(pnpm --version)" == "10.28.2" ]]; then
+  pnpm_cmd=(pnpm)
+else
+  pnpm_cmd=(npm exec --yes --package=pnpm@10.28.2 -- pnpm)
 fi
 
-pnpm install
+if [[ -f pnpm-lock.yaml ]]; then
+  CI=true "${pnpm_cmd[@]}" install --frozen-lockfile
+else
+  # The initial scaffold has no lockfile yet; generate one for later review.
+  CI=true "${pnpm_cmd[@]}" install --no-frozen-lockfile
+fi
 
 if [[ "${CADFLUX_SKIP_LOCAL_POSTGRES:-0}" != "1" ]]; then
   if [[ "$(id -u)" == "0" ]]; then
@@ -47,15 +51,35 @@ SQL
   fi
 fi
 
-pnpm db:generate
+if [[ "${CADFLUX_SKIP_LOCAL_POSTGRES:-0}" == "1" ]]; then
+  node --env-file-if-exists=.env -e 'if (!process.env.DATABASE_URL) throw new Error("Configure DATABASE_URL para PostgreSQL de desenvolvimento antes de continuar.");'
+fi
+
+# Check the real connection without printing credentials or driver error text.
+node --env-file-if-exists=.env --input-type=module <<'JS'
+import pg from 'pg';
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 10000 });
+try {
+  await client.connect();
+  await client.query('SELECT 1');
+  console.log('Conexão PostgreSQL de desenvolvimento validada.');
+} catch {
+  console.error('PostgreSQL indisponível. Revise DATABASE_URL e os serviços do ambiente Cloud.');
+  process.exitCode = 1;
+} finally {
+  await client.end();
+}
+JS
+
+"${pnpm_cmd[@]}" db:generate
 if [[ -d prisma/migrations ]]; then
-  pnpm db:migrate
+  "${pnpm_cmd[@]}" db:migrate
 else
   printf '%s\n' 'Migration da Fase 1 ainda precisa ser criada e validada.'
 fi
 if [[ -f prisma/seed.ts ]]; then
-  pnpm db:seed
+  "${pnpm_cmd[@]}" db:seed
 else
   printf '%s\n' 'Seed da Fase 1 ainda precisa ser implementado e validado.'
 fi
-printf '%s\n' 'Preparação concluída. Leia docs/STATUS.md; a aplicação ainda é parcial.'
+printf '%s\n' 'Dependências e conexão de desenvolvimento preparadas. A Fase 1 NÃO foi validada; leia docs/STATUS.md.'
