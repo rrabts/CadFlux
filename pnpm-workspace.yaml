@@ -1,13 +1,14 @@
 packages:
   - .
 onlyBuiltDependencies:
-  - '@prisma/client'
-  - '@prisma/engines'
+  - "@prisma/client"
+  - "@prisma/engines"
   - prisma
   - sharp
   - esbuild
   - embedded-postgres
-  - '@embedded-postgres/windows-x64'
-  - '@embedded-postgres/linux-x64'
-  - '@embedded-postgres/darwin-arm64'
-  - '@tailwindcss/oxide'
+  - "@embedded-postgres/windows-x64"
+  - "@embedded-postgres/linux-x64"
+  - "@embedded-postgres/darwin-arm64"
+  - "@tailwindcss/oxide"
+  - unrs-resolver

@@ -58,4 +58,4 @@ if [[ -f prisma/seed.ts ]]; then
 else
   printf '%s\n' 'Seed da Fase 1 ainda precisa ser implementado e validado.'
 fi
-printf '%s\n' 'Preparação concluída. Leia docs/STATUS.md; a aplicação ainda é parcial.'
+printf '%s\n' 'Preparação concluída. Execute pnpm dev e consulte o README.'
