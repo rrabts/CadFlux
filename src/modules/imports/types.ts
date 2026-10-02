@@ -35,9 +35,21 @@ export type ImportUserData = {
 
 export type ImportPreviewRow = {
   line: number;
+  values: ImportRawData;
   data: Partial<ImportUserData>;
   errors: string[];
   duplicate: boolean;
+};
+
+export type ImportPreview = {
+  batchId: string;
+  fileName: string;
+  total: number;
+  valid: number;
+  invalid: number;
+  duplicates: number;
+  expiresAt: string;
+  rows: ImportPreviewRow[];
 };
 
 export type ImportReferences = {
