@@ -1,42 +1,45 @@
-# Estado da retomada — 1 de outubro de 2026
+# Fase 1 — entrega de 2 de outubro de 2026
 
-## O que ocorreu
+Branch: `feature/foundation-auth`. Base original inspecionada antes da edição; scaffold preservado e concluído. Nenhuma alteração realizada diretamente na main.
 
-O repositório começou vazio. Foram criados arquivos iniciais Next.js/TypeScript,
-configurações de qualidade e módulos parciais. O usuário interrompeu a execução antes
-de instalar dependências e pediu posteriormente a continuidade na nuvem.
+## Implementado
 
-## Preservado
+- Next.js/TypeScript strict, Tailwind, PostgreSQL real, Prisma, lockfile e configuração de qualidade.
+- Migration inicial com as 11 entidades e proteções de auditoria append-only e contra exclusão física de usuários.
+- Seed idempotente de três contas fictícias, unidade de demonstração e quatro categorias.
+- Login, logout, sessão opaca expirada em 8 horas, hash scrypt, cookie protegido, usuário ativo, limite de tentativas, troca obrigatória de senha temporária.
+- Autorização central no servidor, proteção de páginas/APIs, schemas estritos, CSRF por origem, proteção de autoalteração e último administrador.
+- Gestão de usuários com busca, quatro filtros, criação, edição, vínculos, perfil, ativação/inativação e histórico.
+- Unidades e categorias funcionais; consultas de auditoria somente leitura.
+- Importação CSV/XLSX com template, limites, validação estrutural de CPF, normalização, duplicidades, revisão, confirmação atômica e de uso único. Senhas aleatórias fora do arquivo; arquivo original não é persistido.
+- Verificação real do tamanho descompactado do XLSX, além dos cabeçalhos ZIP, e rejeição de fórmulas/macros/vínculos externos.
+- Dashboards vazios por perfil, marca geométrica, sidebar recolhível, drawer mobile, tema Claro/Escuro/Sistema persistente, feedback e componentes acessíveis.
+- README completo, configuração local/nuvem, limpeza de dados temporários e workflow CI.
 
-- package.json, configurações TypeScript/Next/Tailwind/ESLint/Prettier/Vitest.
-- Schema Prisma inicial: User, ProfessionalCategory, Unit, UserUnitAccess, Session,
-  LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch e AuditLog.
-- Tipos e schema de usuários, autorização central inicial, cliente Prisma e erros.
-- Componentes iniciais de UI, tema, marca, navegação e layout.
-- Tipos iniciais de importação.
-- compose.yaml para PostgreSQL de desenvolvimento e .env.example fictício.
+## Evidências locais
 
-## Ainda não verificado ou concluído
+Ambiente: Node 24, pnpm 10.28.2, PostgreSQL embarcado real 18.4, Prisma 6.19.3. Banco da aplicação separado de `cadflux_test`.
 
-- Dependências não instaladas; não há lockfile gerado.
-- Nenhuma migration executada ou seed implementada/validada.
-- Autenticação, endpoints, gestão e importação ainda não concluídos.
-- Layout referencia globals.css ainda ausente.
-- Scripts local-postgres.mjs e setup-database.mjs referenciados ainda ausentes.
-- Dashboards, páginas, testes e documentação final ainda pendentes.
-- Lint, typecheck, testes e build nunca executados.
-- Sem publicação do aplicativo ou banco operacional em nuvem.
+| Verificação                            | Resultado                                                 |
+| -------------------------------------- | --------------------------------------------------------- |
+| Instalação e geração Prisma            | Executadas                                                |
+| Migration da aplicação                 | Aplicada com sucesso                                      |
+| Migration do banco exclusivo de testes | Aplicada com sucesso                                      |
+| Seed                                   | Executado; idempotência exercitada em múltiplas execuções |
+| Integração PostgreSQL                  | 21 testes aprovados                                       |
+| Navegador Chromium                     | 8 testes aprovados                                        |
+| Acessibilidade axe                     | Sem violações WCAG A/AA detectadas nas telas testadas     |
+| Lint                                   | Aprovado, zero warnings                                   |
+| Typecheck strict                       | Aprovado                                                  |
+| Build Next.js                          | Aprovado                                                  |
+| Capturas desktop/mobile                | Inspecionadas                                             |
 
-## Ordem sugerida de continuidade
+A suíte de integração cobre login válido/inválido/inativo, sessão/expiração/logout, limite de tentativas, permissões dos três perfis, criação/edição/vínculos/perfil/status, revogação de sessão, senha temporária, mass assignment, autoalteração, revalidação do administrador, CSV/XLSX, referências/perfil inválidos, duplicidades, revalidação e atomicidade, IDOR, confirmação expirada, limites/fórmulas/ZIP com tamanho falso e imutabilidade dos logs.
 
-1. Instalar dependências na nuvem e gerar lockfile; confirmar versões compatíveis.
-2. Revisar schema, criar migrations (incluindo proteção append-only) e seed fictício.
-3. Concluir autenticação/sessão, status ativo, troca obrigatória de senha, recuperação
-   e interfaces MFA preparadas; aplicar autorização a todas as rotas e APIs.
-4. Concluir usuários e histórico; proteger autoalteração e integridade administrativa.
-5. Concluir importação segura, prévia/revisão e confirmação transacional.
-6. Concluir UI, dashboards vazios, tema persistido, navegação e responsividade.
-7. Implementar e executar os testes exigidos, migrations/seed, lint/typecheck/build.
-8. Documentar a entrega completa, validar os 20 critérios e parar na Fase 1.
+A suíte de navegador cobre rotas e APIs protegidas, CSRF, acesso direto bloqueado aos perfis operacionais, menu da Direção, tema persistido, sidebar/drawer, logout, inativação, cadastro/edição/ativação/inativação pela UI, revisão e confirmação de importação, troca obrigatória de senha e verificação automatizada de acessibilidade. Os testes não equivalem a uma certificação completa de acessibilidade.
 
-A especificação original é a fonte de verdade. Este resumo não reduz seu escopo.
+## Limites preservados
+
+Sem atendimentos, pessoas/famílias, consulta CPF oficial, fechamentos reais, documentos oficiais, PDF/DOCX, encaminhamentos funcionais, indicadores operacionais, IA ou integrações externas. MFA, e-mail de recuperação/convite, unidades adicionais e segundo aprovador possuem base arquitetural, sem serviço funcional nesta fase. Nenhum deploy de produção foi realizado. CI foi configurada; o resultado remoto deve ser consultado no GitHub após publicação da branch.
+
+Instalação, contas fictícias, permissões, rotas, limites de consulta e decisões estão no README. Não iniciar a Fase 2 sem autorização.
