@@ -101,5 +101,6 @@ try {
       ? error.message
       : "Não foi possível iniciar PostgreSQL. Confira a porta, permissões e dependências locais.",
   );
-  process.exitCode = 1;
+  // embedded-postgres registers an exit hook that overrides exitCode on natural exit.
+  process.exit(1);
 }

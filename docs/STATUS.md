@@ -1,6 +1,12 @@
 # CadFlux V1.1 — verificação da Fase 1 em 02/10/2026
 
-A Fase 1 está concluída: os 20 critérios de aceite foram verificados. Lint, typecheck, 85 testes e build terminaram com saída 0; os dez cenários de navegador também passaram. Nenhum módulo operacional de fases posteriores foi implementado. A entrega permanece na branch de revisão, sem merge ou implantação de produção.
+## Revalidação atual no Linux
+
+A main recebeu o PR #2 no commit `5bc35d727dcde44724bfaa6b7d0f43479a0dba92`. Em 02/10, o checkout remoto Linux passou em lint, TypeScript, schema Prisma e 62 testes unitários. A validação completa em nuvem permanece bloqueada: PostgreSQL não iniciou por restrições de usuário; 23 testes de integração não executaram; Next build falhou com `uv_resident_set_memory`; os cenários de navegador não iniciaram sem build. O retorno indevido de sucesso do db:local foi corrigido e verificado. Veja [relatório Linux](CLOUD-VALIDACAO-2026-10-02.md).
+
+## Verificação anterior no Windows
+
+A Fase 1 foi declarada concluída no Windows: os 20 critérios de aceite foram verificados. Lint, typecheck, 85 testes e build terminaram com saída 0; os dez cenários de navegador também passaram. Os resultados a seguir correspondem à entrega anterior ao merge do PR #2. Nenhum módulo operacional de fases posteriores ou implantação de produção foi executado.
 
 ## Origem e ambiente
 

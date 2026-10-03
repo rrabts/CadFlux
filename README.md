@@ -107,4 +107,6 @@ Validação em 02/10/2026: lint, typecheck, 85 testes em cinco arquivos e build 
 
 Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS.md](docs/STATUS.md). [docs/CLOUD-EXECUCAO.md](docs/CLOUD-EXECUCAO.md) preserva o diagnóstico histórico do executor anterior; não descreve a validação atual.
 
+Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
+
 Não avance para a Fase 2 sem autorização.
