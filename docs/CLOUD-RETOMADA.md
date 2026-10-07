@@ -109,3 +109,22 @@ liberar os hosts oficiais indicados pelo instalador na configuração Cloud.
 Essas evidências verificam reinício de processos na mesma máquina. Uma tarefa em
 uma instância Cloud nova ainda depende de salvar a configuração pela interface,
 incorporar os scripts na branch usada e executar a validação nela.
+
+## Verificação em checkout limpo
+
+Após enviar a branch, foi feito clone Git autenticado em
+`/workspace/CadFlux-clean-validation`, sem `.env`, `.local` ou `node_modules`.
+O setup criou dependências, dois bancos novos, migration e seed, e iniciou os
+serviços com SQL/HTTP aprovados. O cache de pacotes da máquina foi reutilizado;
+não houve reutilização dos bancos ou configuração do checkout original.
+
+Nesse checkout, lint, typecheck, build, 85 testes e 10 E2E passaram novamente
+(E2E: 24,9s, saída 0, teardown automático). Também foi verificada inicialização
+com DATABASE_URL e DATABASE_URL_TEST herdados do processo, sem `.env`: SQL/HTTP
+passaram e nenhum `.env` foi criado. Os serviços desse clone foram encerrados
+após a validação; o supervisor do checkout original foi retomado.
+
+Isso comprova a instalação do zero e a configuração por variáveis na máquina
+atual. Não substitui salvar os secrets/configuração na plataforma e validar uma
+instância Cloud nova. A branch remota permite revisar e incorporar os scripts
+antes dessa etapa.

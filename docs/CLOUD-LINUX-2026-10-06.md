@@ -76,3 +76,14 @@ e typecheck passaram. A preparação completa e as limitações atuais estão em
 registradas acima descrevem a etapa anterior, agora substituída pelo supervisor.
 Salvar a configuração Cloud/secrets e validar uma instância nova continuam
 pendentes por falta de ferramenta de escrita do ambiente nesta sessão.
+
+## Continuação: branch remota e clone independente
+
+Branch `codex/cloud-linux-setup` enviada ao GitHub. Clone autenticado independente
+em `/workspace/CadFlux-clean-validation` confirmou instalação sem `.env`, bancos
+ou dependências anteriores: setup, migrations/seed, SQL e HTTP passaram.
+Lint, typecheck, build, 85 testes e 10 E2E passaram novamente (24,9s).
+Também passou start/status/stop com URLs herdados e sem criação de `.env`.
+Os bancos de desenvolvimento do checkout original foram preservados; serviços
+originais retomados depois dos testes. A plataforma continua sem ferramenta de
+escrita de configuração/secrets ou criação de instância nova nesta sessão.

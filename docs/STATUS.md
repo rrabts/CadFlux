@@ -115,3 +115,9 @@ Reinício dos processos e stop/start validados. E2E Linux: 10 passaram, teardown
 automático; 85 testes de unidade/integração passaram novamente. Configuração
 Cloud/secrets pela interface e instância nova ainda pendentes. Consulte
 [comandos e configuração do ambiente](CLOUD-RETOMADA.md).
+
+Continuação Cloud: branch enviada ao GitHub e validada em clone autenticado limpo,
+com dependências/configuração/bancos novos. Setup, SQL, migrations/seed, lint,
+typecheck, build, 85 testes e 10 E2E passaram. Configuração por variáveis herdadas
+sem `.env` também passou. Uma instância nova e o salvamento dos secrets na
+plataforma seguem pendentes; não houve merge na main nem publicação de produção.
