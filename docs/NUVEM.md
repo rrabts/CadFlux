@@ -80,3 +80,10 @@ Texto para preparação do ambiente:
 Não há ferramenta disponível neste chat para selecionar ou publicar esse ambiente
 Codex Cloud pela API. A seleção precisa ocorrer na interface acima. Não enviar
 senhas reais no texto da tarefa ou commit.
+
+
+## Setup Linux automatizado
+
+A preparação atual usa PostgreSQL das dependências, sem sudo, e um supervisor
+de desenvolvimento para banco e Next.js. Campos para salvar o ambiente, secrets,
+retomada e E2E estão em [CLOUD-RETOMADA.md](CLOUD-RETOMADA.md).

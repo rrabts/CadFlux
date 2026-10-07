@@ -102,3 +102,16 @@ MFA e recuperação de senha possuem modelagem e interfaces preparadas; envio ex
 O README detalha a arquitetura modular, as dez entidades, a migration, as rotas, a matriz de permissões e as decisões de senha/sessão/importação. Rodar localmente: instalar dependências, manter `pnpm db:local` aberto, executar `pnpm db:setup --all` e `pnpm dev` em outro terminal.
 
 Não avançar para a Fase 2 sem nova autorização.
+
+
+Preparação Codex Cloud Linux em 06/10/2026: PostgreSQL real, bancos separados,
+setup/migrations/seed, lint, typecheck, 85 testes e build passaram; Next dev
+respondeu HTTP. Serviços ativos durante a tarefa, com restrições do sandbox e
+persistência entre tarefas ainda sem garantia. Relatório: [CLOUD-LINUX-2026-10-06.md](CLOUD-LINUX-2026-10-06.md).
+
+Retomada Cloud automatizada: `bash scripts/cloud-setup.sh` inicia PostgreSQL e
+Next supervisionados; `cloud:start/status/stop` permite operar sem reinstalar.
+Reinício dos processos e stop/start validados. E2E Linux: 10 passaram, teardown
+automático; 85 testes de unidade/integração passaram novamente. Configuração
+Cloud/secrets pela interface e instância nova ainda pendentes. Consulte
+[comandos e configuração do ambiente](CLOUD-RETOMADA.md).

@@ -110,3 +110,16 @@ Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS
 Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
 
 Não avance para a Fase 2 sem autorização.
+
+
+Preparação Codex Cloud Linux em 06/10/2026: PostgreSQL real, bancos separados,
+setup/migrations/seed, lint, typecheck, 85 testes e build passaram; Next dev
+respondeu HTTP. Serviços ativos durante a tarefa, com restrições do sandbox e
+persistência entre tarefas ainda sem garantia. Relatório: [docs/CLOUD-LINUX-2026-10-06.md](docs/CLOUD-LINUX-2026-10-06.md).
+
+Retomada Cloud automatizada: `bash scripts/cloud-setup.sh` inicia PostgreSQL e
+Next supervisionados; `cloud:start/status/stop` permite operar sem reinstalar.
+Reinício dos processos e stop/start validados. E2E Linux: 10 passaram, teardown
+automático; 85 testes de unidade/integração passaram novamente. Configuração
+Cloud/secrets pela interface e instância nova ainda pendentes. Consulte
+[comandos e configuração do ambiente](docs/CLOUD-RETOMADA.md).

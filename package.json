@@ -22,7 +22,10 @@
     "db:seed": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs prisma/seed.ts",
     "db:local": "node scripts/local-postgres.mjs",
     "db:setup": "node --env-file-if-exists=.env scripts/setup-database.mjs",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "cloud:start": "node scripts/cloud-runtime.mjs start",
+    "cloud:status": "node scripts/cloud-runtime.mjs status",
+    "cloud:stop": "node scripts/cloud-runtime.mjs stop"
   },
   "dependencies": {
     "next": "^16.2.0",

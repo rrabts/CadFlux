@@ -20,66 +20,18 @@ else
   CI=true "${pnpm_cmd[@]}" install --no-frozen-lockfile
 fi
 
-if [[ "${CADFLUX_SKIP_LOCAL_POSTGRES:-0}" != "1" ]]; then
-  if [[ "$(id -u)" == "0" ]]; then
-    as_admin=()
-    as_postgres=(runuser -u postgres --)
+# PostgreSQL is provided by embedded-postgres on Linux, without apt/sudo/root.
+# Runtime credentials stay in the ignored .env or inherited environment.
+if [[ "${CADFLUX_SKIP_LOCAL_POSTGRES:-0}" != "1" && ! -f .env ]]; then
+  if [[ -n "${DATABASE_URL:-}" || -n "${DATABASE_URL_TEST:-}" ]]; then
+    node --input-type=module -e 'import { loadDatabaseEnvironment } from "./scripts/database-config.mjs"; loadDatabaseEnvironment();'
   else
-    as_admin=(sudo)
-    as_postgres=(sudo -u postgres)
-  fi
-  if ! command -v psql >/dev/null 2>&1; then
-    "${as_admin[@]}" apt-get update
-    "${as_admin[@]}" apt-get install -y postgresql postgresql-contrib
-  fi
-  "${as_admin[@]}" service postgresql start
-  # Valores constantes fictícios, exclusivos do ambiente de desenvolvimento.
-  "${as_postgres[@]}" psql -v ON_ERROR_STOP=1 <<'SQL'
-SELECT 'CREATE ROLE cadflux LOGIN PASSWORD ''cadflux_dev_only'''
-WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'cadflux')\gexec
-SELECT 'CREATE DATABASE cadflux OWNER cadflux'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'cadflux')\gexec
-SELECT 'CREATE DATABASE cadflux_test OWNER cadflux'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'cadflux_test')\gexec
-SQL
-  if [[ ! -f .env ]]; then
     umask 077
-    printf '%s\n' \
-      'DATABASE_URL="postgresql://cadflux:cadflux_dev_only@127.0.0.1:5432/cadflux?schema=public"' \
-      'DATABASE_URL_TEST="postgresql://cadflux:cadflux_dev_only@127.0.0.1:5432/cadflux_test?schema=public"' \
-      'APP_URL="http://127.0.0.1:3000"' > .env
+    cp --no-clobber .env.example .env
+    chmod 600 .env
   fi
 fi
-
-if [[ "${CADFLUX_SKIP_LOCAL_POSTGRES:-0}" == "1" ]]; then
-  node --env-file-if-exists=.env -e 'if (!process.env.DATABASE_URL) throw new Error("Configure DATABASE_URL para PostgreSQL de desenvolvimento antes de continuar.");'
-fi
-
-# Check the real connection without printing credentials or driver error text.
-node --env-file-if-exists=.env --input-type=module <<'JS'
-import pg from 'pg';
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 10000 });
-try {
-  await client.connect();
-  await client.query('SELECT 1');
-  console.log('Conexão PostgreSQL de desenvolvimento validada.');
-} catch {
-  console.error('PostgreSQL indisponível. Revise DATABASE_URL e os serviços do ambiente Cloud.');
-  process.exitCode = 1;
-} finally {
-  await client.end();
-}
-JS
 
 "${pnpm_cmd[@]}" db:generate
-if [[ -d prisma/migrations ]]; then
-  "${pnpm_cmd[@]}" db:migrate
-else
-  printf '%s\n' 'Migration da Fase 1 ainda precisa ser criada e validada.'
-fi
-if [[ -f prisma/seed.ts ]]; then
-  "${pnpm_cmd[@]}" db:seed
-else
-  printf '%s\n' 'Seed da Fase 1 ainda precisa ser implementado e validado.'
-fi
-printf '%s\n' 'Dependências e conexão de desenvolvimento preparadas. A Fase 1 NÃO foi validada; leia docs/STATUS.md.'
+node scripts/cloud-runtime.mjs start
+printf '%s\n' 'Ambiente de desenvolvimento pronto. A Fase 1 exige suas próprias verificações; leia docs/STATUS.md.'

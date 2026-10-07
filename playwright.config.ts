@@ -23,6 +23,9 @@ export default defineConfig({
     screenshot: "only-on-failure",
     headless: true,
     channel: process.env.PLAYWRIGHT_CHANNEL,
+    launchOptions: process.env.PLAYWRIGHT_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
+      : undefined,
   },
   webServer: {
     command: "node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3100",
