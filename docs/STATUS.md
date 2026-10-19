@@ -1,6 +1,25 @@
-# CadFlux V1.1 — verificação da Fase 1 em 02/10/2026
+# CadFlux V1.1 - ponto de retomada em 19/10/2026
 
-## Revalidação atual no Linux
+## Validação completa em nuvem - 19/10/2026
+
+A Fase 1 teve sua validação completa reproduzida em runner Linux do GitHub Actions:
+PostgreSQL real, schemas vazios, migration e seed em dois bancos separados,
+idempotência, lint, TypeScript, 85 testes, build e dez cenários de navegador
+aprovados. O servidor de teste encerrou automaticamente, com a porta 3100 livre.
+
+Run inicial: [39302409739](https://github.com/rrabts/CadFlux/actions/runs/39302409739),
+commit `35557320fb8dfc1f0ad3a9fef7eda4a38a82bb06`. A retomada e a última execução
+após refinamento das capturas estão no [PR #5](https://github.com/rrabts/CadFlux/pull/5).
+As mudanças desta retomada permanecem no PR até sua incorporação à main.
+
+O executor restrito do chat continua limitado; o run foi executado no GitHub,
+separadamente. Consulte o [relatório de 19/10](CLOUD-VALIDACAO-2026-10-19.md) para
+comandos, matriz de aceite, evidências e limites. Nenhuma aplicação foi publicada
+em produção e nenhum módulo operacional de fase posterior foi implementado.
+
+Os registros abaixo descrevem as verificações históricas de 02/10.
+
+## Revalidação parcial no Linux - 02/10/2026 (histórico)
 
 A main recebeu o PR #2 no commit `5bc35d727dcde44724bfaa6b7d0f43479a0dba92`. Em 02/10, o checkout remoto Linux passou em lint, TypeScript, schema Prisma e 62 testes unitários. A validação completa em nuvem permanece bloqueada: PostgreSQL não iniciou por restrições de usuário; 23 testes de integração não executaram; Next build falhou com `uv_resident_set_memory`; os cenários de navegador não iniciaram sem build. O retorno indevido de sucesso do db:local foi corrigido e verificado. Veja [relatório Linux](CLOUD-VALIDACAO-2026-10-02.md).
 

@@ -100,11 +100,19 @@ test("temas claro, escuro e sistema persistem e a navegação recolhe", async ({
   await expect(page.locator("html")).toHaveClass(/dark/);
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/dark/);
-  await page.screenshot({ path: ".local/evidence/dashboard-dark.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/dashboard-dark.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Selecionar tema" }).click();
   await page.getByRole("menuitem", { name: "Claro", exact: true }).click();
   await expect(page.locator("html")).not.toHaveClass(/dark/);
-  await page.screenshot({ path: ".local/evidence/dashboard-light.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/dashboard-light.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Selecionar tema" }).click();
   await page.getByRole("menuitem", { name: "Sistema", exact: true }).click();
   await expect
@@ -128,7 +136,11 @@ test("temas claro, escuro e sistema persistem e a navegação recolhe", async ({
   await expect(page.locator(".app-shell")).toHaveClass(/sidebar-collapsed/);
   await page.getByRole("button", { name: "Expandir navegação" }).click();
   await expect(page.locator(".app-shell")).not.toHaveClass(/sidebar-collapsed/);
-  await page.screenshot({ path: ".local/evidence/dashboard-desktop.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/dashboard-desktop.png",
+    fullPage: true,
+  });
 });
 test("mobile tem drawer utilizável por teclado e não excede largura da tela", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -154,7 +166,11 @@ test("mobile tem drawer utilizável por teclado e não excede largura da tela", 
     .toBe(true);
   await page.getByRole("button", { name: "Abrir menu" }).click();
   await expect(page.getByRole("link", { name: "CadFlux, visão geral" })).toBeFocused();
-  await page.screenshot({ path: ".local/evidence/navigation-mobile.png", fullPage: false });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/navigation-mobile.png",
+    fullPage: false,
+  });
   await page.keyboard.press("Shift+Tab");
   await expect(
     page
@@ -168,7 +184,11 @@ test("mobile tem drawer utilizável por teclado e não excede largura da tela", 
     "aria-expanded",
     "false",
   );
-  await page.screenshot({ path: ".local/evidence/users-mobile.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/users-mobile.png",
+    fullPage: true,
+  });
 });
 test("Direção cria, edita, troca vínculos, inativa e consulta histórico", async ({ page }) => {
   await login(page);
@@ -310,5 +330,9 @@ test("gestão pagina sem perder registros e filtros retornam à primeira página
   await page.getByRole("button", { name: "Limpar", exact: true }).click();
   await expect(page.locator(".table-footer")).toContainText(/Mostrando 1–50 de/);
   await expect(page.getByRole("button", { name: "Anterior", exact: true })).toBeDisabled();
-  await page.screenshot({ path: ".local/evidence/users-desktop-pagination.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/users-desktop-pagination.png",
+    fullPage: true,
+  });
 });

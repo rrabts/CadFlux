@@ -40,10 +40,11 @@ try {
       assert.equal(users.rowCount, 3, "O seed precisa conter três usuários fictícios.");
       assert.equal(units.rowCount, 2, "O seed precisa conter duas unidades fictícias.");
       assert.equal(categories.rowCount, 4, "O seed precisa conter quatro categorias.");
-      assert.deepEqual(
-        users.rows.map((user) => user.accessProfile).sort(),
-        ["DIRECTION", "INTERVIEWER", "REFERRAL_OPERATOR"],
-      );
+      assert.deepEqual(users.rows.map((user) => user.accessProfile).sort(), [
+        "DIRECTION",
+        "INTERVIEWER",
+        "REFERRAL_OPERATOR",
+      ]);
       assert.ok(users.rows.every((user) => user.status === "ACTIVE"));
       digests[target.name] = createHash("sha256")
         .update(JSON.stringify([users.rows, units.rows, categories.rows]))
@@ -63,6 +64,8 @@ try {
   }
 } catch {
   // Driver/assertion errors may include credentials, hashes or row contents.
-  console.error(`Verificação CI (${mode ?? "sem modo"}) falhou. Confira banco, migration e seed fictício.`);
+  console.error(
+    `Verificação CI (${mode ?? "sem modo"}) falhou. Confira banco, migration e seed fictício.`,
+  );
   process.exitCode = 1;
 }
