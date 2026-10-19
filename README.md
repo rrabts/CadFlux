@@ -110,3 +110,23 @@ Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS
 Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
 
 Não avance para a Fase 2 sem autorização.
+
+## Validação automatizada em nuvem
+
+O workflow `Phase 1 - Cloud validation`, em `.github/workflows/phase-1-cloud.yml`,
+executa no GitHub Actions: Ubuntu 24.04, Node 24.19.0, pnpm 10.28.2 e PostgreSQL 18.
+Há bancos fictícios separados, verificação de schemas vazios, migration, seed e
+idempotência, lint, TypeScript, testes de backend, build e Playwright com Chromium.
+O fluxo também confere o encerramento do servidor de teste e preserva evidências
+do navegador por sete dias. Ele não hospeda o aplicativo nem publica produção.
+
+A criação do workflow não comprova sua aprovação. Consultar o resultado do run e
+o commit correspondente antes de declarar a Fase 1 validada em nuvem.
+Instruções e distinção entre os ambientes estão em [docs/NUVEM.md](docs/NUVEM.md).
+
+Em 19/10/2026, o [run 39302409739](https://github.com/rrabts/CadFlux/actions/runs/39302409739)
+aprovou a validação completa: bancos inicialmente vazios, migration, seed
+idempotente, lint, TypeScript, 85 testes, build e dez cenários de navegador com
+encerramento automático do servidor. Detalhes no
+[relatório de 19/10](docs/CLOUD-VALIDACAO-2026-10-19.md); atualização e execução mais
+recente após ajuste das capturas no [PR #5](https://github.com/rrabts/CadFlux/pull/5).
