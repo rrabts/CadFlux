@@ -578,27 +578,29 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
           Selecione as outras unidades às quais este usuário está vinculado. O perfil de acesso
           permanece o mesmo.
         </p>
-        {refs.units
-          .filter((item) => item.id !== data.primaryUnitId)
-          .map((item) => (
-            <label className="unit-choice" key={item.id}>
-              <input
-                type="checkbox"
-                checked={data.additionalUnitIds?.includes(item.id) ?? false}
-                disabled={saving || (!item.active && !data.additionalUnitIds?.includes(item.id))}
-                onChange={(event) =>
-                  update(
-                    "additionalUnitIds",
-                    event.target.checked
-                      ? [...(data.additionalUnitIds ?? []), item.id].sort()
-                      : data.additionalUnitIds?.filter((id) => id !== item.id),
-                  )
-                }
-              />
-              {item.name}
-              {!item.active ? " (inativa)" : ""}
-            </label>
-          ))}
+        <div className="unit-options">
+          {refs.units
+            .filter((item) => item.id !== data.primaryUnitId)
+            .map((item) => (
+              <label className="unit-choice" key={item.id}>
+                <input
+                  type="checkbox"
+                  checked={data.additionalUnitIds?.includes(item.id) ?? false}
+                  disabled={saving || (!item.active && !data.additionalUnitIds?.includes(item.id))}
+                  onChange={(event) =>
+                    update(
+                      "additionalUnitIds",
+                      event.target.checked
+                        ? [...(data.additionalUnitIds ?? []), item.id].sort()
+                        : data.additionalUnitIds?.filter((id) => id !== item.id),
+                    )
+                  }
+                />
+                {item.name}
+                {!item.active ? " (inativa)" : ""}
+              </label>
+            ))}
+        </div>
       </fieldset>
     </div>
   );

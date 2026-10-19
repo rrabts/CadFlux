@@ -7,8 +7,8 @@ async function createUnitThroughUi(page: Page, name: string, code: string) {
   await page.goto("/units");
   await page.getByRole("button", { name: "Nova unidade", exact: true }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Nome", { exact: true }).fill(name);
-  await dialog.getByLabel("Código", { exact: true }).fill(code);
+  await dialog.getByLabel(/^Nome/).fill(name);
+  await dialog.getByLabel(/^Código/).fill(code);
   await dialog.getByRole("button", { name: "Salvar cadastro", exact: true }).click();
   await expect(dialog).toHaveCount(0);
 }
@@ -57,7 +57,7 @@ test("Fase 2: unidades adicionais persistem e impedem inativação com usuário 
   await page.getByLabel(/^E-mail/).fill("ui-add-" + id + "@exemplo.invalid");
   await page.getByLabel(/^Matrícula/).fill("UI-ADD-" + id);
   await page
-    .getByLabel("Unidade principal", { exact: true })
+    .getByLabel(/^Unidade principal/)
     .selectOption({ label: "Unidade Central — Demonstração" });
   await page.getByRole("checkbox", { name: unitName, exact: true }).check();
   await page.getByRole("button", { name: "Criar usuário", exact: true }).click();
@@ -100,11 +100,11 @@ test("Fase 2: categoria no mobile, duplicidade e histórico", async ({ page }) =
   await page.goto("/categories");
   const name = "Categoria Fictícia Mobile " + randomUUID().slice(0, 8);
   await page.getByRole("button", { name: "Nova categoria", exact: true }).click();
-  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill(name);
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill(name);
   await page.getByRole("dialog").getByRole("button", { name: "Salvar cadastro" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button", { name: "Nova categoria", exact: true }).click();
-  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill(name.toUpperCase());
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill(name.toUpperCase());
   await page.getByRole("dialog").getByRole("button", { name: "Salvar cadastro" }).click();
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
     "Já existe uma categoria",

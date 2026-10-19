@@ -46,7 +46,12 @@ export function ReferencePage({ kind }: { kind: "units" | "categories" }) {
         const query = new URLSearchParams({ page: String(page) });
         if (q) query.set("q", q);
         if (status) query.set("status", status);
-        setResult(await api<Result>(`/api/references/${kind}?${query}`));
+        let response = await api<Result>(`/api/references/${kind}?${query}`);
+        if (page > 1 && response.items.length === 0) {
+          query.set("page", String(Math.max(1, Math.ceil(response.total / response.pageSize))));
+          response = await api<Result>(`/api/references/${kind}?${query}`);
+        }
+        setResult(response);
       } catch (err) {
         setError(errorMessage(err));
       } finally {
@@ -349,7 +354,7 @@ export function ReferencePage({ kind }: { kind: "units" | "categories" }) {
                     value={draft.code}
                     required
                     maxLength={30}
-                    pattern="[a-zA-Z0-9_-]+"
+                    pattern={"[a-zA-Z0-9_\\-]+"}
                     onChange={(e) => setDraft({ ...draft, code: e.target.value })}
                   />
                 </Field>
