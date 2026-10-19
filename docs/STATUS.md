@@ -1,4 +1,21 @@
-# CadFlux V1.1 - ponto de retomada em 19/10/2026
+# CadFlux V1.1 - Fase 2 em 19/10/2026
+
+## Fase 2 autorizada e implementada em revisão
+
+Roberto autorizou o avanço em 19/10. A entrega permite manutenção de unidades e
+categorias com histórico, além dos vínculos adicionais de usuários. Inclui
+validações no backend, bloqueio de inativação com usuários ativos, revogação de
+sessões e unicidade por caixa no banco. Não amplia o escopo para atendimentos,
+encaminhamentos, fechamentos ou documentos reais.
+
+Base: `09491ee` do PR #5, ainda aberto no início. A Fase 2 está no
+[PR #6](https://github.com/rrabts/CadFlux/pull/6), que inclui a base validada da
+Fase 1. Especificação: [FASE-2-ESPECIFICACAO.md](FASE-2-ESPECIFICACAO.md).
+A validação específica e a regressão ocorrem pelo GitHub Actions. Consultar no PR
+os resultados reais do último commit; a implementação não equivale a aprovação.
+Cobertura e histórico de correções: [FASE-2-VALIDACAO.md](FASE-2-VALIDACAO.md).
+
+O avanço para a Fase 3 depende de autorização explícita.
 
 ## Validação completa em nuvem - 19/10/2026
 

@@ -5,20 +5,20 @@ Leia `docs/STATUS.md` para entender o ponto de retomada.
 
 ## Escopo autorizado
 
-Implementar exclusivamente a Fase 1 da especificação: autenticação real, três perfis,
-autorização no servidor, usuários, unidades e categorias de apoio, importação CSV/XLSX
-com validação/prévia/confirmação, auditoria e interface institucional acessível.
+Roberto autorizou explicitamente a Fase 2 em 19/10/2026. Leia também integralmente
+`docs/FASE-2-ESPECIFICACAO.md`. Preservar a fundação da Fase 1 e refinar a gestão de
+usuários, unidades e categorias, com vínculos adicionais, integridade e auditoria.
 
 Não implementar atendimentos reais, consulta oficial de CPF, pessoas/famílias,
 fechamentos, documentos oficiais/PDF/Word, encaminhamentos reais, indicadores reais,
 SERPRO/Receita, BI, IA, WhatsApp ou notificações externas. Mostrar placeholders quando
-necessário. Não avançar à Fase 2 sem autorização explícita.
+necessário. Não avançar à Fase 3 sem autorização explícita.
 
 ## Estado e critérios de conclusão
 
-O código inicial foi interrompido antes de instalar dependências. Não tratar arquivos
-existentes como funcionalidades concluídas. Conferir imports, rotas, schema e segurança.
-Há scripts referenciados no package.json que ainda precisam ser implementados.
+A Fase 1 possui validação completa em nuvem documentada no PR #5 e em STATUS.
+Conferir o commit e os resultados da execução correspondente antes de reutilizar
+evidências. As mudanças da Fase 2 exigem testes próprios e regressão da fundação.
 
 Usar Next.js, TypeScript estrito, PostgreSQL real, Prisma e Tailwind. Não substituir
 autenticação por mocks ou localStorage. Senhas apenas com hash seguro; sessão httpOnly;
@@ -38,4 +38,4 @@ dependências e caches devem permanecer ignorados. Preparação Linux em
 
 No fim, atualizar README e STATUS com comandos, contas fictícias, rotas, matriz de
 permissões, entidades/migrations, resultados de testes, decisões e limitações. Parar
-após Fase 1 e aguardar autorização.
+após Fase 2 e aguardar autorização para a fase seguinte.

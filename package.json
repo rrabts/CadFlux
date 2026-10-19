@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:integration": "vitest run tests/backend.integration.test.ts tests/imports.integration.test.ts",
+    "test:integration": "vitest run tests/backend.integration.test.ts tests/imports.integration.test.ts tests/references.integration.test.ts",
     "test:e2e": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",

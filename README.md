@@ -1,4 +1,4 @@
-# CadFlux V1.1 — Fase 1
+# CadFlux V1.1 — Fases 1 e 2
 
 Fundação institucional para autenticação, autorização e gestão de usuários do Cadastro Único. Apenas dados fictícios. Atendimentos, encaminhamentos, indicadores operacionais, consulta oficial de CPF, fechamentos e documentos oficiais permanecem como telas vazias ou módulos em desenvolvimento.
 
@@ -52,7 +52,7 @@ Novos usuários criados manualmente ou por importação recebem senha aleatória
 | ---------------------------------------------- | ----------------------- | ----------------------- | ----------------------------------------------------------------------- |
 | /dashboard, /profile, /change-password         | Próprio acesso          | Próprio acesso          | Próprio acesso                                                          |
 | /users, /users/new, /users/[id], /users/import | Bloqueado               | Bloqueado               | Listar, pesquisar, criar, editar, ativar/inativar, histórico e importar |
-| /units, /categories                            | Bloqueado               | Bloqueado               | Consultar cadastros de apoio                                            |
+| /units, /categories                            | Bloqueado               | Bloqueado               | Criar/editar/ativar/inativar cadastros; histórico                                            |
 | /audit                                         | Bloqueado               | Bloqueado               | Consultar auditoria                                                     |
 | /workspace/[slug]                              | Somente menus do perfil | Somente menus do perfil | Somente menus do perfil                                                 |
 | /login, /recovery                              | Público                 | Público                 | Público                                                                 |
@@ -83,9 +83,9 @@ Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateL
 
 Migration: `prisma/migrations/20261002140000_foundation/migration.sql`, gerada a partir do schema e acrescida de triggers para bloquear UPDATE/DELETE/TRUNCATE de AuditLog e DELETE de usuários/unidades/categorias. Auditoria registra login/logout, criação/edição, mudanças de perfil/categoria/unidade/status, troca de senha e confirmação de importação. Senhas, hashes de senha e tokens são removidos recursivamente das informações de auditoria.
 
-Senhas usam scrypt salgado; tokens aleatórios ficam apenas por hash no banco. A sessão dura oito horas, em cookie httpOnly/SameSite=Lax e Secure em produção. Login possui limitação de tentativas no banco. Mutações exigem origem válida. Mudanças de perfil/status e senha revogam sessões; cada requisição consulta o usuário atual. Outro administrador deve alterar o perfil/status da própria Direção; alterações administrativas preservam uma Direção ativa.
+Senhas usam scrypt salgado; tokens aleatórios ficam apenas por hash no banco. A sessão dura oito horas, em cookie httpOnly/SameSite=Lax e Secure em produção. Login possui limitação de tentativas no banco. Mutações exigem origem válida. Mudanças de perfil/status, unidade principal/adicionais e senha revogam sessões; cada requisição consulta o usuário atual. Outro administrador deve alterar o perfil/status da própria Direção; alterações administrativas preservam uma Direção ativa.
 
-A modelagem permite unidades adicionais, recuperação de senha e MFA posterior. A interface de recuperação informa que a entrega externa ainda está preparada. MFA externo, fluxo completo de recuperação e refinamento dos cadastros de apoio ficam para fases posteriores autorizadas. Banco e aplicação de produção não foram publicados nesta tarefa.
+A modelagem permite unidades adicionais, recuperação de senha e MFA posterior. A interface de recuperação informa que a entrega externa ainda está preparada. MFA externo, fluxo completo de recuperação e integrações externas ficam para fases posteriores autorizadas. Banco e aplicação de produção não foram publicados nesta tarefa.
 
 ## Verificar
 
@@ -130,3 +130,34 @@ idempotente, lint, TypeScript, 85 testes, build e dez cenários de navegador com
 encerramento automático do servidor. Detalhes no
 [relatório de 19/10](docs/CLOUD-VALIDACAO-2026-10-19.md); atualização e execução mais
 recente após ajuste das capturas no [PR #5](https://github.com/rrabts/CadFlux/pull/5).
+
+## Fase 2 - gestão institucional
+
+Autorizada por Roberto em 19/10/2026. O escopo está em
+[docs/FASE-2-ESPECIFICACAO.md](docs/FASE-2-ESPECIFICACAO.md).
+
+- A Direção mantém unidades e categorias: busca, filtro de status, paginação,
+  criação, edição, ativação/inativação e histórico. A categoria continua
+  independente dos três perfis de acesso.
+- Unidade exige nome, código único e fuso válido. Categoria exige nome único.
+  A migration `20261019170000_reference_integrity` também protege a unicidade
+  ignorando caixa no PostgreSQL, sem mesclar/apagar dados existentes.
+- A edição de usuários permite até 20 unidades adicionais, sem repetir a
+  principal. Atribuições a unidades inexistentes/inativas ou repetidas são negadas.
+  O campo é opcional: clientes antigos que o omitem preservam os vínculos.
+- Cadastros com usuários ativos vinculados não podem ser inativados. Usuários
+  inativos preservam os vínculos históricos, mas exigem referências ativas para
+  voltar a acessar. Alterações de unidade revogam sessões e ficam na auditoria.
+- Vínculos adicionais são administrativos: ainda não há seletor de unidade de
+  operação nem ampliação de acesso individual aos futuros atendimentos.
+
+APIs da Direção: `GET/POST /api/references/units`,
+`GET/PATCH /api/references/units/[id]` e equivalentes em `/categories`.
+GET de detalhe inclui histórico. Não existem DELETEs. A interface continua em
+`/units`, `/categories` e `/users/[id]`. A importação mantém suas oito colunas.
+
+As mutações compartilham o lock administrativo com a gestão/importação de usuários,
+revalidam o ator e usam transação serializável. Não há registros operacionais ou
+publicação de produção. Resultados atuais de validação são registrados no PR da
+Fase 2, junto ao commit e ao run correspondente.
+Cobertura e histórico: [docs/FASE-2-VALIDACAO.md](docs/FASE-2-VALIDACAO.md).

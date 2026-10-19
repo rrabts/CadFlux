@@ -1,6 +1,7 @@
 import { Prisma, AccessProfile, UserStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
+import { authorizeAdministration } from "@/modules/permissions/administration";
 import { assertPermission } from "@/modules/permissions/service";
 import { generateTemporaryPassword, hashPassword } from "@/modules/auth/password";
 import { writeAudit } from "@/modules/audit/service";
@@ -21,33 +22,51 @@ export function serializeUser(user: SafeUser) {
   };
 }
 
-async function authorizeTransaction(tx: Prisma.TransactionClient, actor: SafeUser) {
-  // Administrative changes share a lock so the last active director cannot disappear in a race.
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(194118, 1)`;
-  const current = await tx.user.findUnique({ where: { id: actor.id }, select: safeUserSelect });
-  if (!current) throw new AppError(401, "Entre para continuar.");
-  assertPermission(current, "users:manage");
-}
-export async function validateUserReferences(tx: Prisma.TransactionClient, input: UserInput) {
+type UserWithUnits = SafeUser & { additionalUnitIds?: string[] };
+export async function validateUserReferences(
+  tx: Prisma.TransactionClient,
+  input: UserInput,
+  previous?: UserWithUnits,
+) {
   const [category, unit] = await Promise.all([
     tx.professionalCategory.findUnique({ where: { id: input.professionalCategoryId } }),
     tx.unit.findUnique({ where: { id: input.primaryUnitId } }),
   ]);
-  if (!category?.active) throw new AppError(400, "Categoria inexistente ou inativa.");
-  if (!unit?.active) throw new AppError(400, "Unidade inexistente ou inativa.");
+  const keepingInactive = input.status === UserStatus.INACTIVE && !!previous;
+  if (
+    !category ||
+    (!category.active && !(keepingInactive && previous?.professionalCategoryId === category.id))
+  )
+    throw new AppError(400, "Categoria inexistente ou inativa.");
+  if (!unit || (!unit.active && !(keepingInactive && previous?.primaryUnitId === unit.id)))
+    throw new AppError(400, "Unidade inexistente ou inativa.");
+  const additionalIds = input.additionalUnitIds ?? previous?.additionalUnitIds ?? [];
+  if (additionalIds.includes(input.primaryUnitId))
+    throw new AppError(400, "A unidade principal não pode se repetir nas unidades adicionais.");
+  const additional = await tx.unit.findMany({ where: { id: { in: additionalIds } } });
+  if (
+    additional.length !== additionalIds.length ||
+    additional.some(
+      (item) =>
+        !item.active && !(keepingInactive && previous?.additionalUnitIds?.includes(item.id)),
+    )
+  )
+    throw new AppError(400, "Unidades adicionais inexistentes ou inativas.");
 }
 export async function createUserInTransaction(
   tx: Prisma.TransactionClient,
   actor: SafeUser,
   raw: unknown,
 ) {
-  await authorizeTransaction(tx, actor);
+  await authorizeAdministration(tx, actor, "users:manage");
   const input = userInputSchema.parse(raw);
   await validateUserReferences(tx, input);
+  const { additionalUnitIds = [], ...fields } = input;
   const temporaryPassword = generateTemporaryPassword();
   const user = await tx.user.create({
     data: {
-      ...input,
+      ...fields,
+      additionalUnits: { create: additionalUnitIds.map((unitId) => ({ unitId })) },
       passwordHash: await hashPassword(temporaryPassword),
       mustChangePassword: true,
     },
@@ -58,9 +77,9 @@ export async function createUserInTransaction(
     action: "USER_CREATED",
     entityType: "User",
     entityId: user.id,
-    newValue: user,
+    newValue: { ...user, additionalUnitIds },
   });
-  return { user, temporaryPassword };
+  return { user: { ...user, additionalUnitIds }, temporaryPassword };
 }
 export async function createUser(actor: SafeUser, input: unknown) {
   return prisma.$transaction((tx) => createUserInTransaction(tx, actor, input), {
@@ -72,7 +91,7 @@ export async function updateUser(actor: SafeUser, id: string, raw: unknown) {
   const input = userInputSchema.parse(raw);
   return prisma.$transaction(
     async (tx) => {
-      await authorizeTransaction(tx, actor);
+      await authorizeAdministration(tx, actor, "users:manage");
       const previous = await tx.user.findUnique({ where: { id }, select: safeUserSelect });
       if (!previous) throw new AppError(404, "Usuário não encontrado.");
       if (
@@ -92,17 +111,34 @@ export async function updateUser(actor: SafeUser, id: string, raw: unknown) {
         )
           throw new AppError(409, "Mantenha ao menos uma Direção ativa.");
       }
-      await validateUserReferences(tx, input);
-      const user = await tx.user.update({ where: { id }, data: input, select: safeUserSelect });
+      const oldLinks = await tx.userUnitAccess.findMany({
+        where: { userId: id },
+        orderBy: { unitId: "asc" },
+      });
+      const previousIds = oldLinks.map((link) => link.unitId);
+      const nextIds = input.additionalUnitIds ?? previousIds;
+      await validateUserReferences(tx, input, { ...previous, additionalUnitIds: previousIds });
+      const { additionalUnitIds, ...fields } = input;
+      const unitsChanged = JSON.stringify(previousIds) !== JSON.stringify(nextIds);
+      const user = await tx.user.update({
+        where: { id },
+        data: {
+          ...fields,
+          ...(additionalUnitIds !== undefined
+            ? { additionalUnits: { deleteMany: {}, create: nextIds.map((unitId) => ({ unitId })) } }
+            : {}),
+        },
+        select: safeUserSelect,
+      });
       await writeAudit(tx, {
         actorUserId: actor.id,
         action: "USER_UPDATED",
         entityType: "User",
         entityId: id,
-        previousValue: previous,
-        newValue: user,
+        previousValue: { ...previous, additionalUnitIds: previousIds },
+        newValue: { ...user, additionalUnitIds: nextIds },
       });
-      const changes: [keyof UserInput, string][] = [
+      const changes: [Exclude<keyof UserInput, "additionalUnitIds">, string][] = [
         ["accessProfile", "USER_PROFILE_CHANGED"],
         ["professionalCategoryId", "USER_CATEGORY_CHANGED"],
         ["primaryUnitId", "USER_UNIT_CHANGED"],
@@ -118,9 +154,23 @@ export async function updateUser(actor: SafeUser, id: string, raw: unknown) {
             previousValue: { [key]: previous[key] },
             newValue: { [key]: input[key] },
           });
-      if (previous.accessProfile !== input.accessProfile || previous.status !== input.status)
+      if (unitsChanged)
+        await writeAudit(tx, {
+          actorUserId: actor.id,
+          action: "USER_ADDITIONAL_UNITS_CHANGED",
+          entityType: "User",
+          entityId: id,
+          previousValue: { additionalUnitIds: previousIds },
+          newValue: { additionalUnitIds: nextIds },
+        });
+      if (
+        previous.accessProfile !== input.accessProfile ||
+        previous.status !== input.status ||
+        previous.primaryUnitId !== input.primaryUnitId ||
+        unitsChanged
+      )
         await tx.session.deleteMany({ where: { userId: id } });
-      return user;
+      return { ...user, additionalUnitIds: nextIds };
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30000 },
   );

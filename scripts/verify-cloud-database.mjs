@@ -33,7 +33,10 @@ try {
       const migration = await client.query(
         'SELECT migration_name FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL ORDER BY migration_name',
       );
-      assert.deepEqual(migration.rows, [{ migration_name: "20261002140000_foundation" }]);
+      assert.deepEqual(migration.rows, [
+        { migration_name: "20261002140000_foundation" },
+        { migration_name: "20261019170000_reference_integrity" },
+      ]);
       const users = await client.query('SELECT * FROM "User" ORDER BY id');
       const units = await client.query('SELECT * FROM "Unit" ORDER BY id');
       const categories = await client.query('SELECT * FROM "ProfessionalCategory" ORDER BY id');

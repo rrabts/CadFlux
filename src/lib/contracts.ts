@@ -5,6 +5,8 @@ export interface ReferenceItem {
   name: string;
   active: boolean;
   code?: string;
+  timezone?: string;
+  linkedUsers?: number;
 }
 export interface SafeUser {
   id: string;
@@ -15,6 +17,7 @@ export interface SafeUser {
   accessProfile: AccessProfile;
   professionalCategoryId: string;
   primaryUnitId: string;
+  additionalUnitIds?: string[];
   status: UserStatus;
   mustChangePassword: boolean;
   createdAt: string | Date;
@@ -31,6 +34,7 @@ export interface UserInput {
   accessProfile: AccessProfile;
   professionalCategoryId: string;
   primaryUnitId: string;
+  additionalUnitIds?: string[];
   status: UserStatus;
 }
 export interface AuditEntry {
