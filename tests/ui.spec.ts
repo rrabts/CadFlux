@@ -77,7 +77,9 @@ test("Fase 2: unidades adicionais persistem e impedem inativação com usuário 
   await page.getByRole("button", { name: "Filtrar", exact: true }).click();
   await page.getByRole("button", { name: "Inativar " + unitName, exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Inativar", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Existem usuários ativos vinculados");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Existem usuários ativos vinculados" }),
+  ).toContainText("Existem usuários ativos vinculados");
   await page.goto(detailUrl);
   await page.getByRole("tab", { name: "Unidade", exact: true }).click();
   await page.getByRole("checkbox", { name: unitName, exact: true }).uncheck();

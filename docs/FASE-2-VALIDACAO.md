@@ -46,6 +46,11 @@ expiraram ao localizar `Nome` por texto exato: o rótulo contém também o marca
 de campo obrigatório. Os seletores foram corrigidos para considerar esse rótulo;
 os campos obrigatórios e as verificações de resultado foram mantidos.
 
+Na segunda execução, a manutenção completa de unidades passou. O teste de vínculo
+alcançou o bloqueio esperado, mas seu seletor genérico de alerta encontrou também
+o anunciador de navegação do framework. A verificação foi direcionada à mensagem
+específica do bloqueio, preservando a exigência de erro textual ao usuário.
+
 A revisão também limitou a altura da lista de unidades adicionais com rolagem,
 preservando o acesso por teclado; ajustou o pattern do código para o formato HTML;
 e fez a listagem voltar à última página válida quando a página atual fica vazia.
