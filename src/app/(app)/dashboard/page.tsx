@@ -40,8 +40,11 @@ export default async function DashboardPage() {
         }
       />
       <div className="phase-note">
-        <Badge variant="info">Fase 1</Badge>
-        <p>Fundação e acesso disponíveis. Os módulos operacionais aguardam desenvolvimento.</p>
+        <Badge variant="info">Fase 2</Badge>
+        <p>
+          Acesso e gestão institucional disponíveis. Os módulos operacionais aguardam
+          desenvolvimento.
+        </p>
       </div>
       <div className="stats-grid">
         {labels.map((label) => (

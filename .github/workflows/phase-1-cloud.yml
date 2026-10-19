@@ -1,4 +1,4 @@
-name: Phase 1 - Cloud validation
+name: CadFlux - Cloud validation
 
 on:
   pull_request:
@@ -101,7 +101,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: phase-1-browser-evidence
+          name: cadflux-browser-evidence
           path: |
             playwright-report/
             test-results/

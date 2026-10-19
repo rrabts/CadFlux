@@ -5,6 +5,7 @@ import type { SafeUser } from "@/modules/users/types";
 export type Action =
   | "dashboard:read"
   | "reference:read"
+  | "reference:manage"
   | "users:read"
   | "users:manage"
   | "audit:read"
@@ -18,6 +19,7 @@ const grants: Record<AccessProfile, readonly Action[]> = {
   DIRECTION: [
     "dashboard:read",
     "reference:read",
+    "reference:manage",
     "users:read",
     "users:manage",
     "audit:read",

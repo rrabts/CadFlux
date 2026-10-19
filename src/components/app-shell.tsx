@@ -182,7 +182,7 @@ export function AppShell({ user, children }: { user: SafeUser; children: ReactNo
           ))}
         </nav>
         <div className="sidebar-footer">
-          <span className="nav-text">CadFlux V1.1 · Fase 1</span>
+          <span className="nav-text">CadFlux V1.1 · Fase 2</span>
           <button
             className="icon-button collapse-button"
             aria-label={collapsed ? "Expandir navegação" : "Recolher navegação"}
