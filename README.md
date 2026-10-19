@@ -2,6 +2,14 @@
 
 Fundação institucional para autenticação, autorização e gestão de usuários do Cadastro Único. Apenas dados fictícios. Atendimentos, encaminhamentos, indicadores operacionais, consulta oficial de CPF, fechamentos e documentos oficiais permanecem como telas vazias ou módulos em desenvolvimento.
 
+As Fases 1 e 2 foram incorporadas à `main` em 19/10/2026 pelos
+[PRs #5](https://github.com/rrabts/CadFlux/pull/5) e
+[#6](https://github.com/rrabts/CadFlux/pull/6). A versão integrada preserva o código
+validado com 94 testes e 13 cenários de navegador. A execução após a integração
+está no [run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/39319811057);
+confira o commit e a conclusão antes de reutilizar os resultados.
+Estado e evidências: [docs/STATUS.md](docs/STATUS.md). A Fase 3 exige nova autorização.
+
 ## Executar localmente
 
 Requisitos: Node.js 22.12+ (validado com 24.19.0), pnpm 10.28.2 e PostgreSQL real. O lockfile deve ser preservado.
@@ -99,7 +107,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-`pnpm test` executa testes unitários e integração contra `DATABASE_URL_TEST`, recusando o mesmo banco de desenvolvimento. `pnpm test:integration` restringe a execução à integração de backend/importação. Os testes usam dados fictícios com identificadores únicos e preservam auditoria.
+`pnpm test` executa testes unitários e integração contra `DATABASE_URL_TEST`, recusando o mesmo banco de desenvolvimento. `pnpm test:integration` restringe a execução à integração de backend, importação e cadastros. Os testes usam dados fictícios com identificadores únicos e preservam auditoria.
 
 O teste de navegador inicia o build de produção em 127.0.0.1:3100, apontando somente ao banco de teste. Instale o Chromium de testes com `pnpm exec playwright install chromium`; em Windows com Edge/Chrome já instalado é possível definir `PLAYWRIGHT_CHANNEL=msedge` ou `chrome`. Execute `pnpm build` antes de `pnpm test:e2e`.
 
@@ -109,11 +117,11 @@ Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS
 
 Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
 
-Não avance para a Fase 2 sem autorização.
+Não avance para a Fase 3 sem autorização.
 
 ## Validação automatizada em nuvem
 
-O workflow `Phase 1 - Cloud validation`, em `.github/workflows/phase-1-cloud.yml`,
+O workflow `CadFlux - Cloud validation`, em `.github/workflows/phase-1-cloud.yml`,
 executa no GitHub Actions: Ubuntu 24.04, Node 24.19.0, pnpm 10.28.2 e PostgreSQL 18.
 Há bancos fictícios separados, verificação de schemas vazios, migration, seed e
 idempotência, lint, TypeScript, testes de backend, build e Playwright com Chromium.

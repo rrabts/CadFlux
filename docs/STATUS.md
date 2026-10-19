@@ -1,6 +1,6 @@
 # CadFlux V1.1 - Fase 2 em 19/10/2026
 
-## Fase 2 autorizada e implementada em revisão
+## Fases 1 e 2 incorporadas à main
 
 Roberto autorizou o avanço em 19/10. A entrega permite manutenção de unidades e
 categorias com histórico, além dos vínculos adicionais de usuários. Inclui
@@ -8,11 +8,20 @@ validações no backend, bloqueio de inativação com usuários ativos, revogaç
 sessões e unicidade por caixa no banco. Não amplia o escopo para atendimentos,
 encaminhamentos, fechamentos ou documentos reais.
 
-Base: `09491ee` do PR #5, ainda aberto no início. A Fase 2 está no
-[PR #6](https://github.com/rrabts/CadFlux/pull/6), que inclui a base validada da
-Fase 1. Especificação: [FASE-2-ESPECIFICACAO.md](FASE-2-ESPECIFICACAO.md).
-A validação específica e a regressão ocorrem pelo GitHub Actions. Consultar no PR
-os resultados reais do último commit; a implementação não equivale a aprovação.
+Os PRs [#5](https://github.com/rrabts/CadFlux/pull/5) e
+[#6](https://github.com/rrabts/CadFlux/pull/6) foram incorporados nessa ordem em
+19/10/2026, com commits de merge e preservação da ancestralidade. Commit de
+integração: `22f9cf642fc6634e3de3474ad5e849249356523f`. Sua árvore é idêntica à
+versão `88dab75` aprovada no
+[run 39317114075, tentativa 2](https://github.com/rrabts/CadFlux/actions/runs/39317114075/attempts/2):
+94 testes em seis arquivos, 13 cenários de navegador, migrations e seed idempotente,
+lint, TypeScript e build aprovados. Nenhum arquivo de aplicação mudou no merge.
+
+A validação da própria main após a integração está no
+[run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/39319811057).
+Conferir a conclusão e o SHA no GitHub ao reutilizar essa evidência. Commits
+posteriores que ajustem apenas documentação não alteram o código validado.
+Especificação: [FASE-2-ESPECIFICACAO.md](FASE-2-ESPECIFICACAO.md).
 Cobertura e histórico de correções: [FASE-2-VALIDACAO.md](FASE-2-VALIDACAO.md).
 
 O avanço para a Fase 3 depende de autorização explícita.
@@ -27,7 +36,7 @@ aprovados. O servidor de teste encerrou automaticamente, com a porta 3100 livre.
 Run inicial: [39302409739](https://github.com/rrabts/CadFlux/actions/runs/39302409739),
 commit `35557320fb8dfc1f0ad3a9fef7eda4a38a82bb06`. A retomada e a última execução
 após refinamento das capturas estão no [PR #5](https://github.com/rrabts/CadFlux/pull/5).
-As mudanças desta retomada permanecem no PR até sua incorporação à main.
+O PR #5 foi incorporado à main em 19/10/2026, antes do PR #6.
 
 O executor restrito do chat continua limitado; o run foi executado no GitHub,
 separadamente. Consulte o [relatório de 19/10](CLOUD-VALIDACAO-2026-10-19.md) para
@@ -129,7 +138,7 @@ Evidências visuais: [tema claro](evidence/dashboard-light.png), [tema escuro](e
 | 19. Testes críticos passam          | PASSOU | 85 testes em 5 arquivos e 10 cenários E2E aprovados; lint/typecheck/build com saída 0         |
 | 20. README explica execução         | PASSOU | Requisitos, instalação, bancos, seed, contas, rotas/permissões, importação e verificações     |
 
-## Limites e continuação
+## Limites da entrega anterior da Fase 1 (histórico)
 
 Não há atendimentos, consulta oficial de CPF, pessoas/famílias, benefícios, fechamentos, documentos oficiais, encaminhamentos ou indicadores reais. Nenhuma integração externa, publicação de aplicação ou banco de produção foi executada.
 
@@ -137,4 +146,5 @@ MFA e recuperação de senha possuem modelagem e interfaces preparadas; envio ex
 
 O README detalha a arquitetura modular, as dez entidades, a migration, as rotas, a matriz de permissões e as decisões de senha/sessão/importação. Rodar localmente: instalar dependências, manter `pnpm db:local` aberto, executar `pnpm db:setup --all` e `pnpm dev` em outro terminal.
 
-Não avançar para a Fase 2 sem nova autorização.
+A Fase 2 já foi autorizada e incorporada, conforme o início deste documento.
+Não avançar para a Fase 3 sem nova autorização.

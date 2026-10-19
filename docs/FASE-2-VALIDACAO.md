@@ -2,8 +2,14 @@
 
 Entrega: [PR #6](https://github.com/rrabts/CadFlux/pull/6). A descrição desse PR
 registra o commit final, o run aprovado, os resultados e a revisão visual. Os
-resultados se aplicam ao commit executado; a incorporação na main é uma etapa
-separada. A base é o commit `09491ee` da Fase 1 validada no PR #5.
+resultados se aplicam ao commit executado. Os PRs #5 e #6 foram incorporados à
+main em 19/10/2026, nessa ordem, preservando os commits. O merge `22f9cf6` tem
+árvore idêntica ao commit `88dab75`, aprovado novamente na tentativa 2 do
+[run 39317114075](https://github.com/rrabts/CadFlux/actions/runs/39317114075/attempts/2).
+A validação pós-integração está no
+[run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/39319811057).
+Consultar o resultado e o commit ao reutilizar a evidência. A base da Fase 2 é
+`09491ee` da Fase 1 validada no PR #5.
 
 ## Ambiente e método
 
