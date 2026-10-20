@@ -46,3 +46,17 @@ O PR identifica a execução realmente aprovada e a inspeção visual correspond
 Somente registros sintéticos no banco de teste. Seed de demonstração não cria
 atendimentos. Sem consulta oficial, indicadores agregados, fechamento, documentos,
 encaminhamentos ou publicação de produção. Ver decisões da especificação da Fase 3.
+
+## Primeira execução e correções
+
+O run [39355679335](https://github.com/rrabts/CadFlux/actions/runs/39355679335),
+commit `bdab4c5`, aprovou as três migrations, seed idempotente, lint e TypeScript.
+Dos 122 testes, 119 passaram. Três casos de rejeição receberam a validação Zod
+como exceção síncrona antes de existir uma Promise. Os serviços foram declarados
+assíncronos para manter o contrato de rejeição; os dados continuam recusados e
+nenhuma verificação foi removida. Build/navegador não foram executados nesse run.
+
+A revisão dos testes de navegador também passou a aguardar o título da página
+de detalhe e um ID real, evitando que `/attendances/new` fosse confundido com
+sucesso de gravação. Seletores de rótulos obrigatórios consideram o marcador de
+obrigatoriedade, mantendo as verificações do campo e dos resultados.

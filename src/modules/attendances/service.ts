@@ -78,7 +78,7 @@ async function checkDuplicate(
     );
   return Boolean(other);
 }
-export function listAttendances(actor: SafeUser, raw: unknown) {
+export async function listAttendances(actor: SafeUser, raw: unknown) {
   const filters = attendanceFiltersSchema.parse(raw);
   return prisma.$transaction(async (tx) => {
     const current = await currentActor(tx, actor, "attendances:read");
@@ -123,7 +123,7 @@ export function listAttendances(actor: SafeUser, raw: unknown) {
     return { items, total, page: filters.page, pageSize: 50 };
   });
 }
-export function getAttendance(actor: SafeUser, id: string) {
+export async function getAttendance(actor: SafeUser, id: string) {
   return prisma.$transaction(async (tx) => {
     const current = await currentActor(tx, actor, "attendances:read");
     const item = await findVisible(tx, current, id);
@@ -146,7 +146,7 @@ export function getAttendance(actor: SafeUser, id: string) {
     };
   });
 }
-export function reuseAttendance(actor: SafeUser, cpf: unknown) {
+export async function reuseAttendance(actor: SafeUser, cpf: unknown) {
   const value = cpfSchema.parse(cpf);
   return prisma.$transaction(async (tx) => {
     const current = await currentActor(tx, actor, "attendances:create");
@@ -157,7 +157,7 @@ export function reuseAttendance(actor: SafeUser, cpf: unknown) {
     });
   });
 }
-export function createAttendance(actor: SafeUser, raw: unknown) {
+export async function createAttendance(actor: SafeUser, raw: unknown) {
   const input = createAttendanceSchema.parse(raw);
   const { duplicateAcknowledged, ...data } = input;
   return prisma.$transaction(
@@ -205,7 +205,7 @@ export function createAttendance(actor: SafeUser, raw: unknown) {
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30000 },
   );
 }
-export function updateAttendance(actor: SafeUser, id: string, raw: unknown) {
+export async function updateAttendance(actor: SafeUser, id: string, raw: unknown) {
   const input = updateAttendanceSchema.parse(raw);
   const { duplicateAcknowledged, version, ...data } = input;
   return prisma.$transaction(
@@ -248,7 +248,7 @@ export function updateAttendance(actor: SafeUser, id: string, raw: unknown) {
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30000 },
   );
 }
-export function cancelAttendance(actor: SafeUser, id: string, raw: unknown) {
+export async function cancelAttendance(actor: SafeUser, id: string, raw: unknown) {
   const input = cancelAttendanceSchema.parse(raw);
   return prisma.$transaction(
     async (tx) => {
@@ -276,7 +276,7 @@ export function cancelAttendance(actor: SafeUser, id: string, raw: unknown) {
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30000 },
   );
 }
-export function attendanceFilterOptions(actor: SafeUser) {
+export async function attendanceFilterOptions(actor: SafeUser) {
   return prisma.$transaction(async (tx) => {
     const current = await currentActor(tx, actor, "attendances:read");
     if (current.accessProfile !== "DIRECTION")

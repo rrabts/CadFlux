@@ -283,6 +283,7 @@ describe("Atendimentos com PostgreSQL real", () => {
     await expect(
       prisma.$executeRaw`DELETE FROM "Attendance" WHERE id=${item.id}`,
     ).rejects.toBeDefined();
+    await expect(prisma.$executeRaw`TRUNCATE TABLE "Attendance"`).rejects.toBeDefined();
     await expect(
       prisma.$executeRaw`UPDATE "Attendance" SET "cancelledAt"=NULL,"cancellationReason"=NULL,version=3 WHERE id=${item.id}`,
     ).rejects.toBeDefined();

@@ -482,7 +482,10 @@ test("Fase 3: registrar, classificar, corrigir e cancelar com histórico", async
   const name = "Pessoa Fictícia Atendimento " + randomUUID().slice(0, 8);
   await fillAttendance(page, name, syntheticCpf());
   await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
-  await expect(page).toHaveURL(/\/attendances\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
   await expect(page.getByRole("heading", { name: "Histórico do atendimento" })).toBeVisible();
   await expect(page.getByLabel(/^CPF/)).toBeDisabled();
   await page.getByLabel("Parecer", { exact: true }).selectOption("WITH");
@@ -523,7 +526,10 @@ test("Fase 3: reaproveitamento confirmado e duplicidade explícita", async ({ pa
   const name = "Pessoa Fictícia Reuso " + randomUUID().slice(0, 8);
   await fillAttendance(page, name, cpf);
   await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
-  await expect(page).toHaveURL(/\/attendances\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
   await page.goto("/attendances/new");
   await page.getByLabel(/^CPF/).fill(cpf);
   await page.getByRole("button", { name: "Consultar meus registros", exact: true }).click();
@@ -537,7 +543,10 @@ test("Fase 3: reaproveitamento confirmado e duplicidade explícita", async ({ pa
   await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Possível duplicidade");
   await page.getByRole("button", { name: "Confirmar registro duplicado", exact: true }).click();
-  await expect(page).toHaveURL(/\/attendances\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
   await page.goto("/attendances");
   await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(cpf);
   await page.getByRole("button", { name: "Filtrar", exact: true }).click();
@@ -554,7 +563,7 @@ test("Fase 3: orientação e inclusão no mobile respeitam campos e parecer", as
   await expect(page).toHaveURL(/\/dashboard/);
   const name = "Pessoa Fictícia Mobile " + randomUUID().slice(0, 8);
   await fillAttendance(page, name, syntheticCpf());
-  await page.getByLabel("Tipo de atendimento", { exact: true }).selectOption("GUIDANCE");
+  await page.getByLabel(/^Tipo de atendimento/).selectOption("GUIDANCE");
   await expect(page.getByLabel(/^Código familiar/)).toHaveCount(0);
   await expect(page.getByLabel("Parecer", { exact: true })).toHaveValue("WITHOUT");
   await expect(page.getByLabel("Parecer", { exact: true })).toBeDisabled();
@@ -567,16 +576,22 @@ test("Fase 3: orientação e inclusão no mobile respeitam campos e parecer", as
     fullPage: true,
   });
   await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
-  await expect(page).toHaveURL(/\/attendances\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
   await fillAttendance(
     page,
     "Pessoa Fictícia Inclusão " + randomUUID().slice(0, 8),
     syntheticCpf(),
   );
-  await page.getByLabel("Tipo de atendimento", { exact: true }).selectOption("INCLUDE_SINGLE_BPC");
+  await page.getByLabel(/^Tipo de atendimento/).selectOption("INCLUDE_SINGLE_BPC");
   await expect(page.getByLabel("Parecer", { exact: true })).toHaveValue("WITHOUT");
   await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
-  await expect(page).toHaveURL(/\/attendances\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
 });
 test("Fase 3: Direção consulta registros e Encaminhador recebe bloqueio", async ({ page }) => {
   await login(page, "entrevistador@cadflux.local");
@@ -584,7 +599,10 @@ test("Fase 3: Direção consulta registros e Encaminhador recebe bloqueio", asyn
   const name = "Pessoa Fictícia Visibilidade " + randomUUID().slice(0, 8);
   await fillAttendance(page, name, syntheticCpf());
   await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
-  await expect(page).toHaveURL(/\/attendances\/[^/]+$/);
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
   const url = page.url();
   await logout(page);
   await login(page);
