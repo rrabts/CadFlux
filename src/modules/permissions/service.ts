@@ -3,6 +3,9 @@ import { AppError } from "@/lib/errors";
 import type { SafeUser } from "@/modules/users/types";
 
 export type Action =
+  | "attendances:read"
+  | "attendances:create"
+  | "attendances:update"
   | "dashboard:read"
   | "reference:read"
   | "reference:manage"
@@ -14,9 +17,18 @@ export type Action =
 export type ResourceScope = { ownerUserId?: string; unitId?: string };
 
 const grants: Record<AccessProfile, readonly Action[]> = {
-  INTERVIEWER: ["dashboard:read", "account:read", "account:password"],
+  INTERVIEWER: [
+    "dashboard:read",
+    "account:read",
+    "account:password",
+    "attendances:read",
+    "attendances:create",
+    "attendances:update",
+  ],
   REFERRAL_OPERATOR: ["dashboard:read", "account:read", "account:password"],
   DIRECTION: [
+    "attendances:read",
+    "attendances:update",
     "dashboard:read",
     "reference:read",
     "reference:manage",

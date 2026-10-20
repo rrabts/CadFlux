@@ -79,21 +79,22 @@ Não enviar `.env`, banco, caches, tokens ou senhas reais ao GitHub. Credenciais
 workflow são fictícias e exclusivas dos containers descartáveis da tarefa.
 Não contratar serviços ou publicar produção nesta etapa.
 
-A Fase 2 foi autorizada em 19/10 e está descrita em `FASE-2-ESPECIFICACAO.md`.
-Continuar exclusivamente nas Fases 1 e 2. Os módulos reais de atendimentos, CPF oficial,
+A Fase 3 foi autorizada em 19/10 e está descrita em `FASE-3-ESPECIFICACAO.md`.
+Continuar exclusivamente até Atendimentos. CPF oficial, indicadores agregados,
 fechamentos, documentos e encaminhamentos dependem de autorização posterior.
 
 ## Pedido de continuidade
 
-> Continue o CadFlux V1.1 exclusivamente até a Fase 2. Leia AGENTS.md, as especificações
-> das Fases 1 e 2, STATUS.md e NUVEM.md. Preserve a implementação existente. Consulte os
+> Continue o CadFlux V1.1 exclusivamente até a Fase 3. Leia AGENTS.md, as especificações
+> das Fases 1, 2 e 3, STATUS.md e NUVEM.md. Preserve a implementação existente. Consulte os
 > resultados atuais do workflow CadFlux - Cloud validation e corrija falhas com
 > evidências. Confirme PostgreSQL real, bancos separados, migrations, seed
 > idempotente, lint, TypeScript, testes, build e cenários de navegador. Atualize a
 > documentação com ambiente, commit, comandos e limitações. Não use a validação
 > anterior do Windows como comprovação de execução em nuvem. Não publique produção
-> nem avance para a Fase 3.
+> nem avance para a Fase 4.
 
 Na Fase 2, o workflow mantém o arquivo `phase-1-cloud.yml`, mas seu nome exibido é
 `CadFlux - Cloud validation`; o artifact passa a ser `cadflux-browser-evidence`.
-O verificador de banco exige as duas migrations antes dos testes.
+Na Fase 3, o verificador exige três migrations e 12 tabelas antes dos testes;
+o seed mantém somente os três usuários, duas unidades e quatro categorias fictícias.

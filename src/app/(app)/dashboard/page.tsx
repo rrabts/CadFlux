@@ -31,7 +31,7 @@ export default async function DashboardPage() {
           ) : (
             <Link
               className="button button-primary"
-              href={referral ? "/workspace/new-referral" : "/workspace/new-service"}
+              href={referral ? "/workspace/new-referral" : "/attendances/new"}
             >
               <Plus size={18} />
               {referral ? "Novo encaminhamento" : "Novo atendimento"}
@@ -40,10 +40,10 @@ export default async function DashboardPage() {
         }
       />
       <div className="phase-note">
-        <Badge variant="info">Fase 2</Badge>
+        <Badge variant="info">Fase 3</Badge>
         <p>
-          Acesso e gestão institucional disponíveis. Os módulos operacionais aguardam
-          desenvolvimento.
+          Gestão institucional e registro de atendimentos disponíveis. Indicadores e demais módulos
+          aguardam as próximas fases.
         </p>
       </div>
       <div className="stats-grid">

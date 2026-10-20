@@ -54,6 +54,7 @@ model User {
   passwordResetTokens    PasswordResetToken[]
   auditLogs              AuditLog[]
   importBatches          UserImportBatch[]
+  attendances            Attendance[]
 
   @@index([accessProfile, status])
   @@index([primaryUnitId, status])
@@ -79,6 +80,7 @@ model Unit {
   updatedAt       DateTime         @updatedAt
   primaryUsers    User[]           @relation("PrimaryUnit")
   authorizedUsers UserUnitAccess[]
+  attendances     Attendance[]
 }
 
 model UserUnitAccess {
@@ -164,4 +166,57 @@ model AuditLog {
   @@index([entityType, entityId, createdAt])
   @@index([actorUserId, createdAt])
   @@index([createdAt])
+}
+
+enum AttendanceKind {
+  UPDATE_SINGLE
+  UPDATE_FAMILY
+  INCLUDE_FAMILY
+  INCLUDE_SINGLE_BF
+  INCLUDE_SINGLE_BPC
+  VERIFICATION
+  GUIDANCE
+}
+
+enum OpinionStatus {
+  PENDING
+  WITH
+  WITHOUT
+}
+
+enum ResponsibleRole {
+  RF
+  RL
+}
+
+model Attendance {
+  id                   String          @id @default(cuid())
+  ownerUserId          String
+  unitId               String
+  serviceDate          DateTime        @db.Date
+  name                 String
+  cpf                  String
+  responsibleRole      ResponsibleRole @default(RF)
+  familyCode           String?
+  phone                String?
+  kind                 AttendanceKind
+  opinion              OpinionStatus
+  crowded              Boolean         @default(false)
+  version              Int             @default(1)
+  operatorName         String
+  operatorRegistration String
+  operatorCategory     String
+  unitName             String
+  unitCode             String
+  timezone             String
+  cancelledAt          DateTime?
+  cancellationReason   String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  owner                User            @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  unit                 Unit            @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  @@index([ownerUserId, serviceDate, id])
+  @@index([unitId, serviceDate])
+  @@index([cpf, serviceDate])
 }

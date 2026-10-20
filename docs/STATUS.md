@@ -1,3 +1,23 @@
+# CadFlux V1.1 — Fase 3 em implementação
+
+Roberto autorizou iniciar Atendimentos com “Vamos” em 19/10/2026, após a proposta
+de registrar, consultar e corrigir com permissões e auditoria.
+Base: main `1e7ccd8`, aprovada no
+[run 39320213960](https://github.com/rrabts/CadFlux/actions/runs/39320213960).
+Branch: `codex/phase-3-attendances-2026-10-19`. A entrega só é aprovada após
+conferência do run correspondente ao commit publicado; o texto não substitui os testes.
+
+Especificação e critérios: [FASE-3-ESPECIFICACAO.md](FASE-3-ESPECIFICACAO.md).
+Cobertura e evidências: [FASE-3-VALIDACAO.md](FASE-3-VALIDACAO.md).
+Inclui lista e formulário, parecer pós-atendimento definitivo, correções na semana,
+consulta global da Direção, reaproveitamento próprio, duplicidade com confirmação,
+cancelamento com motivo e preservação de histórico. Somente dados fictícios.
+
+Fase 4, consulta oficial de CPF, fechamento, documentos, encaminhamentos e hospedagem
+de produção não fazem parte desta entrega. A Fase 4 exige autorização posterior.
+
+---
+
 # CadFlux V1.1 - Fase 2 em 19/10/2026
 
 ## Fases 1 e 2 incorporadas à main
@@ -24,7 +44,7 @@ posteriores que ajustem apenas documentação não alteram o código validado.
 Especificação: [FASE-2-ESPECIFICACAO.md](FASE-2-ESPECIFICACAO.md).
 Cobertura e histórico de correções: [FASE-2-VALIDACAO.md](FASE-2-VALIDACAO.md).
 
-O avanço para a Fase 3 depende de autorização explícita.
+A Fase 3 foi autorizada posteriormente, conforme o início deste documento.
 
 ## Validação completa em nuvem - 19/10/2026
 
@@ -147,4 +167,4 @@ MFA e recuperação de senha possuem modelagem e interfaces preparadas; envio ex
 O README detalha a arquitetura modular, as dez entidades, a migration, as rotas, a matriz de permissões e as decisões de senha/sessão/importação. Rodar localmente: instalar dependências, manter `pnpm db:local` aberto, executar `pnpm db:setup --all` e `pnpm dev` em outro terminal.
 
 A Fase 2 já foi autorizada e incorporada, conforme o início deste documento.
-Não avançar para a Fase 3 sem nova autorização.
+Não avançar para a Fase 4 sem nova autorização.
