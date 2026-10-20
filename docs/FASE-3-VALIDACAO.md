@@ -78,3 +78,10 @@ A inspeção das capturas identificou que o full-page do navegador preservava a
 posição de elementos fixos no ponto de rolagem atual, deslocando visualmente a
 sidebar e o link de pular conteúdo na imagem. As capturas da Fase 3 agora voltam
 ao topo antes de fotografar; a aplicação e sua navegação por teclado são preservadas.
+
+O run [39356310647](https://github.com/rrabts/CadFlux/actions/runs/39356310647)
+aprovou novamente 122 testes e build, mas o cenário da Direção encontrou registros
+extras ao pesquisar um nome com números. A busca indevidamente extraía os dígitos
+de qualquer texto para procurar CPF. A condição foi corrigida: CPF só é pesquisado
+quando a entrada inteira é numérica ou uma máscara numérica. Foi acrescentado um
+teste de regressão para nomes com números, sem reduzir a exigência do navegador.

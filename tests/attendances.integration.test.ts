@@ -378,6 +378,16 @@ describe("Atendimentos com PostgreSQL real", () => {
       (await attendanceFilterOptions(direction)).operators.some((o) => o.id === owner.id),
     ).toBe(true);
   });
+  it("busca textual com números não mistura resultados parciais de CPF", async () => {
+    const data = input();
+    const name = `Busca Fictícia ${suffix} 1`;
+    await createAttendance(owner, { ...data, name });
+    await createAttendance(owner, { ...input(), name: "Outra Pessoa Fictícia" });
+    expect((await listAttendances(owner, { q: name })).total).toBe(1);
+    expect((await listAttendances(owner, { q: data.cpf })).items.map((item) => item.name)).toEqual([
+      name,
+    ]);
+  });
   it("revalida ator atual, revogação de privilégios e unidade ativa", async () => {
     await expect(
       createAttendance({ ...referral, accessProfile: "INTERVIEWER" }, input()),

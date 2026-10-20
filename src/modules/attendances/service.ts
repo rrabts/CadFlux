@@ -84,7 +84,8 @@ export async function listAttendances(actor: SafeUser, raw: unknown) {
     const current = await currentActor(tx, actor, "attendances:read");
     if (current.accessProfile !== "DIRECTION" && (filters.ownerUserId || filters.unitId))
       throw new AppError(403, "Filtros de operador e unidade são exclusivos da Direção.");
-    const digits = filters.q?.replace(/\D/g, "");
+    const digits =
+      filters.q && /^[\d.\-\s]+$/.test(filters.q) ? filters.q.replace(/\D/g, "") : undefined;
     const where: Prisma.AttendanceWhereInput = {
       ...scope(current),
       ...(filters.ownerUserId ? { ownerUserId: filters.ownerUserId } : {}),
