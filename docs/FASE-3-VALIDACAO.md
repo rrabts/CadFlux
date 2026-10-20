@@ -73,3 +73,8 @@ A revisão também permite reaplicar os mesmos filtros após erro transitório e
 resultados antigos quando a busca falha; mensagens do dashboard distinguem os módulos
 disponíveis dos painéis futuros. Nenhum resultado da execução anterior foi reutilizado
 como aprovação desses ajustes.
+
+A inspeção das capturas identificou que o full-page do navegador preservava a
+posição de elementos fixos no ponto de rolagem atual, deslocando visualmente a
+sidebar e o link de pular conteúdo na imagem. As capturas da Fase 3 agora voltam
+ao topo antes de fotografar; a aplicação e sua navegação por teclado são preservadas.

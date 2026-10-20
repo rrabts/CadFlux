@@ -499,6 +499,7 @@ test("Fase 3: registrar, classificar, corrigir e cancelar com histórico", async
   await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
   expect((await saved).status()).toBe(200);
   await expect(page.locator(".attendance-history")).toContainText("Atendimento alterado");
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     animations: "disabled",
     path: ".local/evidence/phase-3-attendance-detail.png",
@@ -551,6 +552,7 @@ test("Fase 3: reaproveitamento confirmado e duplicidade explícita", async ({ pa
   await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(cpf);
   await page.getByRole("button", { name: "Filtrar", exact: true }).click();
   await expect(page.locator("tbody tr")).toHaveCount(2);
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     animations: "disabled",
     path: ".local/evidence/phase-3-attendance-list.png",
@@ -570,6 +572,7 @@ test("Fase 3: orientação e inclusão no mobile respeitam campos e parecer", as
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     animations: "disabled",
     path: ".local/evidence/phase-3-attendance-mobile.png",
