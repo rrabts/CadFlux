@@ -4,7 +4,8 @@ Roberto autorizou iniciar Atendimentos com “Vamos” em 19/10/2026, após a pr
 de registrar, consultar e corrigir com permissões e auditoria.
 Base: main `1e7ccd8`, aprovada no
 [run 39320213960](https://github.com/rrabts/CadFlux/actions/runs/39320213960).
-Branch: `codex/phase-3-attendances-2026-10-19`. A entrega só é aprovada após
+Branch: `codex/phase-3-attendances-2026-10-19`,
+[PR #7](https://github.com/rrabts/CadFlux/pull/7). A entrega só é aprovada após
 conferência do run correspondente ao commit publicado; o texto não substitui os testes.
 
 Especificação e critérios: [FASE-3-ESPECIFICACAO.md](FASE-3-ESPECIFICACAO.md).

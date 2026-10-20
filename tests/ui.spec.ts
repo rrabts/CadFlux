@@ -621,5 +621,8 @@ test("Fase 3: Direção consulta registros e Encaminhador recebe bloqueio", asyn
   await expect(page).toHaveURL(/\/dashboard/);
   await page.goto(url);
   await expect(page.getByRole("heading", { name: "Acesso não permitido" })).toBeVisible();
-  expect((await page.request.get("/api/attendances")).status()).toBe(403);
+  const status = await page.evaluate(
+    async () => (await fetch("/api/attendances", { credentials: "same-origin" })).status,
+  );
+  expect(status).toBe(403);
 });

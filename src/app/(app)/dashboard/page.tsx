@@ -64,7 +64,7 @@ export default async function DashboardPage() {
             </div>
             <EmptyState
               title="Nenhum registro disponível"
-              description="Este módulo será disponibilizado em uma próxima fase. Não há dados operacionais nesta demonstração."
+              description="Este painel será disponibilizado nas próximas fases. Use o menu para acessar os módulos já disponíveis."
               icon={
                 direction ? (
                   <Building2 size={25} />

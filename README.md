@@ -71,7 +71,7 @@ Novos usuários criados manualmente ou por importação recebem senha aleatória
 
 A gestão lista 50 usuários por página, informa o total e mantém os filtros ao navegar. Alterar os filtros volta à primeira página.
 
-Menus de atendimento, encaminhamento, fechamento, documentos e pendências direcionam a estados vazios/“Em desenvolvimento”. Não registram operações reais. A topbar oferece tema Claro/Escuro/Sistema, perfil e logout. A sidebar pode recolher; no mobile funciona como drawer com foco, Escape e navegação por teclado.
+Atendimentos abrem o módulo da Fase 3. Menus de encaminhamento, fechamento, documentos e pendências continuam em desenvolvimento. A topbar oferece tema Claro/Escuro/Sistema, perfil e logout. A sidebar pode recolher; no mobile funciona como drawer com foco, Escape e navegação por teclado.
 
 APIs: `/api/auth/login`, `/api/auth/logout`, `/api/auth/password`, `/api/auth/recovery`; `/api/users`, `/api/users/[id]`; `/api/references`, `/api/audit`; `/api/imports/template`, `/api/imports/preview`, `/api/imports/confirm`. Sessão, usuário ativo, perfil e escopo são verificados no servidor. Não existem endpoints de exclusão de usuário ou edição/exclusão de auditoria.
 
@@ -89,7 +89,7 @@ Limites: 2 MiB, 1.000 usuários, uma planilha XLSX, campos de texto simples. CSV
 
 ## Arquitetura e banco
 
-Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
+Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,references,attendances,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
 
 Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch e AuditLog.
 
@@ -97,7 +97,7 @@ Migration: `prisma/migrations/20261002140000_foundation/migration.sql`, gerada a
 
 Senhas usam scrypt salgado; tokens aleatórios ficam apenas por hash no banco. A sessão dura oito horas, em cookie httpOnly/SameSite=Lax e Secure em produção. Login possui limitação de tentativas no banco. Mutações exigem origem válida. Mudanças de perfil/status, unidade principal/adicionais e senha revogam sessões; cada requisição consulta o usuário atual. Outro administrador deve alterar o perfil/status da própria Direção; alterações administrativas preservam uma Direção ativa.
 
-A modelagem permite unidades adicionais, recuperação de senha e MFA posterior. A interface de recuperação informa que a entrega externa ainda está preparada. MFA externo, fluxo completo de recuperação e integrações externas ficam para fases posteriores autorizadas. Banco e aplicação de produção não foram publicados nesta tarefa.
+Unidades adicionais são gerenciadas pela Direção; recuperação de senha e MFA externo continuam preparados para integração posterior. A interface de recuperação informa que a entrega externa ainda está preparada. MFA externo, fluxo completo de recuperação e integrações externas ficam para fases posteriores autorizadas. Banco e aplicação de produção não foram publicados nesta tarefa.
 
 ## Verificar
 

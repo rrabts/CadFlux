@@ -48,6 +48,7 @@ export function AttendanceList({ direction }: { direction: boolean }) {
   const [draft, setDraft] = useState(initialFilters);
   const [filters, setFilters] = useState(initialFilters);
   const [page, setPage] = useState(1);
+  const [reload, setReload] = useState(0);
   const [data, setData] = useState<PageData | null>(null);
   const [options, setOptions] = useState<FilterOptions>({ operators: [], units: [] });
   const [resolvedQuery, setResolvedQuery] = useState("");
@@ -61,7 +62,8 @@ export function AttendanceList({ direction }: { direction: boolean }) {
   const query = new URLSearchParams({ page: String(page) });
   for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
   const queryKey = query.toString();
-  const loading = resolvedQuery !== queryKey;
+  const requestKey = queryKey + "@" + reload;
+  const loading = resolvedQuery !== requestKey;
   useEffect(() => {
     let active = true;
     api<PageData>("/api/attendances?" + queryKey)
@@ -76,15 +78,18 @@ export function AttendanceList({ direction }: { direction: boolean }) {
         setError("");
       })
       .catch((e) => {
-        if (active) setError(errorMessage(e));
+        if (active) {
+          setError(errorMessage(e));
+          setData(null);
+        }
       })
       .finally(() => {
-        if (active) setResolvedQuery(queryKey);
+        if (active) setResolvedQuery(requestKey);
       });
     return () => {
       active = false;
     };
-  }, [queryKey, page]);
+  }, [queryKey, page, requestKey]);
   const field = (key: keyof typeof initialFilters, value: string) =>
     setDraft((current) => ({ ...current, [key]: value }));
   return (
@@ -112,6 +117,7 @@ export function AttendanceList({ direction }: { direction: boolean }) {
           e.preventDefault();
           setPage(1);
           setFilters({ ...draft });
+          setReload((value) => value + 1);
         }}
       >
         <Field label="Pesquisar nome ou CPF" id="attendance-search">

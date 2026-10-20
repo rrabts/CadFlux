@@ -1,7 +1,7 @@
 # CadFlux — validação da Fase 3
 
 Base: main `1e7ccd8`. Branch `codex/phase-3-attendances-2026-10-19`.
-A descrição do PR desta entrega registra o commit final e o run aprovado, após
+A descrição do [PR #7](https://github.com/rrabts/CadFlux/pull/7) registra o commit final e o run aprovado, após
 executar o workflow. Não confundir implementação ou abertura de PR com aprovação.
 
 ## Método
@@ -60,3 +60,16 @@ A revisão dos testes de navegador também passou a aguardar o título da págin
 de detalhe e um ID real, evitando que `/attendances/new` fosse confundido com
 sucesso de gravação. Seletores de rótulos obrigatórios consideram o marcador de
 obrigatoriedade, mantendo as verificações do campo e dos resultados.
+
+Na segunda execução, [39355875125](https://github.com/rrabts/CadFlux/actions/runs/39355875125),
+os 122 testes de backend, migrations, seed, lint, TypeScript e build passaram.
+Dezessete cenários de navegador foram iniciados; dezesseis passaram. O último
+confirmou o bloqueio da página, mas consultou a API com o cliente HTTP do Playwright,
+que não reproduz o cookie Secure do Chromium no HTTP de loopback. A consulta passou
+para fetch no próprio navegador autenticado, mantendo a exigência de 403 e a
+configuração Secure da aplicação. O comportamento sem sessão (401) tem teste próprio.
+
+A revisão também permite reaplicar os mesmos filtros após erro transitório e limpa
+resultados antigos quando a busca falha; mensagens do dashboard distinguem os módulos
+disponíveis dos painéis futuros. Nenhum resultado da execução anterior foi reutilizado
+como aprovação desses ajustes.
