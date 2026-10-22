@@ -98,3 +98,11 @@ Na Fase 2, o workflow mantém o arquivo `phase-1-cloud.yml`, mas seu nome exibid
 `CadFlux - Cloud validation`; o artifact passa a ser `cadflux-browser-evidence`.
 Na Fase 3, o verificador exige três migrations e 12 tabelas antes dos testes;
 o seed mantém somente os três usuários, duas unidades e quatro categorias fictícias.
+
+## Supervisor de desenvolvimento Cloud — PR #4
+
+O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
+`start` e encerra os grupos de processos, incluindo migrations e seed.
+Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
+`pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
+3000 livre. Configuração e detalhes em [CLOUD-RETOMADA.md](CLOUD-RETOMADA.md).

@@ -76,6 +76,8 @@ jobs:
         run: pnpm typecheck
       - name: Unit and PostgreSQL integration tests
         run: pnpm test
+      - name: Cloud supervisor regression tests
+        run: pnpm test:cloud
       - name: Build production bundle
         run: pnpm build
       - name: Install Chromium and system dependencies

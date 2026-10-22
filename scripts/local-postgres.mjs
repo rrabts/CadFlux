@@ -8,7 +8,7 @@ import pg from "pg";
 import { loadDatabaseEnvironment, projectDirectory } from "./database-config.mjs";
 
 process.chdir(projectDirectory);
-if (!existsSync(".env")) {
+if (!existsSync(".env") && !process.env.DATABASE_URL && !process.env.DATABASE_URL_TEST) {
   await copyFile(".env.example", ".env", constants.COPYFILE_EXCL);
   console.log("Arquivo .env criado com configurações fictícias de desenvolvimento.");
 }

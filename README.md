@@ -211,3 +211,11 @@ As contas fictícias existentes permanecem. O seed não cria atendimentos de
 beneficiários; testes geram registros sintéticos no banco de testes. Indicadores do
 dashboard continuam vazios até a Fase 4; seu botão de atendimento já abre o formulário.
 Não há publicação de produção nem uso de dados reais.
+
+## Supervisor de desenvolvimento Cloud — PR #4
+
+O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
+`start` e encerra os grupos de processos, incluindo migrations e seed.
+Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
+`pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
+3000 livre. Configuração e detalhes em [docs/CLOUD-RETOMADA.md](docs/CLOUD-RETOMADA.md).

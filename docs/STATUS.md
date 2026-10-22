@@ -177,3 +177,11 @@ O README detalha a arquitetura modular, as dez entidades, a migration, as rotas,
 
 A Fase 2 já foi autorizada e incorporada, conforme o início deste documento.
 Não avançar para a Fase 4 sem nova autorização.
+
+## Supervisor de desenvolvimento Cloud — PR #4
+
+O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
+`start` e encerra os grupos de processos, incluindo migrations e seed.
+Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
+`pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
+3000 livre. Configuração e detalhes em [CLOUD-RETOMADA.md](CLOUD-RETOMADA.md).
