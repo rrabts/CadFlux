@@ -2,6 +2,10 @@
 # Preparação de desenvolvimento Linux; não publica aplicativo ou dados.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+if ! command -v flock >/dev/null 2>&1; then
+  printf '%s\n' 'O supervisor exige flock (pacote util-linux) na imagem Linux.' >&2
+  exit 1
+fi
 
 node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if (major < 22 || (major === 22 && minor < 12)) throw new Error("Node.js 22.12+ necessário");'
 

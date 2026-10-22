@@ -121,3 +121,21 @@ com dependências/configuração/bancos novos. Setup, SQL, migrations/seed, lint
 typecheck, build, 85 testes e 10 E2E passaram. Configuração por variáveis herdadas
 sem `.env` também passou. Uma instância nova e o salvamento dos secrets na
 plataforma seguem pendentes; não houve merge na main nem publicação de produção.
+
+## Correções da revisão do PR #4 — 22/10/2026
+
+- `start` usa trava exclusiva `flock` durante toda a vida do supervisor. Chamadas
+  concorrentes não removem PID/prontidão; PID antigo é substituído sob a trava.
+- Cada filho possui grupo de processos próprio. Parada e reinício aguardam também
+  os descendentes de migrations/seed; há SIGKILL após dez segundos de SIGTERM.
+  PID é removido somente pelo supervisor proprietário, após concluir a limpeza.
+- Novo comando `pnpm test:cloud`: três testes de regressão Linux cobrem disputa
+  de inicialização, PID antigo, parada durante migration, resistência a SIGTERM
+  e nova inicialização após a parada. SQL e aplicação são simulados nesses testes;
+  processos, trava, sinais e servidor HTTP são reais.
+- Neste checkout Linux novo: dependências pelo lockfile, migrations/seed nos dois
+  bancos PostgreSQL reais, start/status/stop/start/stop, lint, TypeScript, 85 testes
+  da aplicação, build e dez E2E Chromium passaram (22,8 s; teardown automático).
+- Configuração persistente da plataforma e secrets não foram publicados. Não houve
+  merge, deploy, dados reais nem avanço de fase. As contas, rotas, permissões e
+  entidades da Fase 1 permanecem conforme as seções anteriores.

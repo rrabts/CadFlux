@@ -15,17 +15,21 @@ import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 import pg from "pg";
 import { loadDatabaseEnvironment, projectDirectory } from "./database-config.mjs";
+import { stopGroup } from "./process-groups.mjs";
 
 const script = fileURLToPath(import.meta.url);
 const directory = resolve(projectDirectory, ".local/cloud");
 const pidFile = resolve(directory, "supervisor.pid");
 const logFile = resolve(directory, "services.log");
 const readyFile = resolve(directory, "ready");
+const lockFile = resolve(directory, "supervisor.lock");
 process.chdir(projectDirectory);
 const action = process.argv[2] || "start";
 if (process.platform !== "linux") throw new Error("cloud-runtime exige Linux.");
 if (!["start", "run", "status", "stop"].includes(action))
   throw new Error("Uso: cloud-runtime.mjs start|status|stop");
+if (action === "run" && process.argv[3] !== "--locked")
+  throw new Error("Ação interna do supervisor. Use cloud-runtime.mjs start.");
 process.umask(0o077);
 mkdirSync(directory, { recursive: true });
 
@@ -119,18 +123,31 @@ try {
   } else if (action === "start") {
     loadDatabaseEnvironment();
     if (!supervisorPid()) {
-      remove(pidFile);
-      remove(readyFile);
       const log = openSync(logFile, "a", 0o600);
-      const child = spawn(process.execPath, [script, "run"], {
-        cwd: projectDirectory,
-        env: process.env,
-        detached: true,
-        stdio: ["ignore", log, log],
-      });
+      // flock owns the lock for the supervisor's entire lifetime. Never unlink
+      // this file: concurrent starters must always contend on the same inode.
+      const child = spawn(
+        "flock",
+        [
+          "--exclusive",
+          "--nonblock",
+          "--no-fork",
+          lockFile,
+          process.execPath,
+          script,
+          "run",
+          "--locked",
+        ],
+        {
+          cwd: projectDirectory,
+          env: process.env,
+          detached: true,
+          stdio: ["ignore", log, log],
+        },
+      );
       closeSync(log);
       child.on("error", () => {
-        console.error("Não foi possível iniciar o supervisor.");
+        console.error("Não foi possível iniciar o supervisor. Verifique flock (util-linux).");
         process.exitCode = 1;
       });
       child.unref();
@@ -163,24 +180,37 @@ try {
         "PostgreSQL local exige usuário sem root e URLs locais. Para banco externo use CADFLUX_SKIP_LOCAL_POSTGRES=1.",
       );
     }
-    const lock = openSync(pidFile, "wx", 0o600);
-    writeFileSync(lock, String(process.pid));
-    closeSync(lock);
+    // Internal action, launched by start under flock. A stale PID is replaced
+    // only after obtaining the OS lock, never by a competing start caller.
+    writeFileSync(pidFile, String(process.pid), { mode: 0o600 });
     remove(readyFile);
-    const children = new Set();
+    const children = new Map();
     let stopping = false;
     let shutdownPromise;
     function child(file, args = []) {
+      if (stopping) throw new Error("Supervisor em encerramento.");
       const processChild = spawn(process.execPath, [resolve(projectDirectory, file), ...args], {
         cwd: projectDirectory,
         env: process.env,
         stdio: "inherit",
+        detached: true,
       });
-      children.add(processChild);
-      processChild.once("exit", () => children.delete(processChild));
-      processChild.once("error", () => {
-        children.delete(processChild);
-      });
+      let cleanup;
+      const finish = () => {
+        cleanup ??= (async () => {
+          if (processChild.pid) await stopGroup(processChild.pid);
+          children.delete(processChild);
+        })();
+        return cleanup;
+      };
+      children.set(processChild, finish);
+      const onExit = () =>
+        void finish().catch((error) => {
+          console.error(error.message);
+          void shutdown(1);
+        });
+      processChild.once("exit", onExit);
+      processChild.once("error", onExit);
       return processChild;
     }
     async function shutdown(code) {
@@ -188,11 +218,16 @@ try {
       stopping = true;
       remove(readyFile);
       shutdownPromise = (async () => {
-        const owned = [...children];
-        for (const processChild of owned) processChild.kill("SIGTERM");
-        for (let i = 0; i < 100 && children.size; i++) await delay(100);
-        for (const processChild of children) processChild.kill("SIGKILL");
-        remove(pidFile);
+        try {
+          await Promise.all([...children.values()].map((finish) => finish()));
+        } catch (error) {
+          console.error(error.message);
+          // Keep the supervisor and its lock alive: stop must report failure,
+          // not success while an owned process can still execute.
+          setInterval(() => {}, 1000);
+          return;
+        }
+        if (supervisorPid() === process.pid) remove(pidFile);
         process.exit(code);
       })();
       return shutdownPromise;
@@ -209,6 +244,13 @@ try {
         async function failed() {
           if (handled || stopping) return;
           handled = true;
+          try {
+            await children.get(processChild)?.();
+          } catch {
+            await shutdown(1);
+            return;
+          }
+          if (stopping) return;
           if (++restarts > 5) {
             console.error(`${label}: limite de reinícios atingido.`);
             await shutdown(1);

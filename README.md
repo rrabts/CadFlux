@@ -128,3 +128,8 @@ A branch Cloud foi enviada ao GitHub e validada em checkout autenticado limpo:
 setup e todas as verificações acima passaram novamente. Também foi verificada
 a inicialização somente com variáveis de ambiente, sem `.env`. O salvamento dos
 secrets/configuração pela interface Cloud e uma instância nova continuam pendentes.
+
+Correção da revisão do PR #4 (22/10/2026): o supervisor Cloud exige `flock`
+(util-linux), serializa a inicialização e aguarda o encerramento dos grupos de
+processos, incluindo migrations/seed. Execute `pnpm test:cloud` para os três
+testes de regressão Linux. Evidências e limites em [docs/STATUS.md](docs/STATUS.md).

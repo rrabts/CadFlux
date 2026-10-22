@@ -11,6 +11,7 @@ Os scripts devem estar presentes na branch selecionada ao salvar o ambiente.
 | Repositório   | `rrabts/CadFlux`, conexão GitHub autorizada para leitura/escrita                               |
 | Base          | `main`, depois de incorporar os scripts desta branch                                           |
 | Usuário Linux | Sem root; o binário PostgreSQL está nas dependências do projeto                                |
+| Trava Linux   | `flock` do pacote `util-linux` disponível no PATH; setup verifica antes de instalar dependências |
 | Node          | 22.12 ou superior (verificado com 24.19.0)                                                     |
 | pnpm          | 10.28.2; o setup usa `npm exec` quando a versão global difere                                  |
 | Preparação    | `bash scripts/cloud-setup.sh`, a partir da raiz do checkout                                    |
@@ -67,6 +68,19 @@ Logs, PID e prontidão ficam em `.local/cloud`, ignorados e protegidos por umask
 identificado e encerra os filhos que ele criou. Portas já ocupadas são recusadas;
 encerre os serviços manuais anteriores antes de migrar para o supervisor.
 Após alterar URLs/variáveis, use stop/start para atualizar o ambiente dos filhos.
+
+`start` mantém uma trava exclusiva do sistema operacional durante toda a vida do
+supervisor. O arquivo `.local/cloud/supervisor.lock` não deve ser removido: ele é
+reutilizado, e a trava é liberada pelo kernel ao terminar o processo. Chamadas
+simultâneas aguardam a prontidão do mesmo supervisor. `run` é uma ação interna;
+use somente `start`, `status` e `stop`.
+
+Os filhos iniciam grupos de processos separados. `stop` aguarda também seus
+descendentes (migrations, seed e servidores); após dez segundos usa SIGKILL e
+confirma que não restam processos executáveis no grupo. Se a limpeza falhar,
+mantém PID/trava e não anuncia sucesso. `pnpm test:cloud` executa as três
+regressões Linux em diretórios temporários, sem acessar bancos reais; requer a
+porta 3000 livre. Não execute junto com o supervisor de desenvolvimento.
 
 O sandbox padrão desta sessão não alcança proxy/loopback. Executar estes comandos
 com a permissão ampliada do executor Cloud, como foi feito nas verificações.
