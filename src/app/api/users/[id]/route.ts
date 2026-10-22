@@ -17,7 +17,15 @@ export async function GET(request: Request, context: Context) {
       take: 100,
     });
     return json({
-      user,
+      user: {
+        ...user,
+        additionalUnitIds: (
+          await prisma.userUnitAccess.findMany({
+            where: { userId: id },
+            orderBy: { unitId: "asc" },
+          })
+        ).map((link) => link.unitId),
+      },
       history: history.map(({ actor, ...row }) => ({ ...row, actorUser: actor })),
     });
   } catch (error) {

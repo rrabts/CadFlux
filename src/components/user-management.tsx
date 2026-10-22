@@ -43,6 +43,7 @@ const empty: UserInput = {
   professionalCategoryId: "",
   primaryUnitId: "",
   status: "ACTIVE",
+  additionalUnitIds: [],
 };
 function toInput(user: SafeUser): UserInput {
   return {
@@ -54,6 +55,7 @@ function toInput(user: SafeUser): UserInput {
     professionalCategoryId: user.professionalCategoryId,
     primaryUnitId: user.primaryUnitId,
     status: user.status,
+    additionalUnitIds: user.additionalUnitIds ?? [],
   };
 }
 function Loading() {
@@ -384,6 +386,16 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
           method: "PATCH",
           body: JSON.stringify(data),
         });
+        if (
+          userId === viewerId &&
+          (user?.primaryUnitId !== result.user.primaryUnitId ||
+            JSON.stringify(user?.additionalUnitIds ?? []) !==
+              JSON.stringify(result.user.additionalUnitIds ?? []))
+        ) {
+          router.push("/login");
+          router.refresh();
+          return;
+        }
         setUser(result.user);
         setData(toInput(result.user));
         const detail = await api<{ history: AuditEntry[] }>("/api/users/" + userId);
@@ -542,7 +554,13 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
         <Select
           id="primaryUnitId"
           value={data.primaryUnitId}
-          onChange={(e) => update("primaryUnitId", e.target.value)}
+          onChange={(e) =>
+            setData((previous) => ({
+              ...previous,
+              primaryUnitId: e.target.value,
+              additionalUnitIds: previous.additionalUnitIds?.filter((id) => id !== e.target.value),
+            }))
+          }
           required
         >
           <option value="">Selecione</option>
@@ -554,9 +572,36 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
           ))}
         </Select>
       </Field>
-      <p className="muted small" style={{ marginTop: 15 }}>
-        O vínculo a unidades adicionais está preparado para refinamento futuro.
-      </p>
+      <fieldset className="additional-units">
+        <legend>Unidades adicionais</legend>
+        <p className="muted small">
+          Selecione as outras unidades às quais este usuário está vinculado. O perfil de acesso
+          permanece o mesmo.
+        </p>
+        <div className="unit-options">
+          {refs.units
+            .filter((item) => item.id !== data.primaryUnitId)
+            .map((item) => (
+              <label className="unit-choice" key={item.id}>
+                <input
+                  type="checkbox"
+                  checked={data.additionalUnitIds?.includes(item.id) ?? false}
+                  disabled={saving || (!item.active && !data.additionalUnitIds?.includes(item.id))}
+                  onChange={(event) =>
+                    update(
+                      "additionalUnitIds",
+                      event.target.checked
+                        ? [...(data.additionalUnitIds ?? []), item.id].sort()
+                        : data.additionalUnitIds?.filter((id) => id !== item.id),
+                    )
+                  }
+                />
+                {item.name}
+                {!item.active ? " (inativa)" : ""}
+              </label>
+            ))}
+        </div>
+      </fieldset>
     </div>
   );
   return (

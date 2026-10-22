@@ -31,7 +31,7 @@ export default async function DashboardPage() {
           ) : (
             <Link
               className="button button-primary"
-              href={referral ? "/workspace/new-referral" : "/workspace/new-service"}
+              href={referral ? "/workspace/new-referral" : "/attendances/new"}
             >
               <Plus size={18} />
               {referral ? "Novo encaminhamento" : "Novo atendimento"}
@@ -40,8 +40,11 @@ export default async function DashboardPage() {
         }
       />
       <div className="phase-note">
-        <Badge variant="info">Fase 1</Badge>
-        <p>Fundação e acesso disponíveis. Os módulos operacionais aguardam desenvolvimento.</p>
+        <Badge variant="info">Fase 3</Badge>
+        <p>
+          Gestão institucional e registro de atendimentos disponíveis. Indicadores e demais módulos
+          aguardam as próximas fases.
+        </p>
       </div>
       <div className="stats-grid">
         {labels.map((label) => (
@@ -61,7 +64,7 @@ export default async function DashboardPage() {
             </div>
             <EmptyState
               title="Nenhum registro disponível"
-              description="Este módulo será disponibilizado em uma próxima fase. Não há dados operacionais nesta demonstração."
+              description="Este painel será disponibilizado nas próximas fases. Use o menu para acessar os módulos já disponíveis."
               icon={
                 direction ? (
                   <Building2 size={25} />

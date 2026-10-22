@@ -45,8 +45,18 @@ export const userInputSchema = z
     professionalCategoryId: z.string().min(1),
     primaryUnitId: z.string().min(1),
     status: z.enum(UserStatus).default(UserStatus.ACTIVE),
+    additionalUnitIds: z
+      .array(z.string().min(1).max(100))
+      .max(20)
+      .refine((ids) => new Set(ids).size === ids.length, "Não repita unidades adicionais.")
+      .transform((ids) => [...ids].sort())
+      .optional(),
   })
-  .strict();
+  .strict()
+  .refine((input) => !input.additionalUnitIds?.includes(input.primaryUnitId), {
+    message: "A unidade principal não pode se repetir nas unidades adicionais.",
+    path: ["additionalUnitIds"],
+  });
 
 export type UserInput = z.infer<typeof userInputSchema>;
 

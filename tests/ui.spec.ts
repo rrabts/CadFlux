@@ -2,6 +2,128 @@ import { test, expect, type Page } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { isSameDatabase } from "../src/lib/database-identity";
+
+async function createUnitThroughUi(page: Page, name: string, code: string) {
+  await page.goto("/units");
+  await page.getByRole("button", { name: "Nova unidade", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel(/^Nome/).fill(name);
+  await dialog.getByLabel(/^Código/).fill(code);
+  await dialog.getByRole("button", { name: "Salvar cadastro", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+}
+
+test("Fase 2: Direção mantém unidades e consulta histórico", async ({ page }) => {
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  const id = randomUUID().slice(0, 8);
+  const name = "Unidade Fictícia UI " + id;
+  await createUnitThroughUi(page, name, "UI-F2-" + id);
+  await page.getByLabel("Pesquisar", { exact: true }).fill(name);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(1);
+  await page.getByRole("button", { name: "Editar " + name, exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Fuso horário").fill("America/Manaus");
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar cadastro" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator("tbody")).toContainText("America/Manaus");
+  await page.getByRole("button", { name: "Inativar " + name, exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Inativar", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Ativar " + name, exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Ativar " + name, exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Ativar", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Inativar " + name, exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Histórico " + name, exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Unidade criada");
+  await expect(page.getByRole("dialog")).toContainText("Unidade inativada");
+  await page.getByRole("button", { name: "Fechar janela" }).click();
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-2-units.png",
+    fullPage: true,
+  });
+});
+
+test("Fase 2: unidades adicionais persistem e impedem inativação com usuário ativo", async ({
+  page,
+}) => {
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  const id = randomUUID().slice(0, 8);
+  const unitName = "Unidade Adicional UI " + id;
+  await createUnitThroughUi(page, unitName, "UI-ADD-" + id);
+  await page.goto("/users/new");
+  await page.getByLabel("Nome completo").fill("Pessoa Fictícia Vínculo " + id);
+  await page.getByLabel(/^E-mail/).fill("ui-add-" + id + "@exemplo.invalid");
+  await page.getByLabel(/^Matrícula/).fill("UI-ADD-" + id);
+  await page
+    .getByLabel(/^Unidade principal/)
+    .selectOption({ label: "Unidade Central — Demonstração" });
+  await page.getByRole("checkbox", { name: unitName, exact: true }).check();
+  await page.getByRole("button", { name: "Criar usuário", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("button", { name: "Abrir usuário", exact: true }).click();
+  await expect(page.getByRole("tab", { name: "Unidade", exact: true })).toBeVisible();
+  const detailUrl = page.url();
+  await page.getByRole("tab", { name: "Unidade", exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: unitName, exact: true })).toBeChecked();
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-2-user-units.png",
+    fullPage: true,
+  });
+  await page.goto("/units");
+  await page.getByLabel("Pesquisar", { exact: true }).fill(unitName);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await page.getByRole("button", { name: "Inativar " + unitName, exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Inativar", exact: true }).click();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Existem usuários ativos vinculados" }),
+  ).toContainText("Existem usuários ativos vinculados");
+  await page.goto(detailUrl);
+  await page.getByRole("tab", { name: "Unidade", exact: true }).click();
+  await page.getByRole("checkbox", { name: unitName, exact: true }).uncheck();
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname.startsWith("/api/users/") &&
+      response.request().method() === "PATCH",
+  );
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await page.reload();
+  await page.getByRole("tab", { name: "Unidade", exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: unitName, exact: true })).not.toBeChecked();
+});
+
+test("Fase 2: categoria no mobile, duplicidade e histórico", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/categories");
+  const name = "Categoria Fictícia Mobile " + randomUUID().slice(0, 8);
+  await page.getByRole("button", { name: "Nova categoria", exact: true }).click();
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill(name);
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar cadastro" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByRole("button", { name: "Nova categoria", exact: true }).click();
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill(name.toUpperCase());
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar cadastro" }).click();
+  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
+    "Já existe uma categoria",
+  );
+  await page.getByRole("dialog").getByRole("button", { name: "Cancelar", exact: true }).click();
+  await page.getByLabel("Pesquisar", { exact: true }).fill(name);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(1);
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+    .toBe(true);
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-2-categories-mobile.png",
+    fullPage: true,
+  });
+});
 const password = "CadFlux!Demo2026";
 async function createPaginationFixture() {
   const testUrl = process.env.DATABASE_URL_TEST;
@@ -100,11 +222,19 @@ test("temas claro, escuro e sistema persistem e a navegação recolhe", async ({
   await expect(page.locator("html")).toHaveClass(/dark/);
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/dark/);
-  await page.screenshot({ path: ".local/evidence/dashboard-dark.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/dashboard-dark.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Selecionar tema" }).click();
   await page.getByRole("menuitem", { name: "Claro", exact: true }).click();
   await expect(page.locator("html")).not.toHaveClass(/dark/);
-  await page.screenshot({ path: ".local/evidence/dashboard-light.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/dashboard-light.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Selecionar tema" }).click();
   await page.getByRole("menuitem", { name: "Sistema", exact: true }).click();
   await expect
@@ -128,7 +258,11 @@ test("temas claro, escuro e sistema persistem e a navegação recolhe", async ({
   await expect(page.locator(".app-shell")).toHaveClass(/sidebar-collapsed/);
   await page.getByRole("button", { name: "Expandir navegação" }).click();
   await expect(page.locator(".app-shell")).not.toHaveClass(/sidebar-collapsed/);
-  await page.screenshot({ path: ".local/evidence/dashboard-desktop.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/dashboard-desktop.png",
+    fullPage: true,
+  });
 });
 test("mobile tem drawer utilizável por teclado e não excede largura da tela", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -154,7 +288,11 @@ test("mobile tem drawer utilizável por teclado e não excede largura da tela", 
     .toBe(true);
   await page.getByRole("button", { name: "Abrir menu" }).click();
   await expect(page.getByRole("link", { name: "CadFlux, visão geral" })).toBeFocused();
-  await page.screenshot({ path: ".local/evidence/navigation-mobile.png", fullPage: false });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/navigation-mobile.png",
+    fullPage: false,
+  });
   await page.keyboard.press("Shift+Tab");
   await expect(
     page
@@ -168,7 +306,11 @@ test("mobile tem drawer utilizável por teclado e não excede largura da tela", 
     "aria-expanded",
     "false",
   );
-  await page.screenshot({ path: ".local/evidence/users-mobile.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/users-mobile.png",
+    fullPage: true,
+  });
 });
 test("Direção cria, edita, troca vínculos, inativa e consulta histórico", async ({ page }) => {
   await login(page);
@@ -310,5 +452,180 @@ test("gestão pagina sem perder registros e filtros retornam à primeira página
   await page.getByRole("button", { name: "Limpar", exact: true }).click();
   await expect(page.locator(".table-footer")).toContainText(/Mostrando 1–50 de/);
   await expect(page.getByRole("button", { name: "Anterior", exact: true })).toBeDisabled();
-  await page.screenshot({ path: ".local/evidence/users-desktop-pagination.png", fullPage: true });
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/users-desktop-pagination.png",
+    fullPage: true,
+  });
+});
+
+// Synthetic CPF numbers are generated only for fictitious test records.
+function syntheticCpf() {
+  let value = String(Math.floor(10000000 + Math.random() * 80000000)).padStart(9, "0");
+  for (const size of [9, 10]) {
+    let sum = 0;
+    for (let i = 0; i < size; i++) sum += Number(value[i]) * (size + 1 - i);
+    value += String(((sum * 10) % 11) % 10);
+  }
+  return value;
+}
+async function fillAttendance(page: Page, name: string, cpf: string) {
+  await page.goto("/attendances/new");
+  await expect(page.getByRole("heading", { name: "Novo atendimento", exact: true })).toBeVisible();
+  await page.getByLabel(/^CPF/).fill(cpf);
+  await page.getByLabel(/^Nome completo do RF/).fill(name);
+  await page.getByLabel(/^Código familiar/).fill("12345678901");
+}
+test("Fase 3: registrar, classificar, corrigir e cancelar com histórico", async ({ page }) => {
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const name = "Pessoa Fictícia Atendimento " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, syntheticCpf());
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await expect(page.getByRole("heading", { name: "Histórico do atendimento" })).toBeVisible();
+  await expect(page.getByLabel(/^CPF/)).toBeDisabled();
+  await page.getByLabel("Parecer", { exact: true }).selectOption("WITH");
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  await expect(page.getByLabel("Parecer", { exact: true })).toBeDisabled();
+  await page.getByLabel(/^Telefone/).fill("22999990000");
+  const saved = page.waitForResponse(
+    (r) =>
+      r.request().method() === "PATCH" && new URL(r.url()).pathname.startsWith("/api/attendances/"),
+  );
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(page.locator(".attendance-history")).toContainText("Atendimento alterado");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-3-attendance-detail.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Cancelar registro", exact: true }).click();
+  await page
+    .getByLabel(/^Motivo do cancelamento/)
+    .fill("Lançamento fictício para testar cancelamento");
+  await page.getByRole("button", { name: "Confirmar cancelamento", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator(".attendance-history")).toContainText("Atendimento cancelado");
+  await expect(page.getByRole("button", { name: "Salvar alterações", exact: true })).toHaveCount(0);
+  await page.goto("/attendances");
+  await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(name);
+  await page.getByLabel("Situação", { exact: true }).selectOption("cancelled");
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(1);
+  await expect(page.locator("tbody")).toContainText("Cancelado");
+});
+test("Fase 3: reaproveitamento confirmado e duplicidade explícita", async ({ page }) => {
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const cpf = syntheticCpf();
+  const name = "Pessoa Fictícia Reuso " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, cpf);
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await page.goto("/attendances/new");
+  await page.getByLabel(/^CPF/).fill(cpf);
+  await page.getByRole("button", { name: "Consultar meus registros", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Reaproveitar dados anteriores?");
+  await expect(page.getByLabel(/^Nome completo do RF/)).toHaveValue("");
+  await page.getByRole("button", { name: "Reaproveitar dados", exact: true }).click();
+  await expect(page.getByLabel(/^Nome completo do RF/)).toHaveValue(name);
+  await expect(page.getByLabel(/^Nome completo do RF/)).toBeDisabled();
+  await page.getByRole("button", { name: "Editar dados", exact: true }).click();
+  await expect(page.getByLabel(/^Nome completo do RF/)).toBeEnabled();
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Possível duplicidade");
+  await page.getByRole("button", { name: "Confirmar registro duplicado", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await page.goto("/attendances");
+  await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(cpf);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(2);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-3-attendance-list.png",
+    fullPage: true,
+  });
+});
+test("Fase 3: orientação e inclusão no mobile respeitam campos e parecer", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const name = "Pessoa Fictícia Mobile " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, syntheticCpf());
+  await page.getByLabel(/^Tipo de atendimento/).selectOption("GUIDANCE");
+  await expect(page.getByLabel(/^Código familiar/)).toHaveCount(0);
+  await expect(page.getByLabel("Parecer", { exact: true })).toHaveValue("WITHOUT");
+  await expect(page.getByLabel("Parecer", { exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-3-attendance-mobile.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await fillAttendance(
+    page,
+    "Pessoa Fictícia Inclusão " + randomUUID().slice(0, 8),
+    syntheticCpf(),
+  );
+  await page.getByLabel(/^Tipo de atendimento/).selectOption("INCLUDE_SINGLE_BPC");
+  await expect(page.getByLabel("Parecer", { exact: true })).toHaveValue("WITHOUT");
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+});
+test("Fase 3: Direção consulta registros e Encaminhador recebe bloqueio", async ({ page }) => {
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const name = "Pessoa Fictícia Visibilidade " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, syntheticCpf());
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  const url = page.url();
+  await logout(page);
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/attendances");
+  await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(name);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(1);
+  await page.getByRole("link", { name: "Abrir atendimento de " + name, exact: true }).click();
+  await expect(page.getByLabel(/^Nome completo do RF/)).toHaveValue(name);
+  await page.getByLabel(/^Nome completo do RF/).fill(name + " Corrigido");
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  await expect(page.locator(".attendance-history")).toContainText("Atendimento alterado");
+  await logout(page);
+  await login(page, "encaminhador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto(url);
+  await expect(page.getByRole("heading", { name: "Acesso não permitido" })).toBeVisible();
+  const status = await page.evaluate(
+    async () => (await fetch("/api/attendances", { credentials: "same-origin" })).status,
+  );
+  expect(status).toBe(403);
 });

@@ -1,6 +1,80 @@
-# CadFlux V1.1 — verificação da Fase 1 em 02/10/2026
+# CadFlux V1.1 — Fase 3 incorporada à main
 
-## Revalidação atual no Linux
+Roberto autorizou iniciar Atendimentos com “Vamos” em 19/10/2026, após a proposta
+de registrar, consultar e corrigir com permissões e auditoria.
+Base: main `1e7ccd8`, aprovada no
+[run 39320213960](https://github.com/rrabts/CadFlux/actions/runs/39320213960).
+O [PR #7](https://github.com/rrabts/CadFlux/pull/7) foi incorporado à main em
+22/10/2026, preservando os commits. Merge: `6bbe2366e2e0f776648e97652067414846445a6c`.
+Sua árvore de arquivos é idêntica ao commit `486b049`, aprovado no
+[run 39356722758](https://github.com/rrabts/CadFlux/actions/runs/39356722758):
+123 testes em oito arquivos e 17 cenários de navegador, migrations, seed idempotente,
+lint, TypeScript e build. As capturas finais foram inspecionadas.
+
+As execuções posteriores da main podem ser conferidas no
+[workflow de validação](https://github.com/rrabts/CadFlux/actions/workflows/phase-1-cloud.yml).
+Esta atualização altera somente documentação; não muda a aplicação validada.
+Conferir sempre o commit e a conclusão do run ao reutilizar evidências.
+
+Especificação e critérios: [FASE-3-ESPECIFICACAO.md](FASE-3-ESPECIFICACAO.md).
+Cobertura e evidências: [FASE-3-VALIDACAO.md](FASE-3-VALIDACAO.md).
+Inclui lista e formulário, parecer pós-atendimento definitivo, correções na semana,
+consulta global da Direção, reaproveitamento próprio, duplicidade com confirmação,
+cancelamento com motivo e preservação de histórico. Somente dados fictícios.
+
+Fase 4, consulta oficial de CPF, fechamento, documentos, encaminhamentos e hospedagem
+de produção não fazem parte desta entrega. A Fase 4 exige autorização posterior.
+
+---
+
+# CadFlux V1.1 - Fase 2 em 19/10/2026
+
+## Fases 1 e 2 incorporadas à main
+
+Roberto autorizou o avanço em 19/10. A entrega permite manutenção de unidades e
+categorias com histórico, além dos vínculos adicionais de usuários. Inclui
+validações no backend, bloqueio de inativação com usuários ativos, revogação de
+sessões e unicidade por caixa no banco. Não amplia o escopo para atendimentos,
+encaminhamentos, fechamentos ou documentos reais.
+
+Os PRs [#5](https://github.com/rrabts/CadFlux/pull/5) e
+[#6](https://github.com/rrabts/CadFlux/pull/6) foram incorporados nessa ordem em
+19/10/2026, com commits de merge e preservação da ancestralidade. Commit de
+integração: `22f9cf642fc6634e3de3474ad5e849249356523f`. Sua árvore é idêntica à
+versão `88dab75` aprovada no
+[run 39317114075, tentativa 2](https://github.com/rrabts/CadFlux/actions/runs/39317114075/attempts/2):
+94 testes em seis arquivos, 13 cenários de navegador, migrations e seed idempotente,
+lint, TypeScript e build aprovados. Nenhum arquivo de aplicação mudou no merge.
+
+A validação da própria main após a integração está no
+[run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/39319811057).
+Conferir a conclusão e o SHA no GitHub ao reutilizar essa evidência. Commits
+posteriores que ajustem apenas documentação não alteram o código validado.
+Especificação: [FASE-2-ESPECIFICACAO.md](FASE-2-ESPECIFICACAO.md).
+Cobertura e histórico de correções: [FASE-2-VALIDACAO.md](FASE-2-VALIDACAO.md).
+
+A Fase 3 foi autorizada posteriormente, conforme o início deste documento.
+
+## Validação completa em nuvem - 19/10/2026
+
+A Fase 1 teve sua validação completa reproduzida em runner Linux do GitHub Actions:
+PostgreSQL real, schemas vazios, migration e seed em dois bancos separados,
+idempotência, lint, TypeScript, 85 testes, build e dez cenários de navegador
+aprovados. O servidor de teste encerrou automaticamente, com a porta 3100 livre.
+
+Run inicial: [39302409739](https://github.com/rrabts/CadFlux/actions/runs/39302409739),
+commit `35557320fb8dfc1f0ad3a9fef7eda4a38a82bb06`. A retomada e a última execução
+após refinamento das capturas estão no [PR #5](https://github.com/rrabts/CadFlux/pull/5).
+O PR #5 foi incorporado à main em 19/10/2026, antes do PR #6.
+
+O executor restrito do chat continua limitado; o run foi executado no GitHub,
+separadamente. Consulte o [relatório de 19/10](CLOUD-VALIDACAO-2026-10-19.md) para
+comandos, matriz de aceite, evidências e limites. Nenhuma aplicação foi publicada
+em produção e nenhum módulo operacional de fase posterior foi implementado.
+
+Os registros abaixo descrevem as verificações históricas de 02/10.
+
+## Revalidação parcial no Linux - 02/10/2026 (histórico)
 
 A main recebeu o PR #2 no commit `5bc35d727dcde44724bfaa6b7d0f43479a0dba92`. Em 02/10, o checkout remoto Linux passou em lint, TypeScript, schema Prisma e 62 testes unitários. A validação completa em nuvem permanece bloqueada: PostgreSQL não iniciou por restrições de usuário; 23 testes de integração não executaram; Next build falhou com `uv_resident_set_memory`; os cenários de navegador não iniciaram sem build. O retorno indevido de sucesso do db:local foi corrigido e verificado. Veja [relatório Linux](CLOUD-VALIDACAO-2026-10-02.md).
 
@@ -93,7 +167,7 @@ Evidências visuais: [tema claro](evidence/dashboard-light.png), [tema escuro](e
 | 19. Testes críticos passam          | PASSOU | 85 testes em 5 arquivos e 10 cenários E2E aprovados; lint/typecheck/build com saída 0         |
 | 20. README explica execução         | PASSOU | Requisitos, instalação, bancos, seed, contas, rotas/permissões, importação e verificações     |
 
-## Limites e continuação
+## Limites da entrega anterior da Fase 1 (histórico)
 
 Não há atendimentos, consulta oficial de CPF, pessoas/famílias, benefícios, fechamentos, documentos oficiais, encaminhamentos ou indicadores reais. Nenhuma integração externa, publicação de aplicação ou banco de produção foi executada.
 
@@ -101,41 +175,13 @@ MFA e recuperação de senha possuem modelagem e interfaces preparadas; envio ex
 
 O README detalha a arquitetura modular, as dez entidades, a migration, as rotas, a matriz de permissões e as decisões de senha/sessão/importação. Rodar localmente: instalar dependências, manter `pnpm db:local` aberto, executar `pnpm db:setup --all` e `pnpm dev` em outro terminal.
 
-Não avançar para a Fase 2 sem nova autorização.
+A Fase 2 já foi autorizada e incorporada, conforme o início deste documento.
+Não avançar para a Fase 4 sem nova autorização.
 
+## Supervisor de desenvolvimento Cloud — PR #4
 
-Preparação Codex Cloud Linux em 06/10/2026: PostgreSQL real, bancos separados,
-setup/migrations/seed, lint, typecheck, 85 testes e build passaram; Next dev
-respondeu HTTP. Serviços ativos durante a tarefa, com restrições do sandbox e
-persistência entre tarefas ainda sem garantia. Relatório: [CLOUD-LINUX-2026-10-06.md](CLOUD-LINUX-2026-10-06.md).
-
-Retomada Cloud automatizada: `bash scripts/cloud-setup.sh` inicia PostgreSQL e
-Next supervisionados; `cloud:start/status/stop` permite operar sem reinstalar.
-Reinício dos processos e stop/start validados. E2E Linux: 10 passaram, teardown
-automático; 85 testes de unidade/integração passaram novamente. Configuração
-Cloud/secrets pela interface e instância nova ainda pendentes. Consulte
-[comandos e configuração do ambiente](CLOUD-RETOMADA.md).
-
-Continuação Cloud: branch enviada ao GitHub e validada em clone autenticado limpo,
-com dependências/configuração/bancos novos. Setup, SQL, migrations/seed, lint,
-typecheck, build, 85 testes e 10 E2E passaram. Configuração por variáveis herdadas
-sem `.env` também passou. Uma instância nova e o salvamento dos secrets na
-plataforma seguem pendentes; não houve merge na main nem publicação de produção.
-
-## Correções da revisão do PR #4 — 22/10/2026
-
-- `start` usa trava exclusiva `flock` durante toda a vida do supervisor. Chamadas
-  concorrentes não removem PID/prontidão; PID antigo é substituído sob a trava.
-- Cada filho possui grupo de processos próprio. Parada e reinício aguardam também
-  os descendentes de migrations/seed; há SIGKILL após dez segundos de SIGTERM.
-  PID é removido somente pelo supervisor proprietário, após concluir a limpeza.
-- Novo comando `pnpm test:cloud`: três testes de regressão Linux cobrem disputa
-  de inicialização, PID antigo, parada durante migration, resistência a SIGTERM
-  e nova inicialização após a parada. SQL e aplicação são simulados nesses testes;
-  processos, trava, sinais e servidor HTTP são reais.
-- Neste checkout Linux novo: dependências pelo lockfile, migrations/seed nos dois
-  bancos PostgreSQL reais, start/status/stop/start/stop, lint, TypeScript, 85 testes
-  da aplicação, build e dez E2E Chromium passaram (22,8 s; teardown automático).
-- Configuração persistente da plataforma e secrets não foram publicados. Não houve
-  merge, deploy, dados reais nem avanço de fase. As contas, rotas, permissões e
-  entidades da Fase 1 permanecem conforme as seções anteriores.
+O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
+`start` e encerra os grupos de processos, incluindo migrations e seed.
+Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
+`pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
+3000 livre. Configuração e detalhes em [CLOUD-RETOMADA.md](CLOUD-RETOMADA.md).

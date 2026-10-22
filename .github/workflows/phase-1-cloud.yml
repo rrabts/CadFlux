@@ -1,0 +1,113 @@
+name: CadFlux - Cloud validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-1-cloud-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: PostgreSQL, backend and browser
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: cadflux
+          POSTGRES_PASSWORD: cadflux_ci_only
+          POSTGRES_DB: cadflux
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cadflux -d cadflux"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      DATABASE_URL: postgresql://cadflux:cadflux_ci_only@127.0.0.1:5432/cadflux?schema=public
+      DATABASE_URL_TEST: postgresql://cadflux:cadflux_ci_only@127.0.0.1:5432/cadflux_test?schema=public
+      APP_URL: http://127.0.0.1:3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24.19.0"
+      - name: Verify runtime and install pnpm
+        run: |
+          node -e 'console.log(process.version); console.log(process.memoryUsage())'
+          npm install --global pnpm@10.28.2
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Create isolated test database
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: docker exec "$POSTGRES_CONTAINER" psql -U cadflux -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE cadflux_test OWNER cadflux;'
+      - name: Verify both databases start empty
+        run: node scripts/verify-cloud-database.mjs empty
+      - name: Validate Prisma schema
+        run: pnpm exec prisma validate
+      - name: Apply migrations and seed to both databases
+        run: pnpm db:setup --all
+      - name: Verify migration and demo fixtures
+        run: node scripts/verify-cloud-database.mjs seeded
+      - name: Repeat setup to verify idempotence
+        run: |
+          pnpm db:setup --all
+          node scripts/verify-cloud-database.mjs unchanged
+      - name: Lint
+        run: pnpm lint
+      - name: TypeScript
+        run: pnpm typecheck
+      - name: Unit and PostgreSQL integration tests
+        run: pnpm test
+      - name: Cloud supervisor regression tests
+        run: pnpm test:cloud
+      - name: Build production bundle
+        run: pnpm build
+      - name: Install Chromium and system dependencies
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser scenarios
+        timeout-minutes: 12
+        run: pnpm test:e2e --max-failures=1
+      - name: Verify test server stopped
+        run: |
+          node --input-type=module <<'JS'
+          import { createServer } from 'node:net';
+          const server = createServer();
+          server.once('error', () => {
+            console.error('A porta 3100 continua ocupada após o Playwright.');
+            process.exitCode = 1;
+          });
+          server.listen(3100, '127.0.0.1', () => {
+            console.log('Servidor de teste encerrado automaticamente; porta 3100 livre.');
+            server.close();
+          });
+          JS
+      - name: Preserve browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cadflux-browser-evidence
+          path: |
+            playwright-report/
+            test-results/
+            .local/evidence/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7

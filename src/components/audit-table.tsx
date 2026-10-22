@@ -3,6 +3,18 @@ import { formatDate } from "@/lib/api-client";
 import type { AuditEntry } from "@/lib/contracts";
 import { EmptyState } from "./ui";
 const labels: Record<string, string> = {
+  ATTENDANCE_CREATED: "Atendimento registrado",
+  ATTENDANCE_UPDATED: "Atendimento alterado",
+  ATTENDANCE_CANCELLED: "Atendimento cancelado",
+  UNIT_CREATED: "Unidade criada",
+  UNIT_UPDATED: "Unidade alterada",
+  UNIT_ACTIVATED: "Unidade ativada",
+  UNIT_INACTIVATED: "Unidade inativada",
+  CATEGORY_CREATED: "Categoria criada",
+  CATEGORY_UPDATED: "Categoria alterada",
+  CATEGORY_ACTIVATED: "Categoria ativada",
+  CATEGORY_INACTIVATED: "Categoria inativada",
+  USER_ADDITIONAL_UNITS_CHANGED: "Unidades adicionais alteradas",
   LOGIN: "Acesso ao sistema",
   LOGIN_FAILED: "Tentativa de acesso recusada",
   USER_IMPORT_CONFIRMED: "Importação de usuários confirmada",

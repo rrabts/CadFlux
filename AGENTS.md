@@ -5,20 +5,21 @@ Leia `docs/STATUS.md` para entender o ponto de retomada.
 
 ## Escopo autorizado
 
-Implementar exclusivamente a Fase 1 da especificação: autenticação real, três perfis,
-autorização no servidor, usuários, unidades e categorias de apoio, importação CSV/XLSX
-com validação/prévia/confirmação, auditoria e interface institucional acessível.
+Roberto autorizou a Fase 3 (Atendimentos) em 19/10/2026 após as Fases 1 e 2
+integradas e validadas na main. Leia `docs/FASE-3-ESPECIFICACAO.md` integralmente.
+Preservar autenticação, gestão institucional, permissões e auditoria existentes.
+Implementar registros operacionais apenas com dados fictícios nesta entrega.
 
-Não implementar atendimentos reais, consulta oficial de CPF, pessoas/famílias,
-fechamentos, documentos oficiais/PDF/Word, encaminhamentos reais, indicadores reais,
-SERPRO/Receita, BI, IA, WhatsApp ou notificações externas. Mostrar placeholders quando
-necessário. Não avançar à Fase 2 sem autorização explícita.
+Não implementar consulta oficial de CPF, pessoas/famílias como cadastro separado,
+fechamentos, documentos oficiais/PDF/Word, encaminhamentos, indicadores agregados,
+SERPRO/Receita, BI, IA, WhatsApp, notificações ou publicação de produção.
+Não avançar à Fase 4 sem nova autorização.
 
 ## Estado e critérios de conclusão
 
-O código inicial foi interrompido antes de instalar dependências. Não tratar arquivos
-existentes como funcionalidades concluídas. Conferir imports, rotas, schema e segurança.
-Há scripts referenciados no package.json que ainda precisam ser implementados.
+A Fase 1 possui validação completa em nuvem documentada no PR #5 e em STATUS.
+Conferir o commit e os resultados da execução correspondente antes de reutilizar
+evidências. As Fases 2 e 3 exigem testes próprios e regressão da fundação.
 
 Usar Next.js, TypeScript estrito, PostgreSQL real, Prisma e Tailwind. Não substituir
 autenticação por mocks ou localStorage. Senhas apenas com hash seguro; sessão httpOnly;
@@ -38,4 +39,4 @@ dependências e caches devem permanecer ignorados. Preparação Linux em
 
 No fim, atualizar README e STATUS com comandos, contas fictícias, rotas, matriz de
 permissões, entidades/migrations, resultados de testes, decisões e limitações. Parar
-após Fase 1 e aguardar autorização.
+após Fase 3 e aguardar autorização para a fase seguinte.
