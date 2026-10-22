@@ -1,8 +1,8 @@
 # CadFlux V1.1 — Fases 1 a 3
 
 Aplicação institucional para autenticação, autorização, gestão e registro de
-atendimentos do Cadastro Único. A Fase 3 foi autorizada em 19/10/2026 e está em
-validação numa branch própria. Apenas dados fictícios. Indicadores agregados,
+atendimentos do Cadastro Único. A Fase 3 foi incorporada à `main` em 22/10/2026 pelo
+[PR #7](https://github.com/rrabts/CadFlux/pull/7). Apenas dados fictícios. Indicadores agregados,
 consulta oficial de CPF, fechamentos, documentos e encaminhamentos aguardam as
 próximas fases.
 

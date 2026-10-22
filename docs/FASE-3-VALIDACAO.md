@@ -1,8 +1,17 @@
 # CadFlux — validação da Fase 3
 
-Base: main `1e7ccd8`. Branch `codex/phase-3-attendances-2026-10-19`.
-A descrição do [PR #7](https://github.com/rrabts/CadFlux/pull/7) registra o commit final e o run aprovado, após
-executar o workflow. Não confundir implementação ou abertura de PR com aprovação.
+Base de desenvolvimento: main `1e7ccd8`. O
+[PR #7](https://github.com/rrabts/CadFlux/pull/7) foi incorporado à main em 22/10/2026,
+com merge `6bbe2366e2e0f776648e97652067414846445a6c`. O merge preserva a mesma árvore
+do commit `486b0492d237861d23b51d013536d9b1b57a8e9a`, aprovado no
+[run 39356722758](https://github.com/rrabts/CadFlux/actions/runs/39356722758):
+123 testes, 17 cenários de navegador, migrations/seed, lint, TypeScript e build.
+
+As capturas finais foram inspecionadas. Evidências no
+[artifact final](https://github.com/rrabts/CadFlux/actions/runs/39356722758/artifacts/12235851064),
+com retenção de sete dias a partir da execução. Para commits posteriores, consultar
+as execuções correspondentes no GitHub Actions; não presumir aprovação pela existência
+desta documentação.
 
 ## Método
 

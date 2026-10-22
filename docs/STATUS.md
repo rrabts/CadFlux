@@ -1,12 +1,20 @@
-# CadFlux V1.1 — Fase 3 em implementação
+# CadFlux V1.1 — Fase 3 incorporada à main
 
 Roberto autorizou iniciar Atendimentos com “Vamos” em 19/10/2026, após a proposta
 de registrar, consultar e corrigir com permissões e auditoria.
 Base: main `1e7ccd8`, aprovada no
 [run 39320213960](https://github.com/rrabts/CadFlux/actions/runs/39320213960).
-Branch: `codex/phase-3-attendances-2026-10-19`,
-[PR #7](https://github.com/rrabts/CadFlux/pull/7). A entrega só é aprovada após
-conferência do run correspondente ao commit publicado; o texto não substitui os testes.
+O [PR #7](https://github.com/rrabts/CadFlux/pull/7) foi incorporado à main em
+22/10/2026, preservando os commits. Merge: `6bbe2366e2e0f776648e97652067414846445a6c`.
+Sua árvore de arquivos é idêntica ao commit `486b049`, aprovado no
+[run 39356722758](https://github.com/rrabts/CadFlux/actions/runs/39356722758):
+123 testes em oito arquivos e 17 cenários de navegador, migrations, seed idempotente,
+lint, TypeScript e build. As capturas finais foram inspecionadas.
+
+As execuções posteriores da main podem ser conferidas no
+[workflow de validação](https://github.com/rrabts/CadFlux/actions/workflows/phase-1-cloud.yml).
+Esta atualização altera somente documentação; não muda a aplicação validada.
+Conferir sempre o commit e a conclusão do run ao reutilizar evidências.
 
 Especificação e critérios: [FASE-3-ESPECIFICACAO.md](FASE-3-ESPECIFICACAO.md).
 Cobertura e evidências: [FASE-3-VALIDACAO.md](FASE-3-VALIDACAO.md).
