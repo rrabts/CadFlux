@@ -44,8 +44,8 @@ const navigation: Record<AccessProfile, NavGroup[]> = {
     {
       label: "Atendimentos",
       items: [
-        future("Novo atendimento", "new-service", "plus"),
-        future("Meus atendimentos", "my-services", "clipboard"),
+        { label: "Novo atendimento", href: "/attendances/new", icon: "plus" },
+        { label: "Meus atendimentos", href: "/attendances", icon: "clipboard" },
       ],
     },
     {
@@ -76,7 +76,7 @@ const navigation: Record<AccessProfile, NavGroup[]> = {
     {
       label: "Operação",
       items: [
-        future("Atendimentos", "services", "clipboard"),
+        { label: "Atendimentos", href: "/attendances", icon: "clipboard" },
         future("Encaminhamentos", "referrals", "send"),
         future("Fechamentos", "closings", "calendar"),
         future("Pendências", "pending", "alert"),

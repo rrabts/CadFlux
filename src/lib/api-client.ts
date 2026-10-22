@@ -16,7 +16,10 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     if (response.status === 401 && !path.includes("/auth/login"))
       window.location.assign(new URL("/login", window.location.origin).href);
     throw new ApiError(
-      data.error?.message ||
+      (Array.isArray(data.issues)
+        ? data.issues.map((issue: { message: string }) => issue.message).join(" ")
+        : "") ||
+        data.error?.message ||
         (typeof data.error === "string" ? data.error : data.message) ||
         "Não foi possível concluir a operação. Tente novamente.",
       response.status,

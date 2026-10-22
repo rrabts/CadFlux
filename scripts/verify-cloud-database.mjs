@@ -25,7 +25,7 @@ try {
       const tables = await client.query(
         "SELECT count(*)::int AS total FROM pg_tables WHERE schemaname = 'public'",
       );
-      assert.equal(tables.rows[0].total, mode === "empty" ? 0 : 11, "Total de tabelas inesperado.");
+      assert.equal(tables.rows[0].total, mode === "empty" ? 0 : 12, "Total de tabelas inesperado.");
       if (mode === "empty") {
         console.log(`${target.name}: schema public vazio confirmado.`);
         continue;
@@ -36,6 +36,7 @@ try {
       assert.deepEqual(migration.rows, [
         { migration_name: "20261002140000_foundation" },
         { migration_name: "20261019170000_reference_integrity" },
+        { migration_name: "20261020020000_attendances" },
       ]);
       const users = await client.query('SELECT * FROM "User" ORDER BY id');
       const units = await client.query('SELECT * FROM "Unit" ORDER BY id');

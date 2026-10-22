@@ -1338,3 +1338,31 @@ h3 {
 .reference-table td {
   overflow-wrap: anywhere;
 }
+
+.attendance-form {
+  padding: 26px;
+}
+.attendance-fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.attendance-lookup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0 22px;
+}
+.attendance-history {
+  margin-top: 24px;
+}
+.attendance-reason {
+  resize: vertical;
+  min-height: 100px;
+}
+@media (max-width: 700px) {
+  .attendance-form {
+    padding: 18px;
+  }
+}

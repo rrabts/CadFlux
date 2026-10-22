@@ -3,6 +3,9 @@ import { formatDate } from "@/lib/api-client";
 import type { AuditEntry } from "@/lib/contracts";
 import { EmptyState } from "./ui";
 const labels: Record<string, string> = {
+  ATTENDANCE_CREATED: "Atendimento registrado",
+  ATTENDANCE_UPDATED: "Atendimento alterado",
+  ATTENDANCE_CANCELLED: "Atendimento cancelado",
   UNIT_CREATED: "Unidade criada",
   UNIT_UPDATED: "Unidade alterada",
   UNIT_ACTIVATED: "Unidade ativada",

@@ -458,3 +458,174 @@ test("gestão pagina sem perder registros e filtros retornam à primeira página
     fullPage: true,
   });
 });
+
+// Synthetic CPF numbers are generated only for fictitious test records.
+function syntheticCpf() {
+  let value = String(Math.floor(10000000 + Math.random() * 80000000)).padStart(9, "0");
+  for (const size of [9, 10]) {
+    let sum = 0;
+    for (let i = 0; i < size; i++) sum += Number(value[i]) * (size + 1 - i);
+    value += String(((sum * 10) % 11) % 10);
+  }
+  return value;
+}
+async function fillAttendance(page: Page, name: string, cpf: string) {
+  await page.goto("/attendances/new");
+  await expect(page.getByRole("heading", { name: "Novo atendimento", exact: true })).toBeVisible();
+  await page.getByLabel(/^CPF/).fill(cpf);
+  await page.getByLabel(/^Nome completo do RF/).fill(name);
+  await page.getByLabel(/^Código familiar/).fill("12345678901");
+}
+test("Fase 3: registrar, classificar, corrigir e cancelar com histórico", async ({ page }) => {
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const name = "Pessoa Fictícia Atendimento " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, syntheticCpf());
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await expect(page.getByRole("heading", { name: "Histórico do atendimento" })).toBeVisible();
+  await expect(page.getByLabel(/^CPF/)).toBeDisabled();
+  await page.getByLabel("Parecer", { exact: true }).selectOption("WITH");
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  await expect(page.getByLabel("Parecer", { exact: true })).toBeDisabled();
+  await page.getByLabel(/^Telefone/).fill("22999990000");
+  const saved = page.waitForResponse(
+    (r) =>
+      r.request().method() === "PATCH" && new URL(r.url()).pathname.startsWith("/api/attendances/"),
+  );
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(page.locator(".attendance-history")).toContainText("Atendimento alterado");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-3-attendance-detail.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Cancelar registro", exact: true }).click();
+  await page
+    .getByLabel(/^Motivo do cancelamento/)
+    .fill("Lançamento fictício para testar cancelamento");
+  await page.getByRole("button", { name: "Confirmar cancelamento", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator(".attendance-history")).toContainText("Atendimento cancelado");
+  await expect(page.getByRole("button", { name: "Salvar alterações", exact: true })).toHaveCount(0);
+  await page.goto("/attendances");
+  await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(name);
+  await page.getByLabel("Situação", { exact: true }).selectOption("cancelled");
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(1);
+  await expect(page.locator("tbody")).toContainText("Cancelado");
+});
+test("Fase 3: reaproveitamento confirmado e duplicidade explícita", async ({ page }) => {
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const cpf = syntheticCpf();
+  const name = "Pessoa Fictícia Reuso " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, cpf);
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await page.goto("/attendances/new");
+  await page.getByLabel(/^CPF/).fill(cpf);
+  await page.getByRole("button", { name: "Consultar meus registros", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Reaproveitar dados anteriores?");
+  await expect(page.getByLabel(/^Nome completo do RF/)).toHaveValue("");
+  await page.getByRole("button", { name: "Reaproveitar dados", exact: true }).click();
+  await expect(page.getByLabel(/^Nome completo do RF/)).toHaveValue(name);
+  await expect(page.getByLabel(/^Nome completo do RF/)).toBeDisabled();
+  await page.getByRole("button", { name: "Editar dados", exact: true }).click();
+  await expect(page.getByLabel(/^Nome completo do RF/)).toBeEnabled();
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Possível duplicidade");
+  await page.getByRole("button", { name: "Confirmar registro duplicado", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await page.goto("/attendances");
+  await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(cpf);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(2);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-3-attendance-list.png",
+    fullPage: true,
+  });
+});
+test("Fase 3: orientação e inclusão no mobile respeitam campos e parecer", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const name = "Pessoa Fictícia Mobile " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, syntheticCpf());
+  await page.getByLabel(/^Tipo de atendimento/).selectOption("GUIDANCE");
+  await expect(page.getByLabel(/^Código familiar/)).toHaveCount(0);
+  await expect(page.getByLabel("Parecer", { exact: true })).toHaveValue("WITHOUT");
+  await expect(page.getByLabel("Parecer", { exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    animations: "disabled",
+    path: ".local/evidence/phase-3-attendance-mobile.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  await fillAttendance(
+    page,
+    "Pessoa Fictícia Inclusão " + randomUUID().slice(0, 8),
+    syntheticCpf(),
+  );
+  await page.getByLabel(/^Tipo de atendimento/).selectOption("INCLUDE_SINGLE_BPC");
+  await expect(page.getByLabel("Parecer", { exact: true })).toHaveValue("WITHOUT");
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+});
+test("Fase 3: Direção consulta registros e Encaminhador recebe bloqueio", async ({ page }) => {
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  const name = "Pessoa Fictícia Visibilidade " + randomUUID().slice(0, 8);
+  await fillAttendance(page, name, syntheticCpf());
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/attendances\/c[a-z0-9]+$/);
+  const url = page.url();
+  await logout(page);
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/attendances");
+  await page.getByLabel("Pesquisar nome ou CPF", { exact: true }).fill(name);
+  await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+  await expect(page.locator("tbody tr")).toHaveCount(1);
+  await page.getByRole("link", { name: "Abrir atendimento de " + name, exact: true }).click();
+  await expect(page.getByLabel(/^Nome completo do RF/)).toHaveValue(name);
+  await page.getByLabel(/^Nome completo do RF/).fill(name + " Corrigido");
+  await page.getByRole("button", { name: "Salvar alterações", exact: true }).click();
+  await expect(page.locator(".attendance-history")).toContainText("Atendimento alterado");
+  await logout(page);
+  await login(page, "encaminhador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto(url);
+  await expect(page.getByRole("heading", { name: "Acesso não permitido" })).toBeVisible();
+  const status = await page.evaluate(
+    async () => (await fetch("/api/attendances", { credentials: "same-origin" })).status,
+  );
+  expect(status).toBe(403);
+});

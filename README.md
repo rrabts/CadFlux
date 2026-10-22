@@ -1,6 +1,10 @@
-# CadFlux V1.1 — Fases 1 e 2
+# CadFlux V1.1 — Fases 1 a 3
 
-Fundação institucional para autenticação, autorização e gestão de usuários do Cadastro Único. Apenas dados fictícios. Atendimentos, encaminhamentos, indicadores operacionais, consulta oficial de CPF, fechamentos e documentos oficiais permanecem como telas vazias ou módulos em desenvolvimento.
+Aplicação institucional para autenticação, autorização, gestão e registro de
+atendimentos do Cadastro Único. A Fase 3 foi autorizada em 19/10/2026 e está em
+validação numa branch própria. Apenas dados fictícios. Indicadores agregados,
+consulta oficial de CPF, fechamentos, documentos e encaminhamentos aguardam as
+próximas fases.
 
 As Fases 1 e 2 foram incorporadas à `main` em 19/10/2026 pelos
 [PRs #5](https://github.com/rrabts/CadFlux/pull/5) e
@@ -8,7 +12,7 @@ As Fases 1 e 2 foram incorporadas à `main` em 19/10/2026 pelos
 validado com 94 testes e 13 cenários de navegador. A execução após a integração
 está no [run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/39319811057);
 confira o commit e a conclusão antes de reutilizar os resultados.
-Estado e evidências: [docs/STATUS.md](docs/STATUS.md). A Fase 3 exige nova autorização.
+Estado e evidências: [docs/STATUS.md](docs/STATUS.md). A Fase 3 foi autorizada; a Fase 4 exige nova autorização.
 
 ## Executar localmente
 
@@ -67,7 +71,7 @@ Novos usuários criados manualmente ou por importação recebem senha aleatória
 
 A gestão lista 50 usuários por página, informa o total e mantém os filtros ao navegar. Alterar os filtros volta à primeira página.
 
-Menus de atendimento, encaminhamento, fechamento, documentos e pendências direcionam a estados vazios/“Em desenvolvimento”. Não registram operações reais. A topbar oferece tema Claro/Escuro/Sistema, perfil e logout. A sidebar pode recolher; no mobile funciona como drawer com foco, Escape e navegação por teclado.
+Atendimentos abrem o módulo da Fase 3. Menus de encaminhamento, fechamento, documentos e pendências continuam em desenvolvimento. A topbar oferece tema Claro/Escuro/Sistema, perfil e logout. A sidebar pode recolher; no mobile funciona como drawer com foco, Escape e navegação por teclado.
 
 APIs: `/api/auth/login`, `/api/auth/logout`, `/api/auth/password`, `/api/auth/recovery`; `/api/users`, `/api/users/[id]`; `/api/references`, `/api/audit`; `/api/imports/template`, `/api/imports/preview`, `/api/imports/confirm`. Sessão, usuário ativo, perfil e escopo são verificados no servidor. Não existem endpoints de exclusão de usuário ou edição/exclusão de auditoria.
 
@@ -85,7 +89,7 @@ Limites: 2 MiB, 1.000 usuários, uma planilha XLSX, campos de texto simples. CSV
 
 ## Arquitetura e banco
 
-Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
+Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,references,attendances,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
 
 Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch e AuditLog.
 
@@ -93,7 +97,7 @@ Migration: `prisma/migrations/20261002140000_foundation/migration.sql`, gerada a
 
 Senhas usam scrypt salgado; tokens aleatórios ficam apenas por hash no banco. A sessão dura oito horas, em cookie httpOnly/SameSite=Lax e Secure em produção. Login possui limitação de tentativas no banco. Mutações exigem origem válida. Mudanças de perfil/status, unidade principal/adicionais e senha revogam sessões; cada requisição consulta o usuário atual. Outro administrador deve alterar o perfil/status da própria Direção; alterações administrativas preservam uma Direção ativa.
 
-A modelagem permite unidades adicionais, recuperação de senha e MFA posterior. A interface de recuperação informa que a entrega externa ainda está preparada. MFA externo, fluxo completo de recuperação e integrações externas ficam para fases posteriores autorizadas. Banco e aplicação de produção não foram publicados nesta tarefa.
+Unidades adicionais são gerenciadas pela Direção; recuperação de senha e MFA externo continuam preparados para integração posterior. A interface de recuperação informa que a entrega externa ainda está preparada. MFA externo, fluxo completo de recuperação e integrações externas ficam para fases posteriores autorizadas. Banco e aplicação de produção não foram publicados nesta tarefa.
 
 ## Verificar
 
@@ -117,7 +121,7 @@ Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS
 
 Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
 
-Não avance para a Fase 3 sem autorização.
+Não avance para a Fase 4 sem autorização.
 
 ## Validação automatizada em nuvem
 
@@ -169,3 +173,41 @@ revalidam o ator e usam transação serializável. Não há registros operaciona
 publicação de produção. Resultados atuais de validação são registrados no PR da
 Fase 2, junto ao commit e ao run correspondente.
 Cobertura e histórico: [docs/FASE-2-VALIDACAO.md](docs/FASE-2-VALIDACAO.md).
+
+
+## Fase 3 — atendimentos
+
+Critérios e decisões: [FASE-3-ESPECIFICACAO.md](docs/FASE-3-ESPECIFICACAO.md).
+Evidências da entrega: [FASE-3-VALIDACAO.md](docs/FASE-3-VALIDACAO.md).
+
+| Rota / operação | Entrevistador | Encaminhador | Direção |
+| --- | --- | --- | --- |
+| `/attendances` | Próprios registros | Bloqueado | Consulta global com filtros |
+| `/attendances/new` | Criar na unidade principal ativa | Bloqueado | Bloqueado (não lança em nome de terceiros) |
+| `/attendances/[id]` | Próprio registro e histórico | Bloqueado | Consulta e correção global |
+| Corrigir/cancelar | Semana corrente, somente próprios | Bloqueado | Inclui semanas anteriores |
+| Reaproveitar dados | Próprios registros, após confirmação | Bloqueado | Não utiliza o fluxo de criação |
+
+APIs: `GET/POST /api/attendances`, `GET/PATCH /api/attendances/[id]`,
+`POST /api/attendances/[id]/cancel`, `POST /api/attendances/reuse` e
+`GET /api/attendances/options` (opções administrativas exclusivas da Direção).
+Nenhum DELETE. CPF anterior é enviado no corpo do POST de reaproveitamento.
+
+A entidade `Attendance` preserva operador/unidade/fuso de origem e usa versão para
+recusar perda de alterações simultâneas. A migration
+`20261020020000_attendances` cria tabela, enums, índices, constraints e triggers:
+CPF/RF/RL, identificação institucional e parecer definido não mudam; registro
+cancelado não reativa nem é apagado/truncado. Mutações passam pelo serviço e gravam
+auditoria na mesma transação.
+
+Inclusão e orientação são sem parecer. Atualização/averiguação podem aguardar
+a classificação pós-atendimento, que fica definitiva ao ser escolhida. Orientação
+não guarda código familiar. CPF tem validação estrutural, sem consulta oficial.
+Possível duplicidade no mesmo CPF/data do próprio operador exige confirmação,
+sem bloquear um novo atendimento distinto. A semana usa o fuso salvo no registro.
+A janela de fechamento/reabertura não existe ainda.
+
+As contas fictícias existentes permanecem. O seed não cria atendimentos de
+beneficiários; testes geram registros sintéticos no banco de testes. Indicadores do
+dashboard continuam vazios até a Fase 4; seu botão de atendimento já abre o formulário.
+Não há publicação de produção nem uso de dados reais.
