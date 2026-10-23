@@ -649,7 +649,11 @@ test("Fase 4: benefícios e nomes de tipos têm gestão e histórico", async ({ 
   await page.getByRole("button", { name: "Histórico de " + name, exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("Cadastro operacional alterado");
   await page.getByRole("button", { name: "Fechar janela" }).click();
-  await page.screenshot({ path: ".local/evidence/phase-4-benefits.png", fullPage: true });
+  await page.screenshot({
+    path: ".local/evidence/phase-4-benefits.png",
+    fullPage: true,
+    animations: "disabled",
+  });
   await page.goto("/service-types");
   await expect(page.locator("tbody tr")).toHaveCount(7);
   await page.getByRole("button", { name: "Editar Orientação", exact: true }).click();
@@ -657,7 +661,11 @@ test("Fase 4: benefícios e nomes de tipos têm gestão e histórico", async ({ 
   await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator("tbody")).toContainText("Orientação UI Fictícia");
-  await page.screenshot({ path: ".local/evidence/phase-4-types.png", fullPage: true });
+  await page.screenshot({
+    path: ".local/evidence/phase-4-types.png",
+    fullPage: true,
+    animations: "disabled",
+  });
   await page.getByRole("button", { name: "Editar Orientação UI Fictícia", exact: true }).click();
   await page.getByRole("dialog").getByLabel(/^Nome/).fill("Orientação");
   await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
@@ -726,7 +734,11 @@ test("Fase 4: local persiste, formulário de outra aba não muda e benefícios c
   ).toBeVisible();
   await expect(page.locator(".page-header")).toContainText("Local Fictício UI");
   await expect(page.getByRole("checkbox", { name: benefitName, exact: true })).toBeChecked();
-  await page.screenshot({ path: ".local/evidence/phase-4-attendance.png", fullPage: true });
+  await page.screenshot({
+    path: ".local/evidence/phase-4-attendance.png",
+    fullPage: true,
+    animations: "disabled",
+  });
   await tab.close();
   await logout(page);
   await login(page, email);
@@ -752,6 +764,7 @@ test("Fase 4: indicadores conciliam com API, mobile e bloqueios de perfil", asyn
   await page.screenshot({
     path: ".local/evidence/phase-4-dashboard-direction.png",
     fullPage: true,
+    animations: "disabled",
   });
   await logout(page);
   await login(page, "entrevistador@cadflux.local");
@@ -759,10 +772,14 @@ test("Fase 4: indicadores conciliam com API, mobile e bloqueios de perfil", asyn
   await expect(page.getByRole("heading", { name: "Total da unidade", exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("heading", { name: "Últimos atendimentos" })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
-    true,
-  );
-  await page.screenshot({ path: ".local/evidence/phase-4-dashboard-mobile.png", fullPage: true });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+    .toBe(true);
+  await page.screenshot({
+    path: ".local/evidence/phase-4-dashboard-mobile.png",
+    fullPage: true,
+    animations: "disabled",
+  });
   expect(
     await page.evaluate(
       async () => (await fetch("/api/catalog/benefits", { credentials: "same-origin" })).status,

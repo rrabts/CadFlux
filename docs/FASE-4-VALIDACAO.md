@@ -61,3 +61,14 @@ autenticado no navegador. A conferência passou a usar fetch no próprio navegad
 como os testes de autorização anteriores, preservando a política de cookies.
 Não se alterou autenticação ou resposta esperada (200 para Direção, 403 para perfis
 sem acesso). Nova execução completa necessária.
+
+
+O run `39966900975` foi cancelado automaticamente ao receber os ajustes de layout
+e de contexto legado de unidade, enquanto preparava o Chromium.
+[Run 39968057689](https://github.com/rrabts/CadFlux/actions/runs/39968057689),
+head `c9f365c`: 135 testes e 19 cenários aprovados; reconciliação da API concluída.
+A verificação mobile ocorreu durante a transição de 180 ms da sidebar ao mudar
+viewport. O teste agora aguarda a geometria estabilizar com expect.poll, mantendo
+a exigência de largura sem transbordo. Capturas desativam animações transitórias.
+Também se ajustaram padding dos cards, ações compactas do catálogo com nomes
+acessíveis e bloqueio de formulário legado sem ID quando a preferência é adicional.
