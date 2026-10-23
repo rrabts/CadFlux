@@ -29,7 +29,7 @@ gestão interna e não substitui aplicações oficiais governamentais.
 | 1 | Fundação, acesso, usuários, importação e auditoria | Integrada; preservar regressão |
 | 2 | Unidades, categorias e vínculos administrativos | Integrada; preservar regressão |
 | 3 | Registro, consulta e correção de atendimentos | Integrada; preservar regressão |
-| 4 | Indicadores e complementos de configuração operacional | Planejada; exige autorização de implementação |
+| 4 | Indicadores e complementos de configuração operacional | Especificada em [FASE-4-ESPECIFICACAO.md](FASE-4-ESPECIFICACAO.md); implementação pendente |
 | 5 | Consulta oficial de CPF | Planejada; depende de acesso oficial autorizado |
 | 6 | Pendências e fechamento semanal | Planejada; pendências precedem o fechamento |
 | 7 | Documentos oficiais | Planejada; depende do fechamento e do modelo aprovado |
@@ -89,9 +89,11 @@ evidência de validação correspondente.
 
 ## Decisões que a especificação da fase deve resolver
 
-1. **Fase 4:** definir métricas, tratamento de cancelados/orientações, permissões
-   de configuração dos tipos e regras da operação em unidades adicionais. A
-   alocação de CFG-01–03 não amplia automaticamente a autorização de programação.
+1. **Fase 4:** decisões de orientação incluída/discriminada, tipos renomeáveis e
+   local pré-selecionado foram fornecidas por Roberto em 23/10. Fórmulas,
+   histórico, unidade autorizada e critérios estão em
+   [FASE-4-ESPECIFICACAO.md](FASE-4-ESPECIFICACAO.md).
+   IND-01–03, CFG-01–03 e QUA-01 estão especificados, não implementados.
 2. **Fase 5:** confirmar provedor e acesso oficial. O projeto não possui acesso
    SERPRO/Receita pelo simples fato de prever a integração.
 3. **Fase 6:** conciliar a semana civil segunda–domingo da Fase 3 com a rotina

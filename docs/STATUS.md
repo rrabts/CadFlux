@@ -1,3 +1,27 @@
+# Fase 4 — especificação preparada em 23/10/2026
+
+Roberto solicitou prosseguir com a definição da Fase 4 e respondeu às decisões
+de indicadores, tipos e local de atendimento. Contrato completo:
+[FASE-4-ESPECIFICACAO.md](FASE-4-ESPECIFICACAO.md).
+
+- Orientações contam no total e também aparecem discriminadas; cancelados à parte.
+- Direção pode renomear/ativar/inativar tipos, preservando códigos, regras e histórico.
+- Coordenação define local padrão e vínculos. O operador pode escolher local
+  autorizado, que permanece pré-selecionado nos próximos registros.
+- Benefícios múltiplos, visibilidade por perfil, fórmulas de métricas, possíveis
+  duplicidades, migrações e critérios de aceite estão especificados.
+- Escopo: IND-01–03, CFG-01–03 e QUA-01. Todos continuam pendentes de implementação.
+  Não confundir parecer aguardando classificação com o futuro módulo de pendências.
+
+Base examinada: `832544c`, com
+[run 39955215703 aprovado](https://github.com/rrabts/CadFlux/actions/runs/39955215703).
+Esta alteração é somente documentação. Nenhum serviço, tela, migration ou
+regra operacional foi implementado; a aplicação entregue continua nas Fases 1–3.
+A futura implementação deve cumprir os critérios próprios da Fase 4 e manter a
+regressão. As Fases 5–9 e produção não fazem parte desta etapa.
+
+---
+
 # Manutenção e planejamento — 23/10/2026
 
 Roberto solicitou proteção da main, avaliação da automação auxiliar e alocação
