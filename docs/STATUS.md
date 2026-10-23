@@ -1,3 +1,27 @@
+# Manutenção e planejamento — 23/10/2026
+
+Roberto solicitou proteção da main, avaliação da automação auxiliar e alocação
+dos requisitos pendentes. Base examinada: `35aab49`, com
+[run 39780049860 aprovado](https://github.com/rrabts/CadFlux/actions/runs/39780049860):
+123 testes, 17 cenários de navegador, três testes do supervisor e validações de
+banco/build. Essa é evidência da base, não da alteração de manutenção.
+
+- Remoção preparada do fragmento inválido `copilot-setup-steps.yml`: não havia
+  utilidade adicional demonstrada frente ao ESLint já executado pelo CI.
+  Justificativa em [GOVERNANCA.md](GOVERNANCA.md).
+- Requisitos pendentes vinculados a fases, com IDs, dependências, critérios e
+  decisões ainda necessárias em [ROADMAP.md](ROADMAP.md).
+- Configuração de proteção em `.github/main-ruleset.json`: **preparada, não
+  confirmada como ativa**. A consulta inicial retornou main sem proteção e sem
+  rulesets. A aplicação exige acesso administrativo ao GitHub.
+- Nenhum módulo operacional novo, migration ou alteração de autenticação.
+  Implementação continua nas Fases 1–3, com dados fictícios.
+
+Validação desta manutenção: acompanhar o PR e sua execução correspondente;
+registrar os resultados após a conclusão, sem reutilizar os testes da base.
+
+---
+
 # CadFlux V1.1 — Fase 3 incorporada à main
 
 Roberto autorizou iniciar Atendimentos com “Vamos” em 19/10/2026, após a proposta
@@ -185,3 +209,4 @@ O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
 Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
 `pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
 3000 livre. Configuração e detalhes em [CLOUD-RETOMADA.md](CLOUD-RETOMADA.md).
+

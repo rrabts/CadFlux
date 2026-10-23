@@ -14,6 +14,11 @@ está no [run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/393198
 confira o commit e a conclusão antes de reutilizar os resultados.
 Estado e evidências: [docs/STATUS.md](docs/STATUS.md). A Fase 3 foi autorizada; a Fase 4 exige nova autorização.
 
+Planejamento restante: [matriz de requisitos por fase](docs/ROADMAP.md).
+Proteção da main e decisão sobre a automação auxiliar: [governança](docs/GOVERNANCA.md).
+O JSON de proteção versionado precisa ser aplicado nas configurações do GitHub;
+sua presença no código não comprova que a regra esteja ativa.
+
 ## Executar localmente
 
 Requisitos: Node.js 22.12+ (validado com 24.19.0), pnpm 10.28.2 e PostgreSQL real. O lockfile deve ser preservado.
@@ -219,3 +224,4 @@ O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
 Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
 `pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
 3000 livre. Configuração e detalhes em [docs/CLOUD-RETOMADA.md](docs/CLOUD-RETOMADA.md).
+

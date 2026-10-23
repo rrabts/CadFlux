@@ -2,6 +2,12 @@
 
 Leia `docs/FASE-1-ESPECIFICACAO.txt` integralmente antes de implementar.
 Leia `docs/STATUS.md` para entender o ponto de retomada.
+Leia `docs/ROADMAP.md` para a alocação dos requisitos pendentes e
+`docs/GOVERNANCA.md` antes de alterar automações ou regras do repositório.
+
+Em 23/10/2026 Roberto autorizou manutenção da proteção da main, avaliação e
+remoção/correção da automação auxiliar e vinculação dos requisitos às fases.
+Essa autorização não implementa nem libera automaticamente as Fases 4–9.
 
 ## Escopo autorizado
 
@@ -40,3 +46,4 @@ dependências e caches devem permanecer ignorados. Preparação Linux em
 No fim, atualizar README e STATUS com comandos, contas fictícias, rotas, matriz de
 permissões, entidades/migrations, resultados de testes, decisões e limitações. Parar
 após Fase 3 e aguardar autorização para a fase seguinte.
+
