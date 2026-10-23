@@ -87,8 +87,8 @@ const navigation: Record<AccessProfile, NavGroup[]> = {
       items: [
         { label: "Gestão de usuários", href: "/users", icon: "users" },
         { label: "Unidades", href: "/units", icon: "building" },
-        future("Benefícios", "benefits", "benefits"),
-        future("Tipos de atendimento", "service-types", "clipboard"),
+        { label: "Benefícios", href: "/benefits", icon: "benefits" },
+        { label: "Tipos de atendimento", href: "/service-types", icon: "clipboard" },
         { label: "Categorias profissionais", href: "/categories", icon: "categories" },
       ],
     },

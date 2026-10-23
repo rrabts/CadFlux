@@ -1,3 +1,4 @@
+import { allowedUnit } from "@/modules/operations/service";
 import { Prisma } from "@prisma/client";
 import type { Attendance as AttendanceRecord } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -13,6 +14,23 @@ import {
   createAttendanceSchema,
   updateAttendanceSchema,
 } from "./schema";
+
+async function benefitSelection(
+  tx: Prisma.TransactionClient,
+  ids: string[],
+  previous: { benefitId: string; name: string }[] = [],
+) {
+  const items = await tx.benefit.findMany({ where: { id: { in: ids } } });
+  if (
+    items.length !== ids.length ||
+    items.some((b) => !b.active && !previous.some((p) => p.benefitId === b.id))
+  )
+    throw new AppError(409, "Benefício inexistente ou inativo. Recarregue as opções.");
+  return items.map((b) => ({
+    benefitId: b.id,
+    name: previous.find((p) => p.benefitId === b.id)?.name ?? b.name,
+  }));
+}
 
 async function currentActor(
   tx: Prisma.TransactionClient,
@@ -31,7 +49,10 @@ function scope(actor: SafeUser): Prisma.AttendanceWhereInput {
   return actor.accessProfile === "DIRECTION" ? {} : { ownerUserId: actor.id };
 }
 async function findVisible(tx: Prisma.TransactionClient, actor: SafeUser, id: string) {
-  const item = await tx.attendance.findFirst({ where: { id, ...scope(actor) } });
+  const item = await tx.attendance.findFirst({
+    where: { id, ...scope(actor) },
+    include: { benefits: true },
+  });
   if (!item) throw new AppError(404, "Atendimento não encontrado.");
   return item;
 }
@@ -160,16 +181,14 @@ export async function reuseAttendance(actor: SafeUser, cpf: unknown) {
 }
 export async function createAttendance(actor: SafeUser, raw: unknown) {
   const input = createAttendanceSchema.parse(raw);
-  const { duplicateAcknowledged, ...data } = input;
+  const { duplicateAcknowledged, benefitIds = [], unitId, ...data } = input;
   return prisma.$transaction(
     async (tx) => {
       const current = await currentActor(tx, actor, "attendances:create", true);
-      const unit = await tx.unit.findUniqueOrThrow({ where: { id: current.primaryUnitId } });
-      if (!unit.active)
-        throw new AppError(
-          409,
-          "A unidade principal está inativa. Solicite regularização à Direção.",
-        );
+      const unit = await allowedUnit(tx, current, unitId);
+      const type = await tx.attendanceType.findUniqueOrThrow({ where: { code: input.kind } });
+      if (!type.active) throw new AppError(409, "Tipo de atendimento inativo.");
+      const benefits = await benefitSelection(tx, benefitIds);
       assertAttendanceDate(input.serviceDate, unit.timezone, current);
       const serviceDate = new Date(input.serviceDate + "T00:00:00Z");
       const duplicate = await checkDuplicate(
@@ -182,6 +201,8 @@ export async function createAttendance(actor: SafeUser, raw: unknown) {
       const item = await tx.attendance.create({
         data: {
           ...data,
+          kindName: type.name,
+          benefits: { create: benefits },
           serviceDate,
           ownerUserId: current.id,
           unitId: unit.id,
@@ -198,7 +219,7 @@ export async function createAttendance(actor: SafeUser, raw: unknown) {
         action: "ATTENDANCE_CREATED",
         entityType: "Attendance",
         entityId: item.id,
-        newValue: item,
+        newValue: { ...item, benefits },
         metadata: { duplicateAcknowledged: duplicate },
       });
       return item;
@@ -208,7 +229,7 @@ export async function createAttendance(actor: SafeUser, raw: unknown) {
 }
 export async function updateAttendance(actor: SafeUser, id: string, raw: unknown) {
   const input = updateAttendanceSchema.parse(raw);
-  const { duplicateAcknowledged, version, ...data } = input;
+  const { duplicateAcknowledged, version, benefitIds, ...data } = input;
   return prisma.$transaction(
     async (tx) => {
       const current = await currentActor(tx, actor, "attendances:update", true);
@@ -222,6 +243,13 @@ export async function updateAttendance(actor: SafeUser, id: string, raw: unknown
         );
       if (previous.opinion !== "PENDING" && input.opinion !== previous.opinion)
         throw new AppError(409, "O parecer já foi definido e não pode ser alterado.");
+      const type = await tx.attendanceType.findUniqueOrThrow({ where: { code: input.kind } });
+      if (input.kind !== previous.kind && !type.active)
+        throw new AppError(409, "Tipo de atendimento inativo.");
+      const benefits =
+        benefitIds === undefined
+          ? previous.benefits.map(({ benefitId, name }) => ({ benefitId, name }))
+          : await benefitSelection(tx, benefitIds, previous.benefits);
       const serviceDate = new Date(input.serviceDate + "T00:00:00Z");
       const duplicate = await checkDuplicate(
         tx,
@@ -233,7 +261,13 @@ export async function updateAttendance(actor: SafeUser, id: string, raw: unknown
       );
       const item = await tx.attendance.update({
         where: { id, version: version },
-        data: { ...data, serviceDate, version: { increment: 1 } },
+        data: {
+          ...data,
+          serviceDate,
+          kindName: input.kind === previous.kind ? previous.kindName : type.name,
+          version: { increment: 1 },
+          benefits: { deleteMany: {}, create: benefits },
+        },
       });
       await writeAudit(tx, {
         actorUserId: current.id,
@@ -241,7 +275,7 @@ export async function updateAttendance(actor: SafeUser, id: string, raw: unknown
         entityType: "Attendance",
         entityId: id,
         previousValue: previous,
-        newValue: item,
+        newValue: { ...item, benefits },
         metadata: { duplicateAcknowledged: duplicate },
       });
       return item;
@@ -287,13 +321,11 @@ export async function attendanceFilterOptions(actor: SafeUser) {
         where: { attendances: { some: {} } },
         select: { id: true, name: true, registrationNumber: true },
         orderBy: [{ name: "asc" }, { id: "asc" }],
-        take: 1000,
       }),
       tx.unit.findMany({
         where: { attendances: { some: {} } },
         select: { id: true, name: true, code: true },
         orderBy: [{ name: "asc" }, { id: "asc" }],
-        take: 1000,
       }),
     ]);
     return { operators, units };

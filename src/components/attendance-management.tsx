@@ -1,4 +1,5 @@
 "use client";
+import type { Configuration } from "@/modules/operations/contracts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -13,6 +14,7 @@ import {
   opinionLabels,
   permitsOpinion,
   formatServiceDate,
+  dateInTimezone,
 } from "@/modules/attendances/contracts";
 import {
   Alert,
@@ -45,6 +47,18 @@ const initialFilters = {
   unitId: "",
 };
 export function AttendanceList({ direction }: { direction: boolean }) {
+  const [typeNames, setTypeNames] = useState<Record<string, string>>(kindLabels);
+  useEffect(() => {
+    let live = true;
+    api<Configuration>("/api/operations")
+      .then((c) => {
+        if (live) setTypeNames(Object.fromEntries(c.types.map((t) => [t.code, t.name])));
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
   const [draft, setDraft] = useState(initialFilters);
   const [filters, setFilters] = useState(initialFilters);
   const [page, setPage] = useState(1);
@@ -151,7 +165,7 @@ export function AttendanceList({ direction }: { direction: boolean }) {
             onChange={(e) => field("kind", e.target.value)}
           >
             <option value="">Todos</option>
-            {Object.entries(kindLabels).map(([key, name]) => (
+            {Object.entries(typeNames).map(([key, name]) => (
               <option key={key} value={key}>
                 {name}
               </option>
@@ -269,7 +283,7 @@ export function AttendanceList({ direction }: { direction: boolean }) {
                           {item.responsibleRole} · {item.cpf}
                         </small>
                       </td>
-                      <td>{kindLabels[item.kind]}</td>
+                      <td>{item.kindName ?? kindLabels[item.kind]}</td>
                       <td>
                         <Badge variant={item.opinion === "PENDING" ? "warning" : "neutral"}>
                           {opinionLabels[item.opinion]}
@@ -354,7 +368,10 @@ export function AttendanceEditor({
   const router = useRouter();
   const [form, setForm] = useState<AttendanceInput>(blank(today));
   const [detail, setDetail] = useState<Detail | null>(null);
-  const [loading, setLoading] = useState(Boolean(id));
+  const [configuration, setConfiguration] = useState<Configuration | null>(null);
+  const [unitId, setUnitId] = useState("");
+  const [benefitIds, setBenefitIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
@@ -366,13 +383,34 @@ export function AttendanceEditor({
   const [reason, setReason] = useState("");
   const [cancelError, setCancelError] = useState("");
   useEffect(() => {
-    if (!id) return;
     let active = true;
-    api<Detail>(`/api/attendances/${id}`)
-      .then((result) => {
+    Promise.all([
+      api<Configuration>("/api/operations"),
+      id ? api<Detail>(`/api/attendances/${id}`) : Promise.resolve(null),
+    ])
+      .then(([config, result]) => {
         if (!active) return;
-        setDetail(result);
-        setForm({ ...result.item, serviceDate: result.item.serviceDate.slice(0, 10) });
+        setConfiguration(config);
+        if (result) {
+          setDetail(result);
+          setForm({ ...result.item, serviceDate: result.item.serviceDate.slice(0, 10) });
+          setBenefitIds(result.item.benefits.map((b) => b.benefitId));
+        } else {
+          setUnitId(config.selected?.id ?? "");
+          const first =
+            config.types.find((t) => t.code === "UPDATE_FAMILY" && t.active) ??
+            config.types.find((t) => t.active);
+          if (first)
+            setForm((current) => ({
+              ...current,
+              kind: first.code,
+              opinion: permitsOpinion(first.code) ? "PENDING" : "WITHOUT",
+              serviceDate: config.selected
+                ? dateInTimezone(new Date(), config.selected.timezone)
+                : today,
+            }));
+          if (config.notice) setNote(config.notice);
+        }
       })
       .catch((e) => {
         if (active) setError(errorMessage(e));
@@ -383,7 +421,20 @@ export function AttendanceEditor({
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, today]);
+  async function chooseUnit(value: string) {
+    setBusy(true);
+    setError("");
+    try {
+      await api("/api/operations", { method: "PATCH", body: JSON.stringify({ unitId: value }) });
+      setUnitId(value);
+      window.dispatchEvent(new Event("cadflux-unit-changed"));
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   const patch = <K extends keyof AttendanceInput>(key: K, value: AttendanceInput[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
   const readonly = Boolean(id && !detail?.editable);
@@ -404,6 +455,8 @@ export function AttendanceEditor({
         kind: form.kind,
         opinion: form.opinion,
         crowded: form.crowded,
+        benefitIds,
+        ...(!id ? { unitId } : {}),
         duplicateAcknowledged: acknowledged,
         ...(id && detail ? { version: detail.item.version } : {}),
       };
@@ -416,6 +469,7 @@ export function AttendanceEditor({
       if (id) {
         const next = await api<Detail>(`/api/attendances/${id}`);
         setDetail(next);
+        setBenefitIds(next.item.benefits.map((b) => b.benefitId));
         setForm({ ...next.item, serviceDate: next.item.serviceDate.slice(0, 10) });
       } else router.push(`/attendances/${item.id}`);
     } catch (e) {
@@ -547,7 +601,36 @@ export function AttendanceEditor({
             void save();
           }}
         >
-          <fieldset disabled={busy || readonly || checking} className="attendance-fieldset">
+          {!id && (
+            <Field label="Local deste atendimento" id="service-unit" required>
+              <Select
+                id="service-unit"
+                disabled={busy || !configuration?.units.length}
+                value={unitId}
+                onChange={(e) => void chooseUnit(e.target.value)}
+              >
+                <option value="" disabled>
+                  Selecione um local autorizado
+                </option>
+                {configuration?.units.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          )}
+          {!id && configuration && !unitId && (
+            <Alert variant="warning">
+              {configuration.units.length
+                ? "Selecione um local autorizado para iniciar."
+                : "Não há local de atendimento autorizado e ativo. Solicite regularização à Direção."}
+            </Alert>
+          )}
+          <fieldset
+            disabled={busy || readonly || checking || !configuration || (!id && !unitId)}
+            className="attendance-fieldset"
+          >
             <section className="form-section">
               <h2>Atendimento realizado</h2>
               <div className="form-grid">
@@ -557,7 +640,16 @@ export function AttendanceEditor({
                     type="date"
                     required
                     value={form.serviceDate}
-                    max={today || undefined}
+                    max={
+                      id
+                        ? undefined
+                        : configuration?.units.find((u) => u.id === unitId)
+                          ? dateInTimezone(
+                              new Date(),
+                              configuration.units.find((u) => u.id === unitId)!.timezone,
+                            )
+                          : today || undefined
+                    }
                     onChange={(e) => patch("serviceDate", e.target.value)}
                   />
                 </Field>
@@ -575,21 +667,59 @@ export function AttendanceEditor({
                       }));
                     }}
                   >
-                    {Object.entries(kindLabels).map(([key, name]) => (
-                      <option
-                        key={key}
-                        value={key}
-                        disabled={
-                          opinionFixed &&
-                          detail?.item.opinion === "WITH" &&
-                          !permitsOpinion(key as AttendanceInput["kind"])
-                        }
-                      >
-                        {name}
-                      </option>
-                    ))}
+                    {configuration?.types
+                      .filter((t) => t.active || t.code === detail?.item.kind)
+                      .map(({ code: key, name }) => (
+                        <option
+                          key={key}
+                          value={key}
+                          disabled={
+                            opinionFixed &&
+                            detail?.item.opinion === "WITH" &&
+                            !permitsOpinion(key as AttendanceInput["kind"])
+                          }
+                        >
+                          {key === detail?.item.kind
+                            ? (detail.item.kindName ?? kindLabels[key])
+                            : name}
+                        </option>
+                      ))}
                   </Select>
                 </Field>
+              </div>
+            </section>
+            <section className="form-section">
+              <h2>Benefícios informados</h2>
+              <p className="muted small">
+                Informação do atendimento, sem comprovação oficial de recebimento ou concessão. Sem
+                seleção: não informado.
+              </p>
+              <div className="benefit-options">
+                {[
+                  ...(configuration?.benefits ?? []).map((b) => ({
+                    id: b.id,
+                    name:
+                      detail?.item.benefits.find((old) => old.benefitId === b.id)?.name ?? b.name,
+                    active: true,
+                  })),
+                  ...(detail?.item.benefits
+                    .filter((b) => !configuration?.benefits.some((c) => c.id === b.benefitId))
+                    .map((b) => ({ id: b.benefitId, name: b.name, active: false })) ?? []),
+                ].map((b) => (
+                  <label className="checkbox-row" key={b.id}>
+                    <input
+                      type="checkbox"
+                      checked={benefitIds.includes(b.id)}
+                      onChange={(e) =>
+                        setBenefitIds((ids) =>
+                          e.target.checked ? [...ids, b.id] : ids.filter((i) => i !== b.id),
+                        )
+                      }
+                    />
+                    {b.name}
+                    {!b.active && " (inativo; vínculo histórico)"}
+                  </label>
+                ))}
               </div>
             </section>
             <section className="form-section">

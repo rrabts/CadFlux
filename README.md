@@ -1,10 +1,10 @@
-# CadFlux V1.1 — Fases 1 a 3
+# CadFlux V1.1 — Fases 1 a 4
 
 Aplicação institucional para autenticação, autorização, gestão e registro de
 atendimentos do Cadastro Único. A Fase 3 foi incorporada à `main` em 22/10/2026 pelo
-[PR #7](https://github.com/rrabts/CadFlux/pull/7). Apenas dados fictícios. Indicadores agregados,
-consulta oficial de CPF, fechamentos, documentos e encaminhamentos aguardam as
-próximas fases.
+[PR #7](https://github.com/rrabts/CadFlux/pull/7). Apenas dados fictícios. A Fase 4 acrescenta indicadores verificáveis, benefícios,
+tipos configuráveis e unidade operacional. Consulta oficial de CPF, fechamentos,
+documentos e encaminhamentos aguardam as próximas fases.
 
 As Fases 1 e 2 foram incorporadas à `main` em 19/10/2026 pelos
 [PRs #5](https://github.com/rrabts/CadFlux/pull/5) e
@@ -15,7 +15,9 @@ confira o commit e a conclusão antes de reutilizar os resultados.
 Estado e evidências: [docs/STATUS.md](docs/STATUS.md).
 A [especificação da Fase 4](docs/FASE-4-ESPECIFICACAO.md) foi preparada em
 23/10/2026 com as decisões de indicadores, tipos e local de atendimento.
-A implementação continua pendente; as funcionalidades entregues são as Fases 1–3.
+Entrega da Fase 4 no [PR #11](https://github.com/rrabts/CadFlux/pull/11), validada com
+135 testes, 20 cenários de navegador e três testes do supervisor. Evidências e
+limites: [validação da Fase 4](docs/FASE-4-VALIDACAO.md).
 
 Planejamento restante: [matriz de requisitos por fase](docs/ROADMAP.md).
 Proteção da main e decisão sobre a automação auxiliar: [governança](docs/GOVERNANCA.md).
@@ -97,9 +99,9 @@ Limites: 2 MiB, 1.000 usuários, uma planilha XLSX, campos de texto simples. CSV
 
 ## Arquitetura e banco
 
-Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,references,attendances,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
+Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,references,attendances,operations,catalog,indicators,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
 
-Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch e AuditLog.
+Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch, AuditLog, Attendance, Benefit, AttendanceType e AttendanceBenefit.
 
 Migration: `prisma/migrations/20261002140000_foundation/migration.sql`, gerada a partir do schema e acrescida de triggers para bloquear UPDATE/DELETE/TRUNCATE de AuditLog e DELETE de usuários/unidades/categorias. Auditoria registra login/logout, criação/edição, mudanças de perfil/categoria/unidade/status, troca de senha e confirmação de importação. Senhas, hashes de senha e tokens são removidos recursivamente das informações de auditoria.
 
@@ -119,7 +121,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-`pnpm test` executa testes unitários e integração contra `DATABASE_URL_TEST`, recusando o mesmo banco de desenvolvimento. `pnpm test:integration` restringe a execução à integração de backend, importação e cadastros. Os testes usam dados fictícios com identificadores únicos e preservam auditoria.
+`pnpm test` executa testes unitários e integração contra `DATABASE_URL_TEST`, recusando o mesmo banco de desenvolvimento. `pnpm test:integration` executa integração de backend, importação, cadastros, atendimentos e Fase 4. Os testes usam dados fictícios com identificadores únicos e preservam auditoria.
 
 O teste de navegador inicia o build de produção em 127.0.0.1:3100, apontando somente ao banco de teste. Instale o Chromium de testes com `pnpm exec playwright install chromium`; em Windows com Edge/Chrome já instalado é possível definir `PLAYWRIGHT_CHANNEL=msedge` ou `chrome`. Execute `pnpm build` antes de `pnpm test:e2e`.
 
@@ -129,7 +131,7 @@ Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS
 
 Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
 
-Não avance para a Fase 4 sem autorização.
+A implementação da Fase 4 foi autorizada; não avançar à Fase 5 sem nova autorização.
 
 ## Validação automatizada em nuvem
 
@@ -216,8 +218,8 @@ sem bloquear um novo atendimento distinto. A semana usa o fuso salvo no registro
 A janela de fechamento/reabertura não existe ainda.
 
 As contas fictícias existentes permanecem. O seed não cria atendimentos de
-beneficiários; testes geram registros sintéticos no banco de testes. Indicadores do
-dashboard continuam vazios até a Fase 4; seu botão de atendimento já abre o formulário.
+beneficiários; testes geram registros sintéticos no banco de testes. A Fase 4 usa esses registros nos indicadores do dashboard; o botão de atendimento
+abre o formulário.
 Não há publicação de produção nem uso de dados reais.
 
 ## Supervisor de desenvolvimento Cloud — PR #4
@@ -227,3 +229,54 @@ O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
 Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
 `pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
 3000 livre. Configuração e detalhes em [docs/CLOUD-RETOMADA.md](docs/CLOUD-RETOMADA.md).
+
+
+## Fase 4 — indicadores e configuração operacional
+
+`/dashboard` apresenta números reais do banco fictício. Orientações estão no total
+ativo e discriminadas; cancelados são separados. Com/sem parecer/aguardando
+classificação somam o total. As datas são civis, em America/Sao_Paulo, semana de
+segunda a domingo. O consolidado mensal considera o intervalo selecionado e não
+representa fechamento, RMA oficial ou contagem de famílias únicas.
+
+| Rota/API | Entrevistador | Encaminhador | Direção |
+| --- | --- | --- | --- |
+| `/api/indicators` | Próprios registros; somente total da unidade operacional | Bloqueado | Global, filtros por unidade/operador, detalhamento paginado |
+| `/benefits`, `/service-types`, `/api/catalog/[kind]` | Bloqueado | Bloqueado | Benefícios e os sete tipos existentes; edição e histórico |
+| `/api/operations` GET | Tipos, benefícios ativos e unidades autorizadas | Bloqueado | Tipos e benefícios ativos |
+| `/api/operations` PATCH | Escolher unidade autorizada e ativa | Bloqueado | Bloqueado; define padrão e vínculos na gestão de usuários |
+
+Cada possível duplicidade usa dono + CPF + data: grupos e registros envolvidos
+são contados separadamente, sem deduplicar atendimentos. Filtrar uma unidade
+recalcula os grupos; esses grupos não são aditivos entre unidades. O entrevistador
+não recebe identificação nem detalhamento de colegas. Paginação de 50 linhas não
+limita os totais; os dez últimos registros são uma lista explicitamente limitada.
+
+Direção pode criar/renomear/inativar benefícios e renomear/ativar/inativar os sete
+tipos. Códigos e regras de parecer/código familiar são fixos, sem exclusão física.
+Benefícios são apenas informações do atendimento, sem certificar concessão.
+Seleção vazia significa “não informado”; nomes ficam preservados no registro.
+Tipos e benefícios inativos já usados podem ser mantidos ou removidos conforme
+as regras da correção, mas não adicionados a novos registros.
+
+A última unidade válida fica salva por usuário. A topbar e o novo formulário a
+pré-selecionam; mudar a unidade principal pela Direção redefine a preferência.
+Um formulário aberto envia a unidade que exibe, mesmo se outra aba mudar o padrão.
+O servidor revalida autorização e atividade na gravação. Registros anteriores
+preservam unidade/fuso/proprietário; mudança de local exige cancelamento e novo
+registro. Revogação não elimina acesso ao próprio histórico.
+
+Migration `20261023140000_indicators_configuration`: `Benefit`, `AttendanceType`,
+`AttendanceBenefit`, `Attendance.kindName` e `User.operationalUnitId`. São 15
+tabelas incluindo o controle Prisma. Os sete tipos são inicializados uma vez pela
+migration; o seed repetido preserva nomes/configurações. Registros antigos mantêm
+`kindName = NULL`, interpretado pelo mapa original fixo dos sete tipos, sem usar
+nomes administrativos posteriores. Isso preserva registros cancelados imutáveis;
+não há reescrita histórica nem desligamento de triggers. Benefícios antigos ficam
+não informados. Preferências e alterações cadastrais geram auditoria transacional.
+
+Validação: comandos existentes `pnpm lint`, `pnpm typecheck`, `pnpm test`,
+`pnpm test:cloud`, `pnpm build`, `pnpm test:e2e`. O CI exige banco limpo, quatro
+migrations, seed idempotente, regressão e capturas. O teste de migração também
+reproduz a base anterior preenchida, sem alterar o banco de desenvolvimento.
+Módulos de pendências, fechamento e encaminhamentos continuam indisponíveis.

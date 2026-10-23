@@ -2,8 +2,9 @@
 
 Especificação preparada em 23/10/2026 (America/Sao_Paulo), após Roberto solicitar
 “Prossiga” para a etapa de definição. Base examinada: main `832544c`.
-Este documento especifica a próxima entrega; não declara funcionalidades
-implementadas. O código operacional permanece nas Fases 1–3.
+Após esta especificação, Roberto autorizou a implementação com “Prossiga”.
+Este documento define o contrato; o estado e as evidências atuais estão em
+[FASE-4-VALIDACAO.md](FASE-4-VALIDACAO.md).
 
 ## 1. Objetivo e origem das decisões
 
@@ -243,10 +244,10 @@ Attendance para evitar duplicação por benefícios. Avaliar plano de execução
 volume sintético antes de adicionar índices. Não introduzir cache compartilhado,
 serviço externo ou alteração da trava global sem medição que justifique.
 
-## 9. Critérios de aceite e evidências futuras
+## 9. Critérios de aceite e evidências
 
-Os critérios abaixo estão pendentes de implementação; os testes das Fases 1–3
-não comprovam o funcionamento da Fase 4.
+Os critérios abaixo exigem evidências próprias; os testes das Fases 1–3
+não comprovam isoladamente o funcionamento da Fase 4.
 
 | Critério | IDs | Evidência exigida |
 | --- | --- | --- |
@@ -269,3 +270,13 @@ não comprovam o funcionamento da Fase 4.
 Ao entregar código: relacionar IDs ao PR, commit, run e evidências em STATUS;
 atualizar a matriz do ROADMAP apenas com o que estiver efetivamente validado.
 A documentação desta etapa não libera produção nem implementa Fases 5–9.
+
+
+## 10. Decisão de compatibilidade da implementação
+
+O backfill do nome histórico é lógico: `kindName = NULL` em registros anteriores
+representa o rótulo original fixo de seu código, resolvido pelo contrato existente,
+jamais o rótulo atual do catálogo. Novos registros salvam o nome corrente e uma
+mudança de código salva o novo nome. Essa solução evita alterar linhas canceladas
+imutáveis ou suspender seus triggers. O teste de migração compara integralmente
+os campos anteriores e a auditoria antes/depois. Benefícios não são inferidos.

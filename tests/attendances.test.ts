@@ -66,7 +66,6 @@ describe("Regras de atendimento", () => {
   it("rejeita identidade institucional enviada e confirmação não booleana", () => {
     for (const extra of [
       { ownerUserId: "forged" },
-      { unitId: "forged" },
       { version: 1 },
       { duplicateAcknowledged: "true" },
     ])

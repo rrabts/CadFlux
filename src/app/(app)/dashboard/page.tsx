@@ -1,7 +1,8 @@
+import { IndicatorDashboard } from "@/components/indicators";
 import Link from "next/link";
 import { Building2, ClipboardList, Plus, Send } from "lucide-react";
 import { requirePageUser } from "@/modules/auth/service";
-import { Card, EmptyState, PageHeader, Badge } from "@/components/ui";
+import { Card, EmptyState, PageHeader } from "@/components/ui";
 import { profileLabels } from "@/lib/contracts";
 export default async function DashboardPage() {
   const user = await requirePageUser("dashboard:read");
@@ -39,45 +40,43 @@ export default async function DashboardPage() {
           )
         }
       />
-      <div className="phase-note">
-        <Badge variant="info">Fase 3</Badge>
-        <p>
-          Gestão institucional e registro de atendimentos disponíveis. Indicadores e demais módulos
-          aguardam as próximas fases.
-        </p>
-      </div>
-      <div className="stats-grid">
-        {labels.map((label) => (
-          <Card className="stat-card" key={label}>
-            <span>{label}</span>
-            <strong aria-label="Sem dados nesta fase">—</strong>
-            <small>Disponível em uma próxima fase</small>
-          </Card>
-        ))}
-      </div>
-      <div className={"dashboard-grid " + (referral ? "single-column" : "")}>
-        {sections.map((title, index) => (
-          <Card className={"dashboard-card " + (index === 2 ? "full-width" : "")} key={title}>
-            <div className="card-heading">
-              <h2>{title}</h2>
-              <span className="muted small">Em desenvolvimento</span>
-            </div>
-            <EmptyState
-              title="Nenhum registro disponível"
-              description="Este painel será disponibilizado nas próximas fases. Use o menu para acessar os módulos já disponíveis."
-              icon={
-                direction ? (
-                  <Building2 size={25} />
-                ) : referral ? (
-                  <Send size={25} />
-                ) : (
-                  <ClipboardList size={25} />
-                )
-              }
-            />
-          </Card>
-        ))}
-      </div>
+      {!referral && <IndicatorDashboard direction={direction} />}
+      {referral && (
+        <>
+          <div className="stats-grid">
+            {labels.map((label) => (
+              <Card className="stat-card" key={label}>
+                <span>{label}</span>
+                <strong aria-label="Sem dados nesta fase">—</strong>
+                <small>Disponível em uma próxima fase</small>
+              </Card>
+            ))}
+          </div>
+          <div className={"dashboard-grid " + (referral ? "single-column" : "")}>
+            {sections.map((title, index) => (
+              <Card className={"dashboard-card " + (index === 2 ? "full-width" : "")} key={title}>
+                <div className="card-heading">
+                  <h2>{title}</h2>
+                  <span className="muted small">Em desenvolvimento</span>
+                </div>
+                <EmptyState
+                  title="Nenhum registro disponível"
+                  description="Este painel será disponibilizado nas próximas fases. Use o menu para acessar os módulos já disponíveis."
+                  icon={
+                    direction ? (
+                      <Building2 size={25} />
+                    ) : referral ? (
+                      <Send size={25} />
+                    ) : (
+                      <ClipboardList size={25} />
+                    )
+                  }
+                />
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </>
   );
 }

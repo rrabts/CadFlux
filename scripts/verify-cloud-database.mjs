@@ -25,7 +25,7 @@ try {
       const tables = await client.query(
         "SELECT count(*)::int AS total FROM pg_tables WHERE schemaname = 'public'",
       );
-      assert.equal(tables.rows[0].total, mode === "empty" ? 0 : 12, "Total de tabelas inesperado.");
+      assert.equal(tables.rows[0].total, mode === "empty" ? 0 : 15, "Total de tabelas inesperado.");
       if (mode === "empty") {
         console.log(`${target.name}: schema public vazio confirmado.`);
         continue;
@@ -37,10 +37,14 @@ try {
         { migration_name: "20261002140000_foundation" },
         { migration_name: "20261019170000_reference_integrity" },
         { migration_name: "20261020020000_attendances" },
+        { migration_name: "20261023140000_indicators_configuration" },
       ]);
       const users = await client.query('SELECT * FROM "User" ORDER BY id');
       const units = await client.query('SELECT * FROM "Unit" ORDER BY id');
       const categories = await client.query('SELECT * FROM "ProfessionalCategory" ORDER BY id');
+      const types = await client.query('SELECT * FROM "AttendanceType" ORDER BY code');
+      assert.equal(types.rowCount, 7, "Os sete tipos precisam estar inicializados.");
+      assert.equal((await client.query('SELECT count(*)::int AS n FROM "Benefit"')).rows[0].n, 0);
       assert.equal(users.rowCount, 3, "O seed precisa conter três usuários fictícios.");
       assert.equal(units.rowCount, 2, "O seed precisa conter duas unidades fictícias.");
       assert.equal(categories.rowCount, 4, "O seed precisa conter quatro categorias.");
@@ -51,7 +55,7 @@ try {
       ]);
       assert.ok(users.rows.every((user) => user.status === "ACTIVE"));
       digests[target.name] = createHash("sha256")
-        .update(JSON.stringify([users.rows, units.rows, categories.rows]))
+        .update(JSON.stringify([users.rows, units.rows, categories.rows, types.rows]))
         .digest("hex");
       console.log(`${target.name}: migration concluída; 3 usuários, 2 unidades, 4 categorias.`);
     } finally {

@@ -1,3 +1,39 @@
+# Fase 4 — entrega validada em 23/10/2026
+
+Implementação autorizada por Roberto após a especificação, com “Prossiga”.
+Base: main `cd0b31a` (PR #10). A entrega está no
+[PR #11](https://github.com/rrabts/CadFlux/pull/11).
+IND-01–03 e CFG-01–03 foram implementados e validados; QUA-01 está coberto
+nesta fase e continua sendo requisito das fases seguintes.
+
+- Indicadores próprios/globais, períodos civis, orientação incluída/discriminada,
+  pareceres, cancelados, consolidado mensal e possíveis duplicidades.
+- Benefícios múltiplos com nomes históricos; gestão auditada pela Direção.
+- Nomes e disponibilidade dos sete tipos, preservando códigos/regras/histórico.
+- Unidade operacional persistida, revalidação de vínculos e formulário com local explícito.
+- Migration aditiva, migração de base preenchida e regressão das Fases 1–3.
+
+Head funcional `52ae1bd1ad5b00a13e62111ca778e52ca10dd716`, aprovado no
+[run 39968950264](https://github.com/rrabts/CadFlux/actions/runs/39968950264):
+135 testes em dez arquivos, 20 cenários de navegador, três testes do supervisor,
+Prisma/migrations, seed idempotente, lint, TypeScript e build. Servidor de teste
+encerrado automaticamente e porta 3100 livre. As cinco capturas da Fase 4 foram
+conferidas, incluindo dashboard em 390 px sem transbordo da página.
+
+Matriz de aceite e histórico das verificações:
+[FASE-4-VALIDACAO.md](FASE-4-VALIDACAO.md). Esta atualização final altera apenas
+documentação; o check obrigatório deve aprovar também o head documental antes
+da integração. O PR registra o head final, sua execução e o merge; conferir esses
+identificadores ao reutilizar evidência. A proteção da main permanece ativa.
+
+Somente dados fictícios. A Fase 5 (consulta oficial de CPF) depende de provedor e
+acesso oficial autorizado, além de especificação própria. Não simular consulta
+oficial nem avançar às Fases 5–9/produção sem autorização correspondente.
+
+Os registros abaixo são históricos, preservados para rastreabilidade.
+
+---
+
 # Fase 4 — especificação preparada em 23/10/2026
 
 Roberto solicitou prosseguir com a definição da Fase 4 e respondeu às decisões
