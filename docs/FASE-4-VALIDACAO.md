@@ -1,14 +1,33 @@
 # Fase 4 — validação da implementação
 
 Base: `cd0b31a` (especificação integrada no PR #10). Implementação autorizada por
-Roberto com “Prossiga”. Estado inicial: aguardando execução integrada do head.
+Roberto com “Prossiga”. Entrega validada no [PR #11](https://github.com/rrabts/CadFlux/pull/11).
+
+## Resultado aprovado
+
+Head `52ae1bd1ad5b00a13e62111ca778e52ca10dd716`,
+[run 39968950264](https://github.com/rrabts/CadFlux/actions/runs/39968950264):
+135 testes em dez arquivos, 20 cenários de navegador, três testes do supervisor,
+Prisma, quatro migrations, seed repetido/idempotente, lint, TypeScript e build
+aprovados. O servidor de teste encerrou automaticamente; porta 3100 livre.
+
+As cinco capturas da Fase 4 foram inspecionadas: gestão de benefícios/tipos,
+atendimento com unidade adicional e benefício, dashboard da Direção e dashboard
+do Entrevistador em 390×844. Sem transbordo da página; tabelas extensas têm rolagem
+horizontal dentro de seu bloco. Temas, teclado/foco e isolamento de perfis também
+mantiveram os testes anteriores. Os 15 critérios da especificação têm cobertura
+nas novas suítes e na regressão preservada.
+
+O fechamento documental não altera a aplicação validada. O check obrigatório
+continua sendo exigido no head final, que será identificado no PR junto à integração.
+As execuções intermediárias abaixo são histórico, não bloqueios atuais.
 
 | Requisito | Implementação e evidência própria |
 | --- | --- |
 | IND-01, IND-03 | Agregações PostgreSQL com snapshot consistente; fixture exata 8 ativos/3 orientações/2 cancelados e partição 2+5+1; duplicidades sem deduplicar total |
 | IND-01, IND-03 | Datas civis, viradas UTC/dia/semana/mês/ano e fevereiro bissexto; consolidado por mês da data de atendimento |
 | IND-02 | Dois operadores, IDs forjados, agregado sem colegas identificados, Direção paginada com 51 grupos incluindo unidades históricas inativas |
-| CFG-01 | Criação, rename, inativação, preservação/remoção de vínculo, novo vínculo inativo negado, auditoria e conflito concorrente |
+| CFG-01 | Criação, renomeação, inativação, preservação/remoção de vínculo, novo vínculo inativo negado, auditoria e conflito concorrente |
 | CFG-02 | Renomear/inativar sem alterar códigos/regras, histórico anterior, último tipo ativo protegido; regressão de parecer definitivo |
 | CFG-03 | Preferência persistida, novo login, revogação entre abertura/envio, formulário de outra aba com unidade explícita, troca da principal e histórico próprio |
 | QUA-01 | Rotas anônimas/Encaminhador/origem externa negadas; migration de base anterior com cancelado e auditoria preservados; regressão completa |
@@ -18,15 +37,15 @@ Testes: `tests/phase4.integration.test.ts`,
 As suítes anteriores continuam obrigatórias. A migração da base preenchida acontece
 num schema temporário transacional, integralmente revertido ao final, sem reset.
 
-Capturas previstas no artefato do CI:
+Capturas inspecionadas no artefato do CI:
 - `phase-4-benefits.png` e `phase-4-types.png`: gestão pela Direção.
 - `phase-4-attendance.png`: unidade adicional e benefício no atendimento.
 - `phase-4-dashboard-direction.png`: indicadores globais.
 - `phase-4-dashboard-mobile.png`: indicadores próprios em viewport mobile.
 
 TypeScript e lint passaram no executor local. O PostgreSQL exige usuário sem
-privilégios e não iniciou aqui (executor root); banco/build/navegador dependem do
-run do GitHub Actions. Não reutilizar evidência anterior para concluir esta fase.
+privilégios e não iniciou aqui (executor root). A validação completa acima foi
+executada no GitHub Actions, em bancos fictícios separados.
 
 Limites: dados fictícios, sem produção, concessão de benefício, CPF oficial,
 fechamento, pendências da gestão ou encaminhamentos. `kindName` histórico nulo usa

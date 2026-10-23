@@ -1,8 +1,10 @@
-# Fase 4 — implementação em validação
+# Fase 4 — entrega validada em 23/10/2026
 
-Roberto autorizou prosseguir com a implementação após aprovar a especificação.
-Base: main `cd0b31a` (PR #10). IND-01–03, CFG-01–03 e a cobertura desta fase de
-QUA-01 foram implementados, sujeitos ao check obrigatório e à inspeção das capturas.
+Implementação autorizada por Roberto após a especificação, com “Prossiga”.
+Base: main `cd0b31a` (PR #10). A entrega está no
+[PR #11](https://github.com/rrabts/CadFlux/pull/11).
+IND-01–03 e CFG-01–03 foram implementados e validados; QUA-01 está coberto
+nesta fase e continua sendo requisito das fases seguintes.
 
 - Indicadores próprios/globais, períodos civis, orientação incluída/discriminada,
   pareceres, cancelados, consolidado mensal e possíveis duplicidades.
@@ -11,11 +13,22 @@ QUA-01 foram implementados, sujeitos ao check obrigatório e à inspeção das c
 - Unidade operacional persistida, revalidação de vínculos e formulário com local explícito.
 - Migration aditiva, migração de base preenchida e regressão das Fases 1–3.
 
-Evidências e limites: [FASE-4-VALIDACAO.md](FASE-4-VALIDACAO.md).
-TypeScript e lint passaram localmente. PostgreSQL não inicia como root neste
-executor; testes de banco, navegador e build serão executados no GitHub Actions.
-Não declarar conclusão enquanto o head final não passar e suas capturas não forem
-inspecionadas. Somente dados fictícios; Fases 5–9 e produção não autorizadas.
+Head funcional `52ae1bd1ad5b00a13e62111ca778e52ca10dd716`, aprovado no
+[run 39968950264](https://github.com/rrabts/CadFlux/actions/runs/39968950264):
+135 testes em dez arquivos, 20 cenários de navegador, três testes do supervisor,
+Prisma/migrations, seed idempotente, lint, TypeScript e build. Servidor de teste
+encerrado automaticamente e porta 3100 livre. As cinco capturas da Fase 4 foram
+conferidas, incluindo dashboard em 390 px sem transbordo da página.
+
+Matriz de aceite e histórico das verificações:
+[FASE-4-VALIDACAO.md](FASE-4-VALIDACAO.md). Esta atualização final altera apenas
+documentação; o check obrigatório deve aprovar também o head documental antes
+da integração. O PR registra o head final, sua execução e o merge; conferir esses
+identificadores ao reutilizar evidência. A proteção da main permanece ativa.
+
+Somente dados fictícios. A Fase 5 (consulta oficial de CPF) depende de provedor e
+acesso oficial autorizado, além de especificação própria. Não simular consulta
+oficial nem avançar às Fases 5–9/produção sem autorização correspondente.
 
 Os registros abaixo são históricos, preservados para rastreabilidade.
 

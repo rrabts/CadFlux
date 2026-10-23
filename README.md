@@ -15,7 +15,9 @@ confira o commit e a conclusão antes de reutilizar os resultados.
 Estado e evidências: [docs/STATUS.md](docs/STATUS.md).
 A [especificação da Fase 4](docs/FASE-4-ESPECIFICACAO.md) foi preparada em
 23/10/2026 com as decisões de indicadores, tipos e local de atendimento.
-Implementação e evidências da entrega: [validação da Fase 4](docs/FASE-4-VALIDACAO.md).
+Entrega da Fase 4 no [PR #11](https://github.com/rrabts/CadFlux/pull/11), validada com
+135 testes, 20 cenários de navegador e três testes do supervisor. Evidências e
+limites: [validação da Fase 4](docs/FASE-4-VALIDACAO.md).
 
 Planejamento restante: [matriz de requisitos por fase](docs/ROADMAP.md).
 Proteção da main e decisão sobre a automação auxiliar: [governança](docs/GOVERNANCA.md).

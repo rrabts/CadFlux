@@ -17,7 +17,8 @@ não declara módulos futuros implementados nem autoriza seu desenvolvimento.
   Detalhes ainda contraditórios ou sem especificação estão identificados como
   decisões de aceite, em vez de se tornarem regras silenciosas no código.
 
-As Fases 1–3 estão integradas à main. A base desta revisão é `35aab49`, com
+As Fases 1–3 estão integradas à main; a Fase 4 está validada no PR #11.
+A base da revisão inicial deste roadmap foi `35aab49`, com
 [validação em nuvem aprovada](https://github.com/rrabts/CadFlux/actions/runs/39780049860).
 Existem exatamente Entrevistador, Encaminhador e Direção. O CadFlux apoia a
 gestão interna e não substitui aplicações oficiais governamentais.
@@ -29,7 +30,7 @@ gestão interna e não substitui aplicações oficiais governamentais.
 | 1 | Fundação, acesso, usuários, importação e auditoria | Integrada; preservar regressão |
 | 2 | Unidades, categorias e vínculos administrativos | Integrada; preservar regressão |
 | 3 | Registro, consulta e correção de atendimentos | Integrada; preservar regressão |
-| 4 | Indicadores e complementos de configuração operacional | Implementada em validação; ver [evidências](FASE-4-VALIDACAO.md) |
+| 4 | Indicadores e complementos de configuração operacional | Implementada e validada; [PR #11](https://github.com/rrabts/CadFlux/pull/11) e [evidências](FASE-4-VALIDACAO.md) |
 | 5 | Consulta oficial de CPF | Planejada; depende de acesso oficial autorizado |
 | 6 | Pendências e fechamento semanal | Planejada; pendências precedem o fechamento |
 | 7 | Documentos oficiais | Planejada; depende do fechamento e do modelo aprovado |
@@ -45,20 +46,20 @@ em todas as fases; a Fase 9 complementa essas proteções.
 
 ## Matriz de requisitos pendentes
 
-IND-01–03 e CFG-01–03 estão implementados em validação; QUA-01 acompanha esta
+IND-01–03 e CFG-01–03 estão implementados e validados; QUA-01 acompanha esta
 entrega e continua transversal. Os demais itens abaixo permanecem planejados. Cada ID deve constar na futura especificação, no PR e na
 evidência de validação correspondente.
 
 | ID | Requisito e situação atual | Fase responsável | Critério de conclusão |
 | --- | --- | --- | --- |
-| IND-01 | Cards hoje/semana/mês, resumo da semana e últimos atendimentos; implementados em validação | 4 | Contagens reproduzíveis a partir dos registros, com fuso e definição documentada de ativos/cancelados, orientação e parecer pendente |
+| IND-01 | Cards hoje/semana/mês, resumo da semana e últimos atendimentos; implementados e validados | 4 | Contagens reproduzíveis a partir dos registros, com fuso e definição documentada de ativos/cancelados, orientação e parecer pendente |
 | IND-02 | Direção: visão geral, por unidade e por operador; entrevistador: próprios números e total agregado permitido da unidade | 4 | Filtros e totais conferidos; nenhum dado individual de colegas exposto ao operador |
 | IND-03 | Consolidado mensal, pareceres e duplicidades | 4 | Fórmulas, períodos e definição de duplicidade documentados; totais reconciliados com a lista operacional |
 | IND-04 | Cards e filtros de pendências, semanas abertas e correções pós-fechamento | 6 | Indicadores passam a usar entidades reais da Fase 6; antes disso mostrar indisponibilidade, sem simular zero |
 | IND-05 | Números e últimos encaminhamentos | 8 | Painel do Encaminhador usa somente seus registros; Direção tem consulta autorizada; não mistura balanço de atendimentos |
 | CFG-01 | Cadastro de benefícios pela Direção e seleção múltipla no atendimento | 4 | Criar/inativar benefícios sem perder histórico; vínculos auditados; guardar seleção sem inferir concessão ou habilitação oficial |
 | CFG-02 | Área de tipos de atendimento; sete códigos fixos com nomes/disponibilidade configuráveis | 4 | Definir edição permitida antes de implementar; preservar códigos históricos e regras de código familiar/parecer; não admitir tipo novo sem regras explícitas |
-| CFG-03 | Operação em unidades adicionais; seleção persistida implementada em validação | 4 | Seleção apenas entre unidades autorizadas e ativas, validada no servidor; preservar unidade de cada registro e isolamento entre operadores |
+| CFG-03 | Operação em unidades adicionais; seleção persistida implementada e validada | 4 | Seleção apenas entre unidades autorizadas e ativas, validada no servidor; preservar unidade de cada registro e isolamento entre operadores |
 | CPF-01 | Integração oficial para verificar CPF | 5 | Provedor, autorização de acesso, finalidade, custos e limites definidos; testes de sucesso, indisponibilidade e resposta inválida; sem credenciais no Git |
 | CPF-02 | Nome oficial divergente e origem da consulta | 5 | Aplicar nome oficial ao formulário conforme decisão do produto, com aviso e auditoria; não reescrever atendimentos anteriores silenciosamente |
 | CPF-03 | CPF aguardando verificação ou conflito documental | 5, integração na 6 | Representar indisponibilidade sem falso sucesso; vincular ao fluxo de pendências quando existir; critério de bloqueio explicitado |
@@ -93,8 +94,8 @@ evidência de validação correspondente.
    local pré-selecionado foram fornecidas por Roberto em 23/10. Fórmulas,
    histórico, unidade autorizada e critérios estão em
    [FASE-4-ESPECIFICACAO.md](FASE-4-ESPECIFICACAO.md).
-   IND-01–03, CFG-01–03 e a cobertura da fase de QUA-01 estão implementados em
-   validação; não abrangem entregas futuras.
+   IND-01–03, CFG-01–03 e a cobertura da fase de QUA-01 estão implementados e
+   validados; não abrangem entregas futuras.
 2. **Fase 5:** confirmar provedor e acesso oficial. O projeto não possui acesso
    SERPRO/Receita pelo simples fato de prever a integração.
 3. **Fase 6:** conciliar a semana civil segunda–domingo da Fase 3 com a rotina

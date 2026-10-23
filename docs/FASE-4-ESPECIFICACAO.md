@@ -244,7 +244,7 @@ Attendance para evitar duplicação por benefícios. Avaliar plano de execução
 volume sintético antes de adicionar índices. Não introduzir cache compartilhado,
 serviço externo ou alteração da trava global sem medição que justifique.
 
-## 9. Critérios de aceite e evidências futuras
+## 9. Critérios de aceite e evidências
 
 Os critérios abaixo exigem evidências próprias; os testes das Fases 1–3
 não comprovam isoladamente o funcionamento da Fase 4.
