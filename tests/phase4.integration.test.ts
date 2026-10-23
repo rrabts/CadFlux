@@ -358,6 +358,7 @@ describe("Fase 4 — indicadores, configuração e isolamento", () => {
     const login = await authenticate({ email: actor.email, password: "CadFlux!Demo2026" });
     await logout(login.token);
     expect((await attendanceConfiguration(actor)).selected?.id).toBe(unit.id);
+    await expect(createAttendance(actor, input())).rejects.toMatchObject({ status: 409 });
     await setOperationalUnit(actor, { unitId: actor.primaryUnitId });
     const a = await createAttendance(actor, { ...input(), unitId: unit.id });
     expect(a.unitId).toBe(unit.id);

@@ -180,7 +180,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
               ))}
             </div>
             <div className="dashboard-grid">
-              <Card className="dashboard-card">
+              <Card className="indicator-card dashboard-card">
                 <h2>Resumo do período</h2>
                 <dl className="indicator-values">
                   {[
@@ -199,7 +199,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                   ))}
                 </dl>
               </Card>
-              <Card className="dashboard-card">
+              <Card className="indicator-card dashboard-card">
                 <h2>Possíveis duplicidades</h2>
                 <p>
                   {data.duplicates.groups} grupo(s) · {data.duplicates.records} registro(s)
@@ -235,7 +235,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                 </div>
               </Card>
               {!direction && (
-                <Card className="dashboard-card">
+                <Card className="indicator-card dashboard-card">
                   <h2>Total da unidade</h2>
                   {data.unitTotal ? (
                     <p>
@@ -250,7 +250,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                   </p>
                 </Card>
               )}
-              <Card className="dashboard-card">
+              <Card className="indicator-card dashboard-card">
                 <h2>Atendimentos por tipo</h2>
                 <dl className="indicator-values">
                   {data.kinds.map((k) => (
@@ -262,7 +262,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                 </dl>
                 {!data.kinds.length && <p>Sem atendimentos no período.</p>}
               </Card>
-              <Card className="dashboard-card full-width">
+              <Card className="indicator-card dashboard-card full-width">
                 <h2>Consolidado mensal</h2>
                 <p className="muted small">
                   Contagens pela data do atendimento dentro do período selecionado; não representa
@@ -298,7 +298,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                 </div>
               </Card>
               {direction && (
-                <Card className="dashboard-card full-width">
+                <Card className="indicator-card dashboard-card full-width">
                   <h2>Atendimentos por unidade e operador</h2>
                   <div className="table-container">
                     <table className="data-table">
@@ -341,7 +341,7 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                   </div>
                 </Card>
               )}
-              <Card className="dashboard-card full-width">
+              <Card className="indicator-card dashboard-card full-width">
                 <h2>Últimos atendimentos</h2>
                 {data.recent.length ? (
                   <div className="table-container">

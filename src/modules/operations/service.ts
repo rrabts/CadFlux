@@ -50,6 +50,10 @@ export async function allowedUnit(
   requested?: string,
 ) {
   const context = await unitContext(tx, actor);
+  // Older clients only displayed the primary unit and did not submit its ID.
+  // Never apply a newer preference silently to one of those open forms.
+  if (!requested && context.selected && context.selected.id !== actor.primaryUnitId)
+    throw new AppError(409, "Confirme o local de atendimento no formulário antes de salvar.");
   const unit = requested ? context.units.find((u) => u.id === requested) : context.selected;
   if (!unit)
     throw new AppError(

@@ -120,7 +120,7 @@ export function CatalogPage({ kind }: { kind: "benefits" | "types" }) {
         ) : (
           <>
             <div className="table-container">
-              <table className="data-table">
+              <table className="data-table catalog-table">
                 <thead>
                   <tr>
                     <th>Nome</th>
@@ -144,18 +144,25 @@ export function CatalogPage({ kind }: { kind: "benefits" | "types" }) {
                         </td>
                       )}
                       <td>
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            setError("");
-                            setEdit(item);
-                          }}
-                        >
-                          Editar {item.name}
-                        </Button>
-                        <Button variant="ghost" onClick={() => void showHistory(item)}>
-                          Histórico de {item.name}
-                        </Button>
+                        <div className="reference-actions">
+                          <Button
+                            variant="ghost"
+                            aria-label={"Editar " + item.name}
+                            onClick={() => {
+                              setError("");
+                              setEdit(item);
+                            }}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            aria-label={"Histórico de " + item.name}
+                            onClick={() => void showHistory(item)}
+                          >
+                            Histórico
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

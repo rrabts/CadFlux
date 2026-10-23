@@ -1408,3 +1408,42 @@ h3 {
 .checkbox-row input {
   flex-shrink: 0;
 }
+
+.catalog-table {
+  white-space: normal;
+  min-width: 640px;
+}
+.catalog-table td {
+  overflow-wrap: anywhere;
+}
+.catalog-table th:last-child {
+  width: 200px;
+}
+
+.indicator-card {
+  padding: 22px;
+  min-width: 0;
+}
+.indicator-card h2 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.indicator-card > p {
+  margin: 10px 0;
+}
+.indicator-card ul {
+  margin: 12px 0;
+  padding-left: 18px;
+}
+.indicator-card li {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.indicator-card .table-container {
+  margin-top: 12px;
+}
+@media (max-width: 700px) {
+  .indicator-card {
+    padding: 18px;
+  }
+}
