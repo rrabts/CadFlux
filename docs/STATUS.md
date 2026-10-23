@@ -1,3 +1,26 @@
+# Fase 4 — implementação em validação
+
+Roberto autorizou prosseguir com a implementação após aprovar a especificação.
+Base: main `cd0b31a` (PR #10). IND-01–03, CFG-01–03 e a cobertura desta fase de
+QUA-01 foram implementados, sujeitos ao check obrigatório e à inspeção das capturas.
+
+- Indicadores próprios/globais, períodos civis, orientação incluída/discriminada,
+  pareceres, cancelados, consolidado mensal e possíveis duplicidades.
+- Benefícios múltiplos com nomes históricos; gestão auditada pela Direção.
+- Nomes e disponibilidade dos sete tipos, preservando códigos/regras/histórico.
+- Unidade operacional persistida, revalidação de vínculos e formulário com local explícito.
+- Migration aditiva, migração de base preenchida e regressão das Fases 1–3.
+
+Evidências e limites: [FASE-4-VALIDACAO.md](FASE-4-VALIDACAO.md).
+TypeScript e lint passaram localmente. PostgreSQL não inicia como root neste
+executor; testes de banco, navegador e build serão executados no GitHub Actions.
+Não declarar conclusão enquanto o head final não passar e suas capturas não forem
+inspecionadas. Somente dados fictícios; Fases 5–9 e produção não autorizadas.
+
+Os registros abaixo são históricos, preservados para rastreabilidade.
+
+---
+
 # Fase 4 — especificação preparada em 23/10/2026
 
 Roberto solicitou prosseguir com a definição da Fase 4 e respondeu às decisões

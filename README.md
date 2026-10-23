@@ -1,10 +1,10 @@
-# CadFlux V1.1 — Fases 1 a 3
+# CadFlux V1.1 — Fases 1 a 4
 
 Aplicação institucional para autenticação, autorização, gestão e registro de
 atendimentos do Cadastro Único. A Fase 3 foi incorporada à `main` em 22/10/2026 pelo
-[PR #7](https://github.com/rrabts/CadFlux/pull/7). Apenas dados fictícios. Indicadores agregados,
-consulta oficial de CPF, fechamentos, documentos e encaminhamentos aguardam as
-próximas fases.
+[PR #7](https://github.com/rrabts/CadFlux/pull/7). Apenas dados fictícios. A Fase 4 acrescenta indicadores verificáveis, benefícios,
+tipos configuráveis e unidade operacional. Consulta oficial de CPF, fechamentos,
+documentos e encaminhamentos aguardam as próximas fases.
 
 As Fases 1 e 2 foram incorporadas à `main` em 19/10/2026 pelos
 [PRs #5](https://github.com/rrabts/CadFlux/pull/5) e
@@ -15,7 +15,7 @@ confira o commit e a conclusão antes de reutilizar os resultados.
 Estado e evidências: [docs/STATUS.md](docs/STATUS.md).
 A [especificação da Fase 4](docs/FASE-4-ESPECIFICACAO.md) foi preparada em
 23/10/2026 com as decisões de indicadores, tipos e local de atendimento.
-A implementação continua pendente; as funcionalidades entregues são as Fases 1–3.
+Implementação e evidências da entrega: [validação da Fase 4](docs/FASE-4-VALIDACAO.md).
 
 Planejamento restante: [matriz de requisitos por fase](docs/ROADMAP.md).
 Proteção da main e decisão sobre a automação auxiliar: [governança](docs/GOVERNANCA.md).
@@ -227,3 +227,54 @@ O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
 Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
 `pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
 3000 livre. Configuração e detalhes em [docs/CLOUD-RETOMADA.md](docs/CLOUD-RETOMADA.md).
+
+
+## Fase 4 — indicadores e configuração operacional
+
+`/dashboard` apresenta números reais do banco fictício. Orientações estão no total
+ativo e discriminadas; cancelados são separados. Com/sem parecer/aguardando
+classificação somam o total. As datas são civis, em America/Sao_Paulo, semana de
+segunda a domingo. O consolidado mensal considera o intervalo selecionado e não
+representa fechamento, RMA oficial ou contagem de famílias únicas.
+
+| Rota/API | Entrevistador | Encaminhador | Direção |
+| --- | --- | --- | --- |
+| `/api/indicators` | Próprios registros; somente total da unidade operacional | Bloqueado | Global, filtros por unidade/operador, detalhamento paginado |
+| `/benefits`, `/service-types`, `/api/catalog/[kind]` | Bloqueado | Bloqueado | Benefícios e os sete tipos existentes; edição e histórico |
+| `/api/operations` GET | Tipos, benefícios ativos e unidades autorizadas | Bloqueado | Tipos e benefícios ativos |
+| `/api/operations` PATCH | Escolher unidade autorizada e ativa | Bloqueado | Bloqueado; define padrão e vínculos na gestão de usuários |
+
+Cada possível duplicidade usa dono + CPF + data: grupos e registros envolvidos
+são contados separadamente, sem deduplicar atendimentos. Filtrar uma unidade
+recalcula os grupos; esses grupos não são aditivos entre unidades. O entrevistador
+não recebe identificação nem detalhamento de colegas. Paginação de 50 linhas não
+limita os totais; os dez últimos registros são uma lista explicitamente limitada.
+
+Direção pode criar/renomear/inativar benefícios e renomear/ativar/inativar os sete
+tipos. Códigos e regras de parecer/código familiar são fixos, sem exclusão física.
+Benefícios são apenas informações do atendimento, sem certificar concessão.
+Seleção vazia significa “não informado”; nomes ficam preservados no registro.
+Tipos e benefícios inativos já usados podem ser mantidos ou removidos conforme
+as regras da correção, mas não adicionados a novos registros.
+
+A última unidade válida fica salva por usuário. A topbar e o novo formulário a
+pré-selecionam; mudar a unidade principal pela Direção redefine a preferência.
+Um formulário aberto envia a unidade que exibe, mesmo se outra aba mudar o padrão.
+O servidor revalida autorização e atividade na gravação. Registros anteriores
+preservam unidade/fuso/proprietário; mudança de local exige cancelamento e novo
+registro. Revogação não elimina acesso ao próprio histórico.
+
+Migration `20261023140000_indicators_configuration`: `Benefit`, `AttendanceType`,
+`AttendanceBenefit`, `Attendance.kindName` e `User.operationalUnitId`. São 15
+tabelas incluindo o controle Prisma. Os sete tipos são inicializados uma vez pela
+migration; o seed repetido preserva nomes/configurações. Registros antigos mantêm
+`kindName = NULL`, interpretado pelo mapa original fixo dos sete tipos, sem usar
+nomes administrativos posteriores. Isso preserva registros cancelados imutáveis;
+não há reescrita histórica nem desligamento de triggers. Benefícios antigos ficam
+não informados. Preferências e alterações cadastrais geram auditoria transacional.
+
+Validação: comandos existentes `pnpm lint`, `pnpm typecheck`, `pnpm test`,
+`pnpm test:cloud`, `pnpm build`, `pnpm test:ui`. O CI exige banco limpo, quatro
+migrations, seed idempotente, regressão e capturas. O teste de migração também
+reproduz a base anterior preenchida, sem alterar o banco de desenvolvimento.
+Módulos de pendências, fechamento e encaminhamentos continuam indisponíveis.

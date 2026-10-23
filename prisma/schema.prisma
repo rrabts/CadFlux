@@ -40,6 +40,8 @@ model User {
   accessProfile          AccessProfile
   professionalCategoryId String
   primaryUnitId          String
+  operationalUnitId      String?
+  operationalUnit        Unit?                @relation("OperationalUnit", fields: [operationalUnitId], references: [id], onDelete: Restrict)
   status                 UserStatus           @default(ACTIVE)
   mustChangePassword     Boolean              @default(true)
   passwordChangedAt      DateTime?
@@ -71,16 +73,17 @@ model ProfessionalCategory {
 }
 
 model Unit {
-  id              String           @id @default(cuid())
-  name            String
-  code            String           @unique
-  active          Boolean          @default(true)
-  timezone        String           @default("America/Sao_Paulo")
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  primaryUsers    User[]           @relation("PrimaryUnit")
-  authorizedUsers UserUnitAccess[]
-  attendances     Attendance[]
+  id               String           @id @default(cuid())
+  name             String
+  code             String           @unique
+  active           Boolean          @default(true)
+  timezone         String           @default("America/Sao_Paulo")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  primaryUsers     User[]           @relation("PrimaryUnit")
+  operationalUsers User[]           @relation("OperationalUnit")
+  authorizedUsers  UserUnitAccess[]
+  attendances      Attendance[]
 }
 
 model UserUnitAccess {
@@ -190,19 +193,21 @@ enum ResponsibleRole {
 }
 
 model Attendance {
-  id                   String          @id @default(cuid())
+  id                   String              @id @default(cuid())
   ownerUserId          String
   unitId               String
-  serviceDate          DateTime        @db.Date
+  serviceDate          DateTime            @db.Date
   name                 String
   cpf                  String
-  responsibleRole      ResponsibleRole @default(RF)
+  responsibleRole      ResponsibleRole     @default(RF)
   familyCode           String?
   phone                String?
   kind                 AttendanceKind
+  kindName             String?
+  benefits             AttendanceBenefit[]
   opinion              OpinionStatus
-  crowded              Boolean         @default(false)
-  version              Int             @default(1)
+  crowded              Boolean             @default(false)
+  version              Int                 @default(1)
   operatorName         String
   operatorRegistration String
   operatorCategory     String
@@ -211,12 +216,41 @@ model Attendance {
   timezone             String
   cancelledAt          DateTime?
   cancellationReason   String?
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
-  owner                User            @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
-  unit                 Unit            @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  owner                User                @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  unit                 Unit                @relation(fields: [unitId], references: [id], onDelete: Restrict)
 
   @@index([ownerUserId, serviceDate, id])
   @@index([unitId, serviceDate])
   @@index([cpf, serviceDate])
+}
+
+model Benefit {
+  id          String              @id @default(cuid())
+  name        String
+  active      Boolean             @default(true)
+  version     Int                 @default(1)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  attendances AttendanceBenefit[]
+}
+
+model AttendanceType {
+  code      AttendanceKind @id
+  name      String
+  active    Boolean        @default(true)
+  version   Int            @default(1)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model AttendanceBenefit {
+  attendanceId String
+  benefitId    String
+  name         String
+  attendance   Attendance @relation(fields: [attendanceId], references: [id], onDelete: Restrict)
+  benefit      Benefit    @relation(fields: [benefitId], references: [id], onDelete: Restrict)
+
+  @@id([attendanceId, benefitId])
 }

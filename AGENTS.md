@@ -13,7 +13,9 @@ Em 23/10/2026 Roberto solicitou prosseguir com a especificação da Fase 4 e
 definiu orientação incluída/discriminada, tipos renomeáveis e local
 pré-selecionado por conta com possibilidade de troca. Leia
 `docs/FASE-4-ESPECIFICACAO.md` para o contrato da próxima entrega.
-Esta etapa é documental; a implementação operacional permanece nas Fases 1–3.
+Após a especificação, Roberto autorizou “Prossiga” para implementar a Fase 4.
+O escopo atual inclui IND-01–03, CFG-01–03 e QUA-01; leia também
+`docs/FASE-4-VALIDACAO.md`. Não avançar às Fases 5–9 nem publicar em produção.
 
 ## Escopo autorizado
 
@@ -23,9 +25,9 @@ Preservar autenticação, gestão institucional, permissões e auditoria existen
 Implementar registros operacionais apenas com dados fictícios nesta entrega.
 
 Não implementar consulta oficial de CPF, pessoas/famílias como cadastro separado,
-fechamentos, documentos oficiais/PDF/Word, encaminhamentos, indicadores agregados,
+fechamentos, documentos oficiais/PDF/Word, encaminhamentos,
 SERPRO/Receita, BI, IA, WhatsApp, notificações ou publicação de produção.
-Não avançar à Fase 4 sem nova autorização.
+A Fase 4 está autorizada nos limites da especificação.
 
 ## Estado e critérios de conclusão
 
@@ -51,4 +53,4 @@ dependências e caches devem permanecer ignorados. Preparação Linux em
 
 No fim, atualizar README e STATUS com comandos, contas fictícias, rotas, matriz de
 permissões, entidades/migrations, resultados de testes, decisões e limitações. Parar
-após Fase 3 e aguardar autorização para a fase seguinte.
+após Fase 4 e aguardar autorização para a fase seguinte.

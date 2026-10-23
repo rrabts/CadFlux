@@ -629,3 +629,143 @@ test("Fase 3: Direção consulta registros e Encaminhador recebe bloqueio", asyn
   );
   expect(status).toBe(403);
 });
+
+test("Fase 4: benefícios e nomes de tipos têm gestão e histórico", async ({ page }) => {
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/benefits");
+  await page.getByRole("button", { name: "Novo benefício", exact: true }).click();
+  const name = "Benefício Fictício UI " + randomUUID().slice(0, 8);
+  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill(name);
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByLabel("Pesquisar nome", { exact: true }).fill(name);
+  await page.getByRole("button", { name: "Pesquisar", exact: true }).click();
+  await page.getByRole("button", { name: "Editar " + name, exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Ativo para novos registros").uncheck();
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator("tbody")).toContainText("Inativo");
+  await page.getByRole("button", { name: "Histórico de " + name, exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Cadastro operacional alterado");
+  await page.getByRole("button", { name: "Fechar janela" }).click();
+  await page.screenshot({ path: ".local/evidence/phase-4-benefits.png", fullPage: true });
+  await page.goto("/service-types");
+  await expect(page.locator("tbody tr")).toHaveCount(7);
+  await page.getByRole("button", { name: "Editar Orientação", exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill("Orientação UI Fictícia");
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator("tbody")).toContainText("Orientação UI Fictícia");
+  await page.screenshot({ path: ".local/evidence/phase-4-types.png", fullPage: true });
+  await page.getByRole("button", { name: "Editar Orientação UI Fictícia", exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill("Orientação");
+  await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
+test("Fase 4: local persiste, formulário de outra aba não muda e benefícios chegam ao histórico", async ({
+  page,
+  context,
+}) => {
+  const testUrl = process.env.DATABASE_URL_TEST!;
+  if (isSameDatabase(testUrl, process.env.DATABASE_URL!)) throw Error("Bancos devem ser separados");
+  const db = new PrismaClient({ datasourceUrl: testUrl });
+  const id = randomUUID();
+  let email = "",
+    unitId = "",
+    primaryId = "",
+    benefitName = "";
+  try {
+    const seed = await db.user.findUniqueOrThrow({
+      where: { email: "entrevistador@cadflux.local" },
+    });
+    const unit = await db.unit.create({
+      data: { name: "Local Fictício UI " + id.slice(0, 8), code: "F4UI-" + id },
+    });
+    unitId = unit.id;
+    primaryId = seed.primaryUnitId;
+    email = id + "@exemplo.invalid";
+    await db.user.create({
+      data: {
+        name: "Operador Fictício UI",
+        email,
+        registrationNumber: id,
+        passwordHash: seed.passwordHash,
+        primaryUnitId: primaryId,
+        professionalCategoryId: seed.professionalCategoryId,
+        accessProfile: "INTERVIEWER",
+        mustChangePassword: false,
+        additionalUnits: { create: { unitId } },
+      },
+    });
+    const b = await db.benefit.create({
+      data: { name: "Benefício Fictício Atendimento " + id.slice(0, 8) },
+    });
+    benefitName = b.name;
+  } finally {
+    await db.$disconnect();
+  }
+  await login(page, email);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.getByLabel("Local de atendimento padrão")).toHaveValue(primaryId);
+  await page.getByLabel("Local de atendimento padrão").selectOption(unitId);
+  await expect(page.getByLabel("Local de atendimento padrão")).toHaveValue(unitId);
+  await fillAttendance(page, "Pessoa Fictícia Unidade " + id.slice(0, 8), syntheticCpf());
+  await expect(page.getByLabel("Local deste atendimento")).toHaveValue(unitId);
+  await page.getByRole("checkbox", { name: benefitName, exact: true }).check();
+  const tab = await context.newPage();
+  await tab.goto("/dashboard");
+  await expect(tab.getByLabel("Local de atendimento padrão")).toHaveValue(unitId);
+  await tab.getByLabel("Local de atendimento padrão").selectOption(primaryId);
+  await expect(tab.getByLabel("Local de atendimento padrão")).toHaveValue(primaryId);
+  await expect(page.getByLabel("Local deste atendimento")).toHaveValue(unitId);
+  await page.getByRole("button", { name: "Registrar atendimento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Detalhe do atendimento", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".page-header")).toContainText("Local Fictício UI");
+  await expect(page.getByRole("checkbox", { name: benefitName, exact: true })).toBeChecked();
+  await page.screenshot({ path: ".local/evidence/phase-4-attendance.png", fullPage: true });
+  await tab.close();
+  await logout(page);
+  await login(page, email);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.getByLabel("Local de atendimento padrão")).toHaveValue(primaryId);
+  await page.goto("/attendances/new");
+  await expect(page.getByLabel("Local deste atendimento")).toHaveValue(primaryId);
+});
+
+test("Fase 4: indicadores conciliam com API, mobile e bloqueios de perfil", async ({ page }) => {
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.getByRole("heading", { name: "Resumo do período" })).toBeVisible();
+  const response = await page.request.get("/api/indicators");
+  expect(response.status()).toBe(200);
+  const data = await response.json();
+  const row = page
+    .locator(".indicator-values > div")
+    .filter({ has: page.getByText("Total de atendimentos", { exact: true }) });
+  await expect(row.locator("dd")).toHaveText(String(data.range.total));
+  await page.screenshot({
+    path: ".local/evidence/phase-4-dashboard-direction.png",
+    fullPage: true,
+  });
+  await logout(page);
+  await login(page, "entrevistador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.getByRole("heading", { name: "Total da unidade", exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("heading", { name: "Últimos atendimentos" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
+  await page.screenshot({ path: ".local/evidence/phase-4-dashboard-mobile.png", fullPage: true });
+  expect((await page.request.get("/api/catalog/benefits")).status()).toBe(403);
+  await page.goto("/benefits");
+  await expect(page.getByRole("heading", { name: "Acesso não permitido" })).toBeVisible();
+  await logout(page);
+  await login(page, "encaminhador@cadflux.local");
+  await expect(page).toHaveURL(/\/dashboard/);
+  expect((await page.request.get("/api/indicators")).status()).toBe(403);
+});

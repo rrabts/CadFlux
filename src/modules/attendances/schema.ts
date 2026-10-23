@@ -18,6 +18,11 @@ export const cpfSchema = z
   .transform((v) => v.replace(/\D/g, ""))
   .refine(isValidCpf, "CPF estruturalmente inválido.");
 const fields = {
+  benefitIds: z
+    .array(z.string().min(1).max(100))
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length, "Benefícios repetidos.")
+    .optional(),
   serviceDate: serviceDateSchema,
   name: z
     .string()
@@ -68,7 +73,10 @@ function checkCombination(input: z.infer<typeof baseSchema>, ctx: z.RefinementCt
     });
 }
 export const createAttendanceSchema = baseSchema
-  .extend({ duplicateAcknowledged: z.boolean().default(false) })
+  .extend({
+    unitId: z.string().min(1).max(100).optional(),
+    duplicateAcknowledged: z.boolean().default(false),
+  })
   .strict()
   .superRefine(checkCombination);
 export const updateAttendanceSchema = baseSchema

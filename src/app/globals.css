@@ -1366,3 +1366,34 @@ h3 {
     padding: 18px;
   }
 }
+
+.indicator-values {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.indicator-values > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.indicator-values dd {
+  font-weight: 600;
+}
+.benefit-options {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.operational-unit {
+  max-width: 260px;
+}
+.operational-unit .select {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 640px) {
+  .operational-unit {
+    max-width: 170px;
+  }
+}

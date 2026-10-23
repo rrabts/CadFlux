@@ -18,6 +18,7 @@ export function permitsOpinion(kind: AttendanceKind) {
   return kind === "UPDATE_SINGLE" || kind === "UPDATE_FAMILY" || kind === "VERIFICATION";
 }
 export interface AttendanceInput {
+  benefitIds?: string[];
   serviceDate: string;
   name: string;
   cpf: string;
@@ -32,6 +33,8 @@ export interface Attendance extends AttendanceInput {
   id: string;
   ownerUserId: string;
   unitId: string;
+  kindName: string | null;
+  benefits: { benefitId: string; name: string }[];
   version: number;
   operatorName: string;
   operatorRegistration: string;

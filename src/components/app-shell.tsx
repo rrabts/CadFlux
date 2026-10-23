@@ -1,4 +1,5 @@
 "use client";
+import { OperationalUnitControl } from "./operational-unit";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
@@ -205,7 +206,11 @@ export function AppShell({ user, children }: { user: SafeUser; children: ReactNo
               <Menu size={20} />
             </button>
             <Building2 size={17} aria-hidden />
-            <span>{user.primaryUnit.name}</span>
+            {user.accessProfile === "INTERVIEWER" && !user.mustChangePassword ? (
+              <OperationalUnitControl />
+            ) : (
+              <span>{user.primaryUnit.name}</span>
+            )}
           </div>
           <div className="topbar-actions">
             <span
