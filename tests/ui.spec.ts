@@ -636,7 +636,7 @@ test("Fase 4: benefícios e nomes de tipos têm gestão e histórico", async ({ 
   await page.goto("/benefits");
   await page.getByRole("button", { name: "Novo benefício", exact: true }).click();
   const name = "Benefício Fictício UI " + randomUUID().slice(0, 8);
-  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill(name);
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill(name);
   await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByLabel("Pesquisar nome", { exact: true }).fill(name);
@@ -653,13 +653,13 @@ test("Fase 4: benefícios e nomes de tipos têm gestão e histórico", async ({ 
   await page.goto("/service-types");
   await expect(page.locator("tbody tr")).toHaveCount(7);
   await page.getByRole("button", { name: "Editar Orientação", exact: true }).click();
-  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill("Orientação UI Fictícia");
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill("Orientação UI Fictícia");
   await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator("tbody")).toContainText("Orientação UI Fictícia");
   await page.screenshot({ path: ".local/evidence/phase-4-types.png", fullPage: true });
   await page.getByRole("button", { name: "Editar Orientação UI Fictícia", exact: true }).click();
-  await page.getByRole("dialog").getByLabel("Nome", { exact: true }).fill("Orientação");
+  await page.getByRole("dialog").getByLabel(/^Nome/).fill("Orientação");
   await page.getByRole("dialog").getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });

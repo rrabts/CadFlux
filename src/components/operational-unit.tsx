@@ -1,24 +1,30 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, errorMessage } from "@/lib/api-client";
 import type { Configuration } from "@/modules/operations/contracts";
 import { Select } from "./ui";
 export function OperationalUnitControl() {
   const router = useRouter();
+  const latest = useRef(0);
   const [context, setContext] = useState<Configuration | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   useEffect(() => {
     let live = true;
-    const load = () =>
-      api<Configuration>("/api/operations")
+    const load = () => {
+      const request = ++latest.current;
+      return api<Configuration>("/api/operations")
         .then((d) => {
-          if (live) setContext(d);
+          if (live && request === latest.current) {
+            setContext(d);
+            setError("");
+          }
         })
         .catch((e) => {
-          if (live) setError(errorMessage(e));
+          if (live && request === latest.current) setError(errorMessage(e));
         });
+    };
     void load();
     window.addEventListener("cadflux-unit-changed", load);
     window.addEventListener("focus", load);
@@ -29,6 +35,7 @@ export function OperationalUnitControl() {
     };
   }, []);
   async function choose(unitId: string) {
+    ++latest.current;
     setBusy(true);
     setError("");
     try {
@@ -45,7 +52,7 @@ export function OperationalUnitControl() {
     <div className="operational-unit">
       <Select
         aria-label="Local de atendimento padrão"
-        disabled={busy || !context?.selected}
+        disabled={busy || !context?.units.length}
         value={context?.selected?.id ?? ""}
         onChange={(e) => void choose(e.target.value)}
       >

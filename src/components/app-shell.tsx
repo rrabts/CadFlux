@@ -183,7 +183,7 @@ export function AppShell({ user, children }: { user: SafeUser; children: ReactNo
           ))}
         </nav>
         <div className="sidebar-footer">
-          <span className="nav-text">CadFlux V1.1 · Fase 3</span>
+          <span className="nav-text">CadFlux V1.1 · Fase 4</span>
           <button
             className="icon-button collapse-button"
             aria-label={collapsed ? "Expandir navegação" : "Recolher navegação"}
@@ -218,7 +218,7 @@ export function AppShell({ user, children }: { user: SafeUser; children: ReactNo
               title="Pendências estarão disponíveis em uma próxima fase"
             >
               <span />
-              Sem pendências nesta fase
+              Pendências indisponíveis
             </span>
             <ThemeSwitch />
             <Dropdown.Root>

@@ -129,7 +129,7 @@ Resultados reais, matriz dos 20 critérios e limitações estão em [docs/STATUS
 
 Revalidação Linux em 02/10/2026 da main após o PR #2: lint, TypeScript, schema Prisma e 62 testes unitários passaram. Banco, integração, build e navegador permanecem bloqueados neste executor restrito; isso não substitui a evidência anterior do Windows por aprovação em nuvem. O comando db:local foi corrigido para retornar saída 1 quando a inicialização falha. Detalhes em [docs/CLOUD-VALIDACAO-2026-10-02.md](docs/CLOUD-VALIDACAO-2026-10-02.md).
 
-Não avance para a Fase 4 sem autorização.
+A implementação da Fase 4 foi autorizada; não avançar à Fase 5 sem nova autorização.
 
 ## Validação automatizada em nuvem
 
@@ -216,8 +216,8 @@ sem bloquear um novo atendimento distinto. A semana usa o fuso salvo no registro
 A janela de fechamento/reabertura não existe ainda.
 
 As contas fictícias existentes permanecem. O seed não cria atendimentos de
-beneficiários; testes geram registros sintéticos no banco de testes. Indicadores do
-dashboard continuam vazios até a Fase 4; seu botão de atendimento já abre o formulário.
+beneficiários; testes geram registros sintéticos no banco de testes. A Fase 4 usa esses registros nos indicadores do dashboard; o botão de atendimento
+abre o formulário.
 Não há publicação de produção nem uso de dados reais.
 
 ## Supervisor de desenvolvimento Cloud — PR #4
@@ -274,7 +274,7 @@ não há reescrita histórica nem desligamento de triggers. Benefícios antigos 
 não informados. Preferências e alterações cadastrais geram auditoria transacional.
 
 Validação: comandos existentes `pnpm lint`, `pnpm typecheck`, `pnpm test`,
-`pnpm test:cloud`, `pnpm build`, `pnpm test:ui`. O CI exige banco limpo, quatro
+`pnpm test:cloud`, `pnpm build`, `pnpm test:e2e`. O CI exige banco limpo, quatro
 migrations, seed idempotente, regressão e capturas. O teste de migração também
 reproduz a base anterior preenchida, sem alterar o banco de desenvolvimento.
 Módulos de pendências, fechamento e encaminhamentos continuam indisponíveis.

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { api, errorMessage, formatDate } from "@/lib/api-client";
+import { api, errorMessage } from "@/lib/api-client";
 import type { indicators } from "@/modules/indicators/service";
 import { formatServiceDate, kindLabels } from "@/modules/attendances/contracts";
 import { Alert, Button, Card, Field, Input, Select, Skeleton } from "./ui";
@@ -154,7 +154,12 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
           <>
             <p className="muted small">
               {data.scope} · {formatServiceDate(data.from)} a {formatServiceDate(data.to)} ·{" "}
-              {data.timezone} · Atualizado em {formatDate(data.updatedAt, true)}
+              {data.timezone} · Atualizado em{" "}
+              {new Intl.DateTimeFormat("pt-BR", {
+                dateStyle: "short",
+                timeStyle: "short",
+                timeZone: data.timezone,
+              }).format(new Date(data.updatedAt))}
             </p>
             <div className="stats-grid">
               {[
@@ -166,7 +171,11 @@ export function IndicatorDashboard({ direction }: { direction: boolean }) {
                 <Card className="stat-card" key={String(label)}>
                   <span>{label}</span>
                   <strong>{value}</strong>
-                  <small>Ativos · períodos correntes</small>
+                  <small>
+                    {label === "Unidades ativas"
+                      ? "Cadastro atual · independe do período"
+                      : "Ativos · períodos correntes"}
+                  </small>
                 </Card>
               ))}
             </div>

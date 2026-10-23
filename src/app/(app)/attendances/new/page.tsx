@@ -6,9 +6,6 @@ export default async function NewAttendancePage() {
   const actor = await requirePageUser("attendances:create");
   const unit = await prisma.unit.findUniqueOrThrow({ where: { id: actor.primaryUnitId } });
   return (
-    <AttendanceEditor
-      today={dateInTimezone(new Date(), unit.timezone)}
-      contextLabel={`${actor.name} · ${unit.name}`}
-    />
+    <AttendanceEditor today={dateInTimezone(new Date(), unit.timezone)} contextLabel={actor.name} />
   );
 }

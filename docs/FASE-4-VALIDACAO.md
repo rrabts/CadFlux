@@ -32,3 +32,22 @@ Limites: dados fictícios, sem produção, concessão de benefício, CPF oficial
 fechamento, pendências da gestão ou encaminhamentos. `kindName` histórico nulo usa
 mapa original fixo, sem reescrever registros cancelados. O benchmark sintético é
 uma observação de consulta, não valida capacidade de produção ou carga concorrente.
+
+
+## Execução inicial e ajustes
+
+[Run 39965201444](https://github.com/rrabts/CadFlux/actions/runs/39965201444),
+head `fe6e11c`: migrations/seed/idempotência, lint, TypeScript, 135 testes em dez
+arquivos, três testes do supervisor e build aprovados. Os 17 cenários anteriores
+passaram. O primeiro cenário novo parou no seletor exato “Nome”, que não considera
+o marcador de campo obrigatório; corrigido para selecionar o rótulo completo.
+Os dois cenários seguintes não rodaram devido à política de parar na primeira falha.
+Essa execução não conclui a Fase 4; uma nova execução completa é necessária.
+
+O plano sintético, em PostgreSQL 18.6, usou 8.002 registros distribuídos pelo ano,
+684 no intervalo de outubro (683 ativos). Consultas de contagem global, por dono e
+duplicidades levaram, respectivamente, 0,245 / 0,194 / 0,529 ms nesse runner e
+usaram os índices existentes, sem escrita temporária em disco. Amostra única com
+cache aquecido; não é latência de API nem demonstra capacidade de produção.
+Não se adicionaram índices ou cache sem necessidade medida. Plano completo no
+artefato `phase-4-query-plans.json`; evidências do workflow têm retenção de sete dias.

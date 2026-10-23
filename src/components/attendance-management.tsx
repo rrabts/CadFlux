@@ -601,6 +601,32 @@ export function AttendanceEditor({
             void save();
           }}
         >
+          {!id && (
+            <Field label="Local deste atendimento" id="service-unit" required>
+              <Select
+                id="service-unit"
+                disabled={busy || !configuration?.units.length}
+                value={unitId}
+                onChange={(e) => void chooseUnit(e.target.value)}
+              >
+                <option value="" disabled>
+                  Selecione um local autorizado
+                </option>
+                {configuration?.units.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          )}
+          {!id && configuration && !unitId && (
+            <Alert variant="warning">
+              {configuration.units.length
+                ? "Selecione um local autorizado para iniciar."
+                : "Não há local de atendimento autorizado e ativo. Solicite regularização à Direção."}
+            </Alert>
+          )}
           <fieldset
             disabled={busy || readonly || checking || !configuration || (!id && !unitId)}
             className="attendance-fieldset"
@@ -608,24 +634,6 @@ export function AttendanceEditor({
             <section className="form-section">
               <h2>Atendimento realizado</h2>
               <div className="form-grid">
-                {!id && (
-                  <Field label="Local deste atendimento" id="service-unit" required>
-                    <Select
-                      id="service-unit"
-                      value={unitId}
-                      onChange={(e) => void chooseUnit(e.target.value)}
-                    >
-                      <option value="" disabled>
-                        Selecione um local autorizado
-                      </option>
-                      {configuration?.units.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                )}
                 <Field label="Data do atendimento" id="service-date" required>
                   <Input
                     id="service-date"
