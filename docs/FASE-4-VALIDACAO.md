@@ -51,3 +51,13 @@ usaram os índices existentes, sem escrita temporária em disco. Amostra única 
 cache aquecido; não é latência de API nem demonstra capacidade de produção.
 Não se adicionaram índices ou cache sem necessidade medida. Plano completo no
 artefato `phase-4-query-plans.json`; evidências do workflow têm retenção de sete dias.
+
+
+[Run 39966167373](https://github.com/rrabts/CadFlux/actions/runs/39966167373),
+head `7ce32b3`: backend/build novamente aprovados; 19 cenários de navegador passaram,
+incluindo catálogos, benefícios e troca de unidade entre abas. O último cenário
+usou o cliente HTTP do Playwright e recebeu 401, enquanto o dashboard já estava
+autenticado no navegador. A conferência passou a usar fetch no próprio navegador,
+como os testes de autorização anteriores, preservando a política de cookies.
+Não se alterou autenticação ou resposta esperada (200 para Direção, 403 para perfis
+sem acesso). Nova execução completa necessária.

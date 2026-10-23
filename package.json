@@ -16,7 +16,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:cloud": "node --test tests/cloud-runtime.test.mjs",
-    "test:integration": "vitest run tests/backend.integration.test.ts tests/imports.integration.test.ts tests/references.integration.test.ts tests/attendances.integration.test.ts",
+    "test:integration": "vitest run tests/backend.integration.test.ts tests/imports.integration.test.ts tests/references.integration.test.ts tests/attendances.integration.test.ts tests/phase4.integration.test.ts tests/phase4-migration.integration.test.ts",
     "test:e2e": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",

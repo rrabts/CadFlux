@@ -740,9 +740,11 @@ test("Fase 4: indicadores conciliam com API, mobile e bloqueios de perfil", asyn
   await login(page);
   await expect(page).toHaveURL(/\/dashboard/);
   await expect(page.getByRole("heading", { name: "Resumo do período" })).toBeVisible();
-  const response = await page.request.get("/api/indicators");
-  expect(response.status()).toBe(200);
-  const data = await response.json();
+  const { status, data } = await page.evaluate(async () => {
+    const response = await fetch("/api/indicators", { credentials: "same-origin" });
+    return { status: response.status, data: await response.json() };
+  });
+  expect(status).toBe(200);
   const row = page
     .locator(".indicator-values > div")
     .filter({ has: page.getByText("Total de atendimentos", { exact: true }) });
@@ -761,11 +763,19 @@ test("Fase 4: indicadores conciliam com API, mobile e bloqueios de perfil", asyn
     true,
   );
   await page.screenshot({ path: ".local/evidence/phase-4-dashboard-mobile.png", fullPage: true });
-  expect((await page.request.get("/api/catalog/benefits")).status()).toBe(403);
+  expect(
+    await page.evaluate(
+      async () => (await fetch("/api/catalog/benefits", { credentials: "same-origin" })).status,
+    ),
+  ).toBe(403);
   await page.goto("/benefits");
   await expect(page.getByRole("heading", { name: "Acesso não permitido" })).toBeVisible();
   await logout(page);
   await login(page, "encaminhador@cadflux.local");
   await expect(page).toHaveURL(/\/dashboard/);
-  expect((await page.request.get("/api/indicators")).status()).toBe(403);
+  expect(
+    await page.evaluate(
+      async () => (await fetch("/api/indicators", { credentials: "same-origin" })).status,
+    ),
+  ).toBe(403);
 });

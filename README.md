@@ -97,9 +97,9 @@ Limites: 2 MiB, 1.000 usuários, uma planilha XLSX, campos de texto simples. CSV
 
 ## Arquitetura e banco
 
-Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,references,attendances,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
+Monólito modular Next.js/TypeScript estrito, React/Tailwind, PostgreSQL/Prisma. Serviços em `src/modules/{auth,permissions,users,references,attendances,operations,catalog,indicators,imports,audit}`, componentes reutilizáveis em `src/components` e rotas em `src/app`.
 
-Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch e AuditLog.
+Entidades: User, ProfessionalCategory, Unit, UserUnitAccess, Session, LoginRateLimit, MfaCredential, PasswordResetToken, UserImportBatch, AuditLog, Attendance, Benefit, AttendanceType e AttendanceBenefit.
 
 Migration: `prisma/migrations/20261002140000_foundation/migration.sql`, gerada a partir do schema e acrescida de triggers para bloquear UPDATE/DELETE/TRUNCATE de AuditLog e DELETE de usuários/unidades/categorias. Auditoria registra login/logout, criação/edição, mudanças de perfil/categoria/unidade/status, troca de senha e confirmação de importação. Senhas, hashes de senha e tokens são removidos recursivamente das informações de auditoria.
 
@@ -119,7 +119,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-`pnpm test` executa testes unitários e integração contra `DATABASE_URL_TEST`, recusando o mesmo banco de desenvolvimento. `pnpm test:integration` restringe a execução à integração de backend, importação e cadastros. Os testes usam dados fictícios com identificadores únicos e preservam auditoria.
+`pnpm test` executa testes unitários e integração contra `DATABASE_URL_TEST`, recusando o mesmo banco de desenvolvimento. `pnpm test:integration` executa integração de backend, importação, cadastros, atendimentos e Fase 4. Os testes usam dados fictícios com identificadores únicos e preservam auditoria.
 
 O teste de navegador inicia o build de produção em 127.0.0.1:3100, apontando somente ao banco de teste. Instale o Chromium de testes com `pnpm exec playwright install chromium`; em Windows com Edge/Chrome já instalado é possível definir `PLAYWRIGHT_CHANNEL=msedge` ou `chrome`. Execute `pnpm build` antes de `pnpm test:e2e`.
 

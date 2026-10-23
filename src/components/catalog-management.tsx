@@ -189,7 +189,9 @@ export function CatalogPage({ kind }: { kind: "benefits" | "types" }) {
         onOpenChange={(open) => {
           if (!busy && !open) setEdit(null);
         }}
-        title={kind === "benefits" ? "Editar benefício" : "Editar tipo"}
+        title={
+          kind === "benefits" ? (edit?.id ? "Editar benefício" : "Novo benefício") : "Editar tipo"
+        }
       >
         {edit && (
           <form
