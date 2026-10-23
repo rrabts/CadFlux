@@ -1,10 +1,10 @@
 # CadFlux — governança do repositório
 
-## Proteção desejada da main
+## Proteção ativa da main
 
 Configuração declarativa: [main-ruleset.json](../.github/main-ruleset.json).
-O arquivo versionado não ativa a proteção no GitHub. A ativação exige uma
-operação administrativa e verificação posterior das regras efetivas.
+O arquivo versionado descreve a configuração; a proteção foi ativada no GitHub
+em 23/10/2026, pelo ruleset [25721543](https://github.com/rrabts/CadFlux/rules/25721543).
 
 | Regra | Configuração |
 | --- | --- |
@@ -37,10 +37,24 @@ PR exigido, check exato vinculado ao GitHub Actions e base atualizada. Conferir
 também a API de regras efetivas de `main`. Validar o comportamento com o PR
 de manutenção já aprovado, sem criar commits inválidos ou tentar force push.
 
-O conector disponível nesta sessão permite código/PRs, mas não possui ação de
-escrita administrativa de rulesets. A interface do GitHub exige autenticação
-administrativa independente. Enquanto não houver evidência da aplicação, o
-item permanece **preparado, não confirmado como ativo** em STATUS.
+### Evidência da ativação em 23/10/2026
+
+A interface administrativa confirmou a criação e mostrou o estado `Active`,
+aplicado a um único alvo: `main`. A leitura de
+`GET /repos/rrabts/CadFlux/rulesets/25721543` confirmou modo ativo,
+alvo `refs/heads/main`, lista de bypass vazia e todas as regras da tabela.
+A consulta `GET /repos/rrabts/CadFlux/branches/main` retornou
+`protected: true`. A proteção usa ruleset; o bloco legado de branch protection
+não descreve essas regras.
+
+A consulta de regras efetivas por branch não está disponível no conector desta
+sessão. A confirmação foi feita pelo ruleset ativo, pelo alvo exibido na
+interface e pelo indicador de proteção da branch. Nenhum push inválido,
+force push ou exclusão foi tentado para testar bloqueios.
+
+O GitHub também retornou `require_extra_approval_for_unattributed_changes: true`,
+padrão da interface para PRs com alterações não atribuídas. O mínimo de
+aprovações continua zero; não há exigência de revisão humana independente.
 
 Referências oficiais:
 - [API de regras de repositório](https://docs.github.com/en/rest/repos/rules?apiVersion=2022-11-28).
