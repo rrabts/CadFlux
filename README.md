@@ -12,7 +12,10 @@ As Fases 1 e 2 foram incorporadas à `main` em 19/10/2026 pelos
 validado com 94 testes e 13 cenários de navegador. A execução após a integração
 está no [run 39319811057](https://github.com/rrabts/CadFlux/actions/runs/39319811057);
 confira o commit e a conclusão antes de reutilizar os resultados.
-Estado e evidências: [docs/STATUS.md](docs/STATUS.md). A Fase 3 foi autorizada; a Fase 4 exige nova autorização.
+Estado e evidências: [docs/STATUS.md](docs/STATUS.md).
+A [especificação da Fase 4](docs/FASE-4-ESPECIFICACAO.md) foi preparada em
+23/10/2026 com as decisões de indicadores, tipos e local de atendimento.
+A implementação continua pendente; as funcionalidades entregues são as Fases 1–3.
 
 Planejamento restante: [matriz de requisitos por fase](docs/ROADMAP.md).
 Proteção da main e decisão sobre a automação auxiliar: [governança](docs/GOVERNANCA.md).

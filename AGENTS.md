@@ -9,6 +9,12 @@ Em 23/10/2026 Roberto autorizou manutenção da proteção da main, avaliação 
 remoção/correção da automação auxiliar e vinculação dos requisitos às fases.
 Essa autorização não implementa nem libera automaticamente as Fases 4–9.
 
+Em 23/10/2026 Roberto solicitou prosseguir com a especificação da Fase 4 e
+definiu orientação incluída/discriminada, tipos renomeáveis e local
+pré-selecionado por conta com possibilidade de troca. Leia
+`docs/FASE-4-ESPECIFICACAO.md` para o contrato da próxima entrega.
+Esta etapa é documental; a implementação operacional permanece nas Fases 1–3.
+
 ## Escopo autorizado
 
 Roberto autorizou a Fase 3 (Atendimentos) em 19/10/2026 após as Fases 1 e 2
