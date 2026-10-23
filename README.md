@@ -224,4 +224,3 @@ O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
 Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
 `pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
 3000 livre. Configuração e detalhes em [docs/CLOUD-RETOMADA.md](docs/CLOUD-RETOMADA.md).
-

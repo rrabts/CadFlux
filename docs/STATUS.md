@@ -6,7 +6,7 @@ dos requisitos pendentes. Base examinada: `35aab49`, com
 123 testes, 17 cenários de navegador, três testes do supervisor e validações de
 banco/build. Essa é evidência da base, não da alteração de manutenção.
 
-- Remoção preparada do fragmento inválido `copilot-setup-steps.yml`: não havia
+- Remoção do fragmento inválido `copilot-setup-steps.yml`: não havia
   utilidade adicional demonstrada frente ao ESLint já executado pelo CI.
   Justificativa em [GOVERNANCA.md](GOVERNANCA.md).
 - Requisitos pendentes vinculados a fases, com IDs, dependências, critérios e
@@ -17,8 +17,13 @@ banco/build. Essa é evidência da base, não da alteração de manutenção.
 - Nenhum módulo operacional novo, migration ou alteração de autenticação.
   Implementação continua nas Fases 1–3, com dados fictícios.
 
-Validação desta manutenção: acompanhar o PR e sua execução correspondente;
-registrar os resultados após a conclusão, sem reutilizar os testes da base.
+Validação desta manutenção no [PR #8](https://github.com/rrabts/CadFlux/pull/8):
+commit `e60b93a`, [run 39951045070 aprovado](https://github.com/rrabts/CadFlux/actions/runs/39951045070).
+123 testes, 17 cenários de navegador, três regressões do supervisor, migrations,
+seed idempotente, lint, TypeScript e build passaram. O commit que registra esta
+evidência altera apenas documentação; conferir sua execução própria antes de
+integrar. A proteção continua pendente: o conector não possui escrita
+administrativa e a tentativa de login pelo navegador não foi concluída.
 
 ---
 
@@ -209,4 +214,3 @@ O supervisor exige `flock` (util-linux), serializa chamadas simultâneas de
 Use `pnpm cloud:start`, `pnpm cloud:status` e `pnpm cloud:stop`.
 `pnpm test:cloud` executa três regressões Linux sem bancos reais; requer porta
 3000 livre. Configuração e detalhes em [CLOUD-RETOMADA.md](CLOUD-RETOMADA.md).
-

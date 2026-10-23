@@ -46,4 +46,3 @@ dependências e caches devem permanecer ignorados. Preparação Linux em
 No fim, atualizar README e STATUS com comandos, contas fictícias, rotas, matriz de
 permissões, entidades/migrations, resultados de testes, decisões e limitações. Parar
 após Fase 3 e aguardar autorização para a fase seguinte.
-
