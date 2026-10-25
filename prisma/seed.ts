@@ -1,5 +1,6 @@
 import { PrismaClient, AccessProfile } from "@prisma/client";
 import { hashPassword } from "../src/modules/auth/password";
+import { ensureDemoCategories } from "./demo-categories";
 const prisma = new PrismaClient();
 async function main() {
   if (process.env.NODE_ENV === "production") throw new Error("Seed fictício proibido em produção.");
@@ -10,11 +11,11 @@ async function main() {
     process.env.CADFLUX_ALLOW_DEMO_SEED !== "1"
   )
     throw new Error("Seed externo exige CADFLUX_ALLOW_DEMO_SEED=1 para banco fictício.");
-  const categories = await Promise.all(
-    ["Entrevistador", "Assistente Social", "Coordenação", "Visitador"].map((name) =>
-      prisma.professionalCategory.upsert({ where: { name }, create: { name }, update: {} }),
-    ),
-  );
+  const categories = await prisma.$transaction(async (tx) => {
+    // Match the administrative lock used by category creation/renaming.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(194118, 1)`;
+    return ensureDemoCategories(tx);
+  });
   const units = await Promise.all(
     [
       { name: "Unidade Central — Demonstração", code: "DEMO-CENTRAL" },

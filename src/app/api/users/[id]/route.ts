@@ -3,6 +3,7 @@ import { json, readJson } from "@/lib/responses";
 import { apiError, assertSameOrigin, AppError } from "@/lib/errors";
 import { requireApiUser } from "@/modules/auth/service";
 import { updateUser, safeUserSelect } from "@/modules/users/service";
+import { auditPage } from "@/modules/audit/pagination";
 type Context = { params: Promise<{ id: string }> };
 export async function GET(request: Request, context: Context) {
   try {
@@ -10,12 +11,11 @@ export async function GET(request: Request, context: Context) {
     const { id } = await context.params;
     const user = await prisma.user.findUnique({ where: { id }, select: safeUserSelect });
     if (!user) throw new AppError(404, "Usuário não encontrado.");
-    const history = await prisma.auditLog.findMany({
-      where: { entityType: "User", entityId: id },
-      include: { actor: { select: { name: true, email: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
+    const history = await auditPage(
+      prisma,
+      { entityType: "User", entityId: id },
+      new URL(request.url).searchParams.get("cursor") ?? undefined,
+    );
     return json({
       user: {
         ...user,
@@ -26,7 +26,8 @@ export async function GET(request: Request, context: Context) {
           })
         ).map((link) => link.unitId),
       },
-      history: history.map(({ actor, ...row }) => ({ ...row, actorUser: actor })),
+      history: history.entries,
+      nextHistoryCursor: history.nextHistoryCursor,
     });
   } catch (error) {
     return apiError(error);

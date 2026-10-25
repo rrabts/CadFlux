@@ -38,6 +38,9 @@ try {
         { migration_name: "20261019170000_reference_integrity" },
         { migration_name: "20261020020000_attendances" },
         { migration_name: "20261023140000_indicators_configuration" },
+        { migration_name: "20261024110000_user_version" },
+        { migration_name: "20261024120000_unicode_names" },
+        { migration_name: "20261024130000_audit_cursor_indexes" },
       ]);
       const users = await client.query('SELECT * FROM "User" ORDER BY id');
       const units = await client.query('SELECT * FROM "Unit" ORDER BY id');

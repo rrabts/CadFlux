@@ -8,7 +8,14 @@ export async function GET(request: Request, context: Context) {
   try {
     const actor = await requireApiUser(request, "reference:read");
     const { kind, id } = await context.params;
-    return json(await getReference(actor, referenceKindSchema.parse(kind), id));
+    return json(
+      await getReference(
+        actor,
+        referenceKindSchema.parse(kind),
+        id,
+        new URL(request.url).searchParams.get("cursor") ?? undefined,
+      ),
+    );
   } catch (error) {
     return apiError(error);
   }

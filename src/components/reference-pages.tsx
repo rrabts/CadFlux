@@ -6,13 +6,16 @@ import { Alert, Card, EmptyState, PageHeader, Skeleton } from "./ui";
 import { AuditTable } from "./audit-table";
 export { ReferencePage } from "./reference-management";
 export function AuditPage() {
-  const [entries, setEntries] = useState<AuditEntry[] | null>(null);
+  const [result, setResult] = useState<{
+    entries: AuditEntry[];
+    nextHistoryCursor: string | null;
+  } | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
     let live = true;
-    api<{ entries: AuditEntry[] }>("/api/audit")
+    api<{ entries: AuditEntry[]; nextHistoryCursor: string | null }>("/api/audit")
       .then((result) => {
-        if (live) setEntries(result.entries);
+        if (live) setResult(result);
       })
       .catch((err) => {
         if (live) setError(errorMessage(err));
@@ -30,9 +33,13 @@ export function AuditPage() {
       />
       {error ? (
         <Alert variant="error">{error}</Alert>
-      ) : entries ? (
+      ) : result ? (
         <Card>
-          <AuditTable entries={entries} />
+          <AuditTable
+            entries={result.entries}
+            endpoint="/api/audit"
+            nextCursor={result.nextHistoryCursor}
+          />
         </Card>
       ) : (
         <Card className="loading-panel" role="status" aria-label="Carregando auditoria">
@@ -40,7 +47,7 @@ export function AuditPage() {
           <Skeleton />
         </Card>
       )}
-      {entries?.length === 0 && (
+      {result?.entries.length === 0 && (
         <EmptyState
           title="Aguardando ações"
           description="Os próximos acessos e alterações serão registrados aqui."

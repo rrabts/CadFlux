@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { authenticate, logout, userFromToken } from "@/modules/auth/service";
 import { safeUserSelect, type SafeUser } from "@/modules/users/types";
-import { createUser, updateUser } from "@/modules/users/service";
+import { createUser, updateUser as updateUserVersioned } from "@/modules/users/service";
+import type { UserInput } from "@/modules/users/schema";
 import { getReference, listReferencePage, saveReference } from "@/modules/references/service";
 import { unitInputSchema, categoryInputSchema } from "@/modules/references/schema";
 import { GET, POST } from "@/app/api/references/[kind]/route";
@@ -12,6 +13,14 @@ import { PATCH } from "@/app/api/references/[kind]/[id]/route";
 const suffix = randomUUID().slice(0, 8);
 let direction: SafeUser;
 let count = 0;
+// These scenarios edit a freshly read user; stale drafts are covered separately.
+async function updateUser(actor: SafeUser, id: string, input: UserInput) {
+  const { version } = await prisma.user.findUniqueOrThrow({
+    where: { id },
+    select: { version: true },
+  });
+  return updateUserVersioned(actor, id, { ...input, version });
+}
 const unitData = (name: string) => ({
   name: `Unidade Fictícia ${name} ${suffix}`,
   code: `F2-${suffix}-${++count}`,

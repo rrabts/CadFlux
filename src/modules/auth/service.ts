@@ -42,6 +42,9 @@ export async function authenticate(input: unknown) {
       const limit = await tx.loginRateLimit.findUniqueOrThrow({ where: { key } });
       const expired = now.getTime() - limit.windowStartedAt.getTime() > 15 * 60 * 1000;
       if (!expired && limit.attempts >= 10) return { error: 429 } as const;
+      // Serialize credential checks/session issuance with password changes,
+      // while allowing foreign-key checks from concurrent audit/logout writes.
+      await tx.$queryRaw`SELECT id FROM "User" WHERE email = ${email} FOR NO KEY UPDATE`;
       const user = await tx.user.findUnique({ where: { email } });
       const valid = await verifyPassword(
         password,
@@ -156,6 +159,7 @@ export async function changePassword(actor: SafeUser, input: unknown) {
   const passwordHash = await hashPassword(newPassword);
   await prisma.$transaction(
     async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${actor.id} FOR NO KEY UPDATE`;
       const user = await tx.user.findUniqueOrThrow({ where: { id: actor.id } });
       if (user.status !== UserStatus.ACTIVE) throw new AppError(401, "Entre para continuar.");
       if (!(await verifyPassword(currentPassword, user.passwordHash)))
@@ -172,7 +176,7 @@ export async function changePassword(actor: SafeUser, input: unknown) {
         entityId: user.id,
       });
     },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
   );
 }
 // Delivery and MFA verification remain explicit interfaces for later integration.

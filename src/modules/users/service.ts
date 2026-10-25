@@ -8,6 +8,7 @@ import { writeAudit } from "@/modules/audit/service";
 import {
   userFiltersSchema,
   userInputSchema,
+  userUpdateSchema,
   normalizeFunctionalIdentifier,
   type UserInput,
 } from "./schema";
@@ -88,12 +89,17 @@ export async function createUser(actor: SafeUser, input: unknown) {
   });
 }
 export async function updateUser(actor: SafeUser, id: string, raw: unknown) {
-  const input = userInputSchema.parse(raw);
+  const { version, ...input } = userUpdateSchema.parse(raw);
   return prisma.$transaction(
     async (tx) => {
       await authorizeAdministration(tx, actor, "users:manage");
       const previous = await tx.user.findUnique({ where: { id }, select: safeUserSelect });
       if (!previous) throw new AppError(404, "Usuário não encontrado.");
+      if (version !== previous.version)
+        throw new AppError(
+          409,
+          "Este usuário foi alterado. Recarregue o cadastro antes de salvar.",
+        );
       if (
         actor.id === id &&
         (input.accessProfile !== previous.accessProfile || input.status !== previous.status)
@@ -121,9 +127,10 @@ export async function updateUser(actor: SafeUser, id: string, raw: unknown) {
       const { additionalUnitIds, ...fields } = input;
       const unitsChanged = JSON.stringify(previousIds) !== JSON.stringify(nextIds);
       const user = await tx.user.update({
-        where: { id },
+        where: { id, version },
         data: {
           ...fields,
+          version: { increment: 1 },
           ...(additionalUnitIds !== undefined
             ? { additionalUnits: { deleteMany: {}, create: nextIds.map((unitId) => ({ unitId })) } }
             : {}),

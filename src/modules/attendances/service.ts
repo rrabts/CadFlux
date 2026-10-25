@@ -4,6 +4,7 @@ import type { Attendance as AttendanceRecord } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { writeAudit } from "@/modules/audit/service";
+import { auditPage } from "@/modules/audit/pagination";
 import { safeUserSelect, type SafeUser } from "@/modules/users/types";
 import { assertPermission, type Action } from "@/modules/permissions/service";
 import { dateInTimezone, weekStart } from "./contracts";
@@ -145,17 +146,18 @@ export async function listAttendances(actor: SafeUser, raw: unknown) {
     return { items, total, page: filters.page, pageSize: 50 };
   });
 }
-export async function getAttendance(actor: SafeUser, id: string) {
+export async function getAttendance(actor: SafeUser, id: string, cursor?: string) {
   return prisma.$transaction(async (tx) => {
     const current = await currentActor(tx, actor, "attendances:read");
     const item = await findVisible(tx, current, id);
     // Only read history after checking ownership; never expose foreign audit values.
-    const history = await tx.auditLog.findMany({
-      where: { entityType: "Attendance", entityId: id },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 100,
-      include: { actor: { select: { name: true } } },
-    });
+    const history = await auditPage(
+      tx,
+      { entityType: "Attendance", entityId: id },
+      cursor,
+      100,
+      false,
+    );
     const editable =
       !item.cancelledAt &&
       (current.accessProfile === "DIRECTION" ||
@@ -164,7 +166,8 @@ export async function getAttendance(actor: SafeUser, id: string) {
     return {
       item,
       editable,
-      history: history.map(({ actor, ...entry }) => ({ ...entry, actorUser: actor })),
+      history: history.entries,
+      nextHistoryCursor: history.nextHistoryCursor,
     };
   });
 }

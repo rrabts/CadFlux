@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Copy, Plus, Search, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -81,7 +81,12 @@ export function UserList() {
   });
   const [appliedFilters, setAppliedFilters] = useState(filters);
   const [pagination, setPagination] = useState({ total: 0, page: 1, pageSize: 50 });
+  const requestSequence = useRef(0);
+  const invalidateRequests = useCallback(() => {
+    requestSequence.current++;
+  }, []);
   async function load(next = filters, nextPage = 1) {
+    const sequence = ++requestSequence.current;
     setLoading(true);
     setError("");
     try {
@@ -90,35 +95,40 @@ export function UserList() {
         if (value) query.set(key, value);
       });
       const result = await api<UserListResult>("/api/users?" + query.toString());
+      if (sequence !== requestSequence.current) return;
       setUsers(result.users);
       setPagination({ total: result.total, page: result.page, pageSize: result.pageSize });
       setAppliedFilters(next);
     } catch (err) {
-      setError(errorMessage(err));
+      if (sequence === requestSequence.current) setError(errorMessage(err));
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
   }
   useEffect(() => {
     let live = true;
+    const sequence = ++requestSequence.current;
     Promise.all([api<UserListResult>("/api/users"), api<References>("/api/references")])
       .then(([result, references]) => {
         if (live) {
-          setUsers(result.users);
-          setPagination({ total: result.total, page: result.page, pageSize: result.pageSize });
           setRefs(references);
+          if (sequence === requestSequence.current) {
+            setUsers(result.users);
+            setPagination({ total: result.total, page: result.page, pageSize: result.pageSize });
+          }
         }
       })
       .catch((err) => {
-        if (live) setError(errorMessage(err));
+        if (live && sequence === requestSequence.current) setError(errorMessage(err));
       })
       .finally(() => {
-        if (live) setLoading(false);
+        if (live && sequence === requestSequence.current) setLoading(false);
       });
     return () => {
       live = false;
+      invalidateRequests();
     };
-  }, []);
+  }, [invalidateRequests]);
   function search(event: FormEvent) {
     event.preventDefault();
     void load();
@@ -330,6 +340,7 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
   const [data, setData] = useState<UserInput>(empty);
   const [user, setUser] = useState<SafeUser | null>(null);
   const [history, setHistory] = useState<AuditEntry[]>([]);
+  const [nextHistoryCursor, setNextHistoryCursor] = useState<string | null>(null);
   const [refs, setRefs] = useState<References>({ units: [], categories: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -348,13 +359,16 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
         if (!live) return;
         setRefs(references);
         if (userId) {
-          const result = await api<{ user: SafeUser; history: AuditEntry[] }>(
-            "/api/users/" + userId,
-          );
+          const result = await api<{
+            user: SafeUser;
+            history: AuditEntry[];
+            nextHistoryCursor: string | null;
+          }>("/api/users/" + userId);
           if (!live) return;
           setUser(result.user);
           setData(toInput(result.user));
           setHistory(result.history);
+          setNextHistoryCursor(result.nextHistoryCursor);
         } else {
           setData({
             ...empty,
@@ -378,13 +392,14 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
   }
   async function save(event: FormEvent) {
     event.preventDefault();
+    if (userId && !user) return;
     setSaving(true);
     setError("");
     try {
       if (userId) {
         const result = await api<{ user: SafeUser }>("/api/users/" + userId, {
           method: "PATCH",
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, version: user!.version }),
         });
         if (
           userId === viewerId &&
@@ -398,8 +413,11 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
         }
         setUser(result.user);
         setData(toInput(result.user));
-        const detail = await api<{ history: AuditEntry[] }>("/api/users/" + userId);
+        const detail = await api<{ history: AuditEntry[]; nextHistoryCursor: string | null }>(
+          "/api/users/" + userId,
+        );
         setHistory(detail.history);
+        setNextHistoryCursor(detail.nextHistoryCursor);
         toast.success("Usuário atualizado.");
         router.refresh();
       } else {
@@ -428,6 +446,7 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
     try {
       const next = {
         ...toInput(user),
+        version: user.version,
         status: (user.status === "ACTIVE" ? "INACTIVE" : "ACTIVE") as UserStatus,
       };
       const result = await api<{ user: SafeUser }>("/api/users/" + user.id, {
@@ -436,8 +455,11 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
       });
       setUser(result.user);
       setData(toInput(result.user));
-      const detail = await api<{ history: AuditEntry[] }>("/api/users/" + user.id);
+      const detail = await api<{ history: AuditEntry[]; nextHistoryCursor: string | null }>(
+        "/api/users/" + user.id,
+      );
       setHistory(detail.history);
+      setNextHistoryCursor(detail.nextHistoryCursor);
       setConfirm(false);
       toast.success(result.user.status === "ACTIVE" ? "Usuário ativado." : "Usuário inativado.");
       router.refresh();
@@ -659,7 +681,13 @@ export function UserEditor({ userId, viewerId }: { userId?: string; viewerId: st
                     {
                       value: "history",
                       label: "Histórico",
-                      content: <AuditTable entries={history} />,
+                      content: (
+                        <AuditTable
+                          entries={history}
+                          endpoint={`/api/users/${user.id}`}
+                          nextCursor={nextHistoryCursor}
+                        />
+                      ),
                     },
                   ]}
                 />

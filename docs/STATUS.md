@@ -1,3 +1,49 @@
+# Correções da revisão — 24/10/2026
+
+Correção dos seis defeitos confirmados, autorizada nesta conversa. Branch
+`fix/revisao-seis-defeitos`, base `022b4ab`, preparada para pull request à main.
+Sem publicação ou acesso a banco de produção.
+
+- D01: autenticação e troca de senha compartilham lock de linha antes de verificar
+  credenciais. As duas ordens da corrida têm testes determinísticos no PostgreSQL.
+- D02: versão administrativa própria de User; PATCH exige versão esperada e devolve
+  409 para edição antiga. Login e preferência operacional não avançam essa versão.
+- D03: cargas antigas não atualizam dados, erros ou loading das listas; cobertura
+  Playwright para usuários, categorias e falha inicial atrasada.
+- D04: cursores createdAt/id, limite por resposta e continuação na interface de todos
+  os históricos; autorização por página e testes além de 200/100 eventos.
+- D05: seed reutiliza categorias renomeadas por caixa, preservando ID, nome e status.
+- D06: collation builtin pg_c_utf8 nos nomes de categorias, benefícios e tipos,
+  inclusive em clusters C. Preflight recusa colisões sem mesclar ou apagar dados.
+
+Migrations novas: `20261024110000_user_version`,
+`20261024120000_unicode_names` e `20261024130000_audit_cursor_indexes`.
+O índice antigo de histórico por entidade foi substituído pelo índice com desempate
+por id. São sete migrations no total; nenhuma tabela nova. PostgreSQL 17+ UTF8 é
+necessário para pg_c_utf8; validado com 18.4. Bancos com colisões exigem resolução
+explícita antes de reaplicar a migration.
+
+Validação local Windows, Node 22.22.3 / pnpm 10.28.2 / PostgreSQL 18.4:
+
+| Verificação | Resultado |
+| --- | --- |
+| Dois bancos fictícios novos, schemas inicialmente vazios | Confirmado |
+| Sete migrations e seed em ambos | Passou |
+| Setup repetido e resumos do seed | Preservados integralmente |
+| Prisma validate, lint sem avisos e typecheck | Passaram |
+| Vitest completo | 150 testes em 14 arquivos passaram |
+| Regressão final de autenticação | Dois cenários concorrentes passaram |
+| Build de produção | Passou |
+| Playwright/Edge | 24 cenários passaram; saída 0 |
+| Supervisor Linux | Três testes SKIP no Windows; não equivalem a aprovação |
+
+Os testes usam apenas cadflux_fix_20261024 e cadflux_fix_test_20261024, novos e
+fictícios, em 127.0.0.1:55439. Os bancos da revisão anterior foram preservados.
+Servidores encerrados; portas 3100 e 55439 conferidas livres.
+Esta evidência é local; não representa CI remoto aprovado nem implantação.
+
+---
+
 # Fase 4 — entrega validada em 23/10/2026
 
 Implementação autorizada por Roberto após a especificação, com “Prossiga”.

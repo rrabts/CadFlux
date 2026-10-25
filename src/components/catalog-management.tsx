@@ -15,7 +15,11 @@ export function CatalogPage({ kind }: { kind: "benefits" | "types" }) {
     [search, setSearch] = useState(""),
     [reload, setReload] = useState(0);
   const [edit, setEdit] = useState<Item | null>(null),
-    [history, setHistory] = useState<AuditEntry[] | null>(null),
+    [history, setHistory] = useState<{
+      entries: AuditEntry[];
+      endpoint: string;
+      nextCursor: string | null;
+    } | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [loaded, setLoaded] = useState("");
@@ -68,10 +72,9 @@ export function CatalogPage({ kind }: { kind: "benefits" | "types" }) {
   }
   async function showHistory(item: Item) {
     try {
-      const d = await api<{ history: AuditEntry[] }>(
-        `/api/catalog/${kind}/${item.id ?? item.code}`,
-      );
-      setHistory(d.history);
+      const endpoint = `/api/catalog/${kind}/${item.id ?? item.code}`;
+      const d = await api<{ history: AuditEntry[]; nextHistoryCursor: string | null }>(endpoint);
+      setHistory({ entries: d.history, endpoint, nextCursor: d.nextHistoryCursor });
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -241,7 +244,11 @@ export function CatalogPage({ kind }: { kind: "benefits" | "types" }) {
         }}
         title="Histórico do cadastro"
       >
-        <AuditTable entries={history ?? []} />
+        <AuditTable
+          entries={history?.entries ?? []}
+          endpoint={history?.endpoint}
+          nextCursor={history?.nextCursor}
+        />
       </Modal>
     </>
   );
