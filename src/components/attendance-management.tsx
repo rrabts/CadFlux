@@ -355,7 +355,12 @@ const blank = (today: string): AttendanceInput => ({
   crowded: false,
 });
 type Reusable = Pick<AttendanceInput, "name" | "cpf" | "responsibleRole" | "phone" | "familyCode">;
-type Detail = { item: Attendance; history: AuditEntry[]; editable: boolean };
+type Detail = {
+  item: Attendance;
+  history: AuditEntry[];
+  nextHistoryCursor: string | null;
+  editable: boolean;
+};
 export function AttendanceEditor({
   id,
   today = "",
@@ -871,7 +876,11 @@ export function AttendanceEditor({
               Versão {detail.item.version} · {detail.item.timezone}
             </span>
           </div>
-          <AuditTable entries={detail.history} />
+          <AuditTable
+            entries={detail.history}
+            endpoint={`/api/attendances/${id}`}
+            nextCursor={detail.nextHistoryCursor}
+          />
         </Card>
       )}
       <ConfirmDialog

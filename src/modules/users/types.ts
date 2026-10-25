@@ -10,6 +10,7 @@ export const safeUserSelect = {
   professionalCategoryId: true,
   primaryUnitId: true,
   status: true,
+  version: true,
   mustChangePassword: true,
   lastLoginAt: true,
   createdAt: true,

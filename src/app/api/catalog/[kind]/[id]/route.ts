@@ -7,7 +7,14 @@ export async function GET(request: Request, context: Context) {
   try {
     const actor = await requireApiUser(request, "reference:read");
     const p = await context.params;
-    return json(await catalogHistory(actor, catalogKind.parse(p.kind), p.id));
+    return json(
+      await catalogHistory(
+        actor,
+        catalogKind.parse(p.kind),
+        p.id,
+        new URL(request.url).searchParams.get("cursor") ?? undefined,
+      ),
+    );
   } catch (e) {
     return apiError(e);
   }

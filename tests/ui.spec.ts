@@ -796,3 +796,148 @@ test("Fase 4: indicadores conciliam com API, mobile e bloqueios de perfil", asyn
     ),
   ).toBe(403);
 });
+
+for (const target of [
+  { label: "usuários", page: "/users", api: "/api/users" },
+  { label: "categorias", page: "/categories", api: "/api/references/categories" },
+]) {
+  test(`D03: ${target.label} mantém a consulta mais recente após resposta atrasada`, async ({
+    page,
+  }) => {
+    await login(page);
+    await expect(page).toHaveURL(/\/dashboard/);
+    await page.goto(target.page);
+    await expect(page.locator("tbody tr")).not.toHaveCount(0);
+    const query = "filtro-inexistente-" + randomUUID();
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(`**${target.api}?*`, async (route) => {
+      if (new URL(route.request().url()).searchParams.get("q") !== query) {
+        await route.continue();
+        return;
+      }
+      const response = await route.fetch();
+      await held;
+      await route.fulfill({ response });
+    });
+    try {
+      await page.getByLabel("Pesquisar", { exact: true }).fill(query);
+      const oldStarted = page.waitForRequest(
+        (request) =>
+          new URL(request.url()).pathname === target.api &&
+          new URL(request.url()).searchParams.get("q") === query,
+      );
+      await page.getByRole("button", { name: "Filtrar", exact: true }).click();
+      await oldStarted;
+      const cleared = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === target.api &&
+          !new URL(response.url()).searchParams.has("q"),
+      );
+      await page.getByRole("button", { name: "Limpar", exact: true }).click();
+      expect((await cleared).status()).toBe(200);
+      await expect(page.locator("tbody tr")).not.toHaveCount(0);
+      const oldFinished = page.waitForEvent("requestfinished", {
+        predicate: (request) =>
+          new URL(request.url()).pathname === target.api &&
+          new URL(request.url()).searchParams.get("q") === query,
+      });
+      release();
+      await oldFinished;
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+          ),
+      );
+      await expect(page.getByLabel("Pesquisar", { exact: true })).toHaveValue("");
+      await expect(page.locator("tbody tr")).not.toHaveCount(0);
+      await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
+    } finally {
+      release();
+      await page.unrouteAll({ behavior: "wait" });
+    }
+  });
+}
+
+test("D03: falha atrasada da carga inicial não substitui consulta já concluída", async ({
+  page,
+}) => {
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/references/categories", async (route) => {
+    await held;
+    await route.fulfill({
+      status: 500,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "Falha antiga de teste" }),
+    });
+  });
+  try {
+    const initial = page.waitForRequest(
+      (request) =>
+        new URL(request.url()).pathname === "/api/references/categories" &&
+        !new URL(request.url()).search,
+    );
+    await page.goto("/categories");
+    await initial;
+    const cleared = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/references/categories" &&
+        new URL(response.url()).searchParams.get("page") === "1",
+    );
+    await page.getByRole("button", { name: "Limpar", exact: true }).click();
+    expect((await cleared).status()).toBe(200);
+    await expect(page.locator("tbody tr")).not.toHaveCount(0);
+    const oldFinished = page.waitForEvent("requestfinished", {
+      predicate: (request) =>
+        new URL(request.url()).pathname === "/api/references/categories" &&
+        !new URL(request.url()).search,
+    });
+    release();
+    await oldFinished;
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
+    await expect(page.locator("tbody tr")).not.toHaveCount(0);
+  } finally {
+    release();
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
+test("D04: auditoria carrega eventos além dos primeiros 200", async ({ page }) => {
+  const testUrl = process.env.DATABASE_URL_TEST!;
+  if (isSameDatabase(process.env.DATABASE_URL!, testUrl))
+    throw new Error("Banco de testes separado exigido.");
+  const fixture = new PrismaClient({ datasourceUrl: testUrl });
+  const action = "HISTORICO_FICTICIO_UI_" + randomUUID();
+  try {
+    const start = Date.now() + 60_000;
+    await fixture.auditLog.createMany({
+      data: Array.from({ length: 205 }, (_, index) => ({
+        action,
+        entityType: "ReviewFixture",
+        createdAt: new Date(start + index),
+      })),
+    });
+  } finally {
+    await fixture.$disconnect();
+  }
+  await login(page);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/audit");
+  await expect(page.getByRole("cell", { name: action, exact: true })).toHaveCount(200);
+  await page.getByRole("button", { name: "Carregar registros anteriores", exact: true }).click();
+  await expect(page.getByRole("cell", { name: action, exact: true })).toHaveCount(205);
+});

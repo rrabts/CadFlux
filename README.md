@@ -1,5 +1,32 @@
 # CadFlux V1.1 — Fases 1 a 4
 
+## Correções da revisão de 24/10/2026
+
+As correções desta branch preservam as Fases 1–4 e não publicam produção:
+
+- Login e troca de senha serializam a leitura das credenciais e a emissão/revogação
+  de sessões na linha do usuário. Um login concorrente não conserva acesso com a senha anterior.
+- `PATCH /api/users/[id]` exige `version` do cadastro lido. Edições desatualizadas
+  retornam 409; criação continua sem versão. Login e preferência de unidade não
+  alteram a versão administrativa.
+- Listas de usuários e referências descartam respostas e erros de consultas antigas.
+- Auditoria e históricos oferecem “Carregar registros anteriores”. As APIs mantêm
+  `entries`/`history` e acrescentam `nextHistoryCursor`; envie-o como `cursor` para
+  continuar. Cada página mantém as verificações de sessão, perfil e propriedade.
+- Seed reutiliza categorias com grafia alterada por caixa, inclusive acentos,
+  sem sobrescrever ID, nome ou estado de cadastros existentes.
+- Novas migrations adicionam versão administrativa e índices de histórico e
+  aplicam `pg_catalog.pg_c_utf8` aos nomes de categorias, benefícios e tipos.
+  A comparação Unicode funciona também em clusters previamente criados com locale `C`.
+
+O banco deve ser PostgreSQL **17+ com encoding UTF8**, validado aqui com 18.4.
+A migration de collation aborta se encontrar nomes que passariam a ser duplicados;
+nessa situação, é necessária resolução explícita antes de tentar novamente.
+Ela não mescla, apaga nem renomeia dados e não exige recriar o cluster.
+Consulte os resultados efetivamente executados em [STATUS](docs/STATUS.md).
+
+---
+
 Aplicação institucional para autenticação, autorização, gestão e registro de
 atendimentos do Cadastro Único. A Fase 3 foi incorporada à `main` em 22/10/2026 pelo
 [PR #7](https://github.com/rrabts/CadFlux/pull/7). Apenas dados fictícios. A Fase 4 acrescenta indicadores verificáveis, benefícios,
@@ -26,7 +53,7 @@ sua presença no código não comprova que a regra esteja ativa.
 
 ## Executar localmente
 
-Requisitos: Node.js 22.12+ (validado com 24.19.0), pnpm 10.28.2 e PostgreSQL real. O lockfile deve ser preservado.
+Requisitos: Node.js 22.12+ (validado com 22.22.3 e 24.19.0), pnpm 10.28.2 e PostgreSQL 17+ UTF8 real. O lockfile deve ser preservado.
 
 ```sh
 npm install --global pnpm@10.28.2

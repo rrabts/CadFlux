@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { writeAudit } from "@/modules/audit/service";
+import { auditPage } from "@/modules/audit/pagination";
 import { authorizeAdministration } from "@/modules/permissions/administration";
 import { assertPermission } from "@/modules/permissions/service";
 import type { SafeUser } from "@/modules/users/types";
@@ -70,20 +71,24 @@ export async function listReferencePage(actor: SafeUser, kind: ReferenceKind, ra
   };
 }
 
-export async function getReference(actor: SafeUser, kind: ReferenceKind, id: string) {
+export async function getReference(
+  actor: SafeUser,
+  kind: ReferenceKind,
+  id: string,
+  cursor?: string,
+) {
   assertPermission(actor, "reference:read");
   const item =
     kind === "units"
       ? await prisma.unit.findUnique({ where: { id } })
       : await prisma.professionalCategory.findUnique({ where: { id } });
   if (!item) throw new AppError(404, "Cadastro não encontrado.");
-  const history = await prisma.auditLog.findMany({
-    where: { entityType: kind === "units" ? "Unit" : "ProfessionalCategory", entityId: id },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    take: 100,
-    include: { actor: { select: { name: true, email: true } } },
-  });
-  return { item, history: history.map(({ actor, ...entry }) => ({ ...entry, actorUser: actor })) };
+  const history = await auditPage(
+    prisma,
+    { entityType: kind === "units" ? "Unit" : "ProfessionalCategory", entityId: id },
+    cursor,
+  );
+  return { item, history: history.entries, nextHistoryCursor: history.nextHistoryCursor };
 }
 
 export async function saveReference(

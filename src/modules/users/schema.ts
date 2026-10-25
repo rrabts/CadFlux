@@ -60,6 +60,10 @@ export const userInputSchema = z
 
 export type UserInput = z.infer<typeof userInputSchema>;
 
+export const userUpdateSchema = userInputSchema.safeExtend({
+  version: z.number().int().min(1),
+});
+
 export const userFiltersSchema = z.object({
   page: z.coerce.number().int().min(1).max(100000).default(1),
   q: z.string().trim().max(120).optional(),

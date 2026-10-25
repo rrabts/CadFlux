@@ -10,7 +10,7 @@ import {
 } from "@/modules/auth/service";
 import {
   createUser,
-  updateUser,
+  updateUser as updateUserService,
   listUsers,
   listUsersPage,
   safeUserSelect,
@@ -22,6 +22,15 @@ import { POST as logoutRoute } from "@/app/api/auth/logout/route";
 import type { SafeUser } from "@/modules/users/types";
 import { isValidCpf, type UserInput } from "@/modules/users/schema";
 let direction: SafeUser;
+// Existing workflow cases always edit the latest snapshot. Stale submissions
+// have their own regression suite and intentionally bypass this helper.
+async function updateUser(actor: SafeUser, id: string, raw: object) {
+  const { version } = await prisma.user.findUniqueOrThrow({
+    where: { id },
+    select: { version: true },
+  });
+  return updateUserService(actor, id, { ...raw, version });
+}
 let unit: string, category: string;
 const suffix = randomUUID().slice(0, 8);
 function input(name: string): UserInput {

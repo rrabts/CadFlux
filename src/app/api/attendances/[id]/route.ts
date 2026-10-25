@@ -9,6 +9,7 @@ export async function GET(request: Request, context: Context) {
       await getAttendance(
         await requireApiUser(request, "attendances:read"),
         (await context.params).id,
+        new URL(request.url).searchParams.get("cursor") ?? undefined,
       ),
     );
   } catch (error) {

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { writeAudit } from "@/modules/audit/service";
+import { auditPage } from "@/modules/audit/pagination";
 import type { SafeUser } from "@/modules/users/types";
 import { operationActor } from "@/modules/operations/service";
 import { kindLabels } from "@/modules/attendances/contracts";
@@ -55,16 +56,17 @@ export async function listCatalog(actor: SafeUser, kind: Kind, raw: unknown) {
     { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
   );
 }
-export async function catalogHistory(actor: SafeUser, kind: Kind, id: string) {
+export async function catalogHistory(actor: SafeUser, kind: Kind, id: string, cursor?: string) {
   return prisma.$transaction(async (tx) => {
     await operationActor(tx, actor, "reference:read");
-    const history = await tx.auditLog.findMany({
-      where: { entityType: kind === "benefits" ? "Benefit" : "AttendanceType", entityId: id },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 100,
-      include: { actor: { select: { name: true } } },
-    });
-    return { history: history.map(({ actor, ...entry }) => ({ ...entry, actorUser: actor })) };
+    const history = await auditPage(
+      tx,
+      { entityType: kind === "benefits" ? "Benefit" : "AttendanceType", entityId: id },
+      cursor,
+      100,
+      false,
+    );
+    return { history: history.entries, nextHistoryCursor: history.nextHistoryCursor };
   });
 }
 export async function saveCatalog(actor: SafeUser, kind: Kind, raw: unknown, id?: string) {

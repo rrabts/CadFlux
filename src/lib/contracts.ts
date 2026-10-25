@@ -19,6 +19,7 @@ export interface SafeUser {
   primaryUnitId: string;
   additionalUnitIds?: string[];
   status: UserStatus;
+  version: number;
   mustChangePassword: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;

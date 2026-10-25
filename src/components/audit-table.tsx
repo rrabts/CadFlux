@@ -1,7 +1,8 @@
 "use client";
-import { formatDate } from "@/lib/api-client";
+import { useState } from "react";
+import { api, errorMessage, formatDate } from "@/lib/api-client";
 import type { AuditEntry } from "@/lib/contracts";
-import { EmptyState } from "./ui";
+import { Alert, Button, EmptyState } from "./ui";
 const labels: Record<string, string> = {
   CATALOG_CREATED: "Cadastro operacional criado",
   CATALOG_UPDATED: "Cadastro operacional alterado",
@@ -35,8 +36,42 @@ const labels: Record<string, string> = {
   PASSWORD_CHANGED: "Senha alterada",
   IMPORT_PREVIEW: "Prévia de importação",
 };
-export function AuditTable({ entries }: { entries: AuditEntry[] }) {
-  if (!entries.length)
+type AuditTableProps = { entries: AuditEntry[]; endpoint?: string; nextCursor?: string | null };
+export function AuditTable(props: AuditTableProps) {
+  // A fresh query/history resets previously appended pages; old responses belong to the unmounted instance.
+  const key = `${props.endpoint}:${props.entries[0]?.id}:${props.entries.at(-1)?.id}:${props.entries.length}:${props.nextCursor}`;
+  return <AuditPages key={key} {...props} />;
+}
+function AuditPages({ entries, endpoint, nextCursor = null }: AuditTableProps) {
+  const [rows, setRows] = useState(entries);
+  const [cursor, setCursor] = useState(nextCursor);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  async function more() {
+    if (!cursor || !endpoint || loading) return;
+    setLoading(true);
+    setError("");
+    try {
+      const page = await api<{
+        entries?: AuditEntry[];
+        history?: AuditEntry[];
+        nextHistoryCursor: string | null;
+      }>(`${endpoint}${endpoint.includes("?") ? "&" : "?"}cursor=${encodeURIComponent(cursor)}`);
+      setRows((previous) => {
+        const existing = new Set(previous.map((entry) => entry.id));
+        return [
+          ...previous,
+          ...(page.entries ?? page.history ?? []).filter((entry) => !existing.has(entry.id)),
+        ];
+      });
+      setCursor(page.nextHistoryCursor);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+  if (!rows.length)
     return (
       <EmptyState
         compact
@@ -45,42 +80,58 @@ export function AuditTable({ entries }: { entries: AuditEntry[] }) {
       />
     );
   return (
-    <div className="table-container">
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Data e hora</th>
-            <th>Ação</th>
-            <th>Responsável</th>
-            <th>Registro</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry) => (
-            <tr key={entry.id}>
-              <td>{formatDate(entry.createdAt, true)}</td>
-              <td>{labels[entry.action] || entry.action}</td>
-              <td>{entry.actorUser?.name || "Sistema"}</td>
-              <td>
-                <details>
-                  <summary>Ver alterações</summary>
-                  <pre className="audit-values">
-                    {JSON.stringify(
-                      {
-                        anterior: entry.previousValue,
-                        atual: entry.newValue,
-                        contexto: entry.metadata,
-                      },
-                      null,
-                      2,
-                    )}
-                  </pre>
-                </details>
-              </td>
+    <>
+      <div className="table-container">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Data e hora</th>
+              <th>Ação</th>
+              <th>Responsável</th>
+              <th>Registro</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((entry) => (
+              <tr key={entry.id}>
+                <td>{formatDate(entry.createdAt, true)}</td>
+                <td>{labels[entry.action] || entry.action}</td>
+                <td>{entry.actorUser?.name || "Sistema"}</td>
+                <td>
+                  <details>
+                    <summary>Ver alterações</summary>
+                    <pre className="audit-values">
+                      {JSON.stringify(
+                        {
+                          anterior: entry.previousValue,
+                          atual: entry.newValue,
+                          contexto: entry.metadata,
+                        },
+                        null,
+                        2,
+                      )}
+                    </pre>
+                  </details>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {error && <Alert variant="error">{error}</Alert>}
+      {endpoint && (
+        <div className="table-footer">
+          <span aria-live="polite">
+            {rows.length} registros carregados
+            {cursor ? "; há registros anteriores." : "; histórico completo."}
+          </span>
+          {cursor && (
+            <Button type="button" variant="secondary" loading={loading} onClick={() => void more()}>
+              Carregar registros anteriores
+            </Button>
+          )}
+        </div>
+      )}
+    </>
   );
 }

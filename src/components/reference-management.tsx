@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { api, errorMessage } from "@/lib/api-client";
@@ -35,11 +35,21 @@ export function ReferencePage({ kind }: { kind: "units" | "categories" }) {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [confirm, setConfirm] = useState<ReferenceItem | null>(null);
-  const [history, setHistory] = useState<{ title: string; entries: AuditEntry[] } | null>(null);
+  const [history, setHistory] = useState<{
+    id: string;
+    title: string;
+    entries: AuditEntry[];
+    nextCursor: string | null;
+  } | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
+  const requestSequence = useRef(0);
+  const invalidateRequests = useCallback(() => {
+    requestSequence.current++;
+  }, []);
   const load = useCallback(
     async (q: string, status: string, page: number) => {
+      const sequence = ++requestSequence.current;
       setLoading(true);
       setError("");
       try {
@@ -47,35 +57,38 @@ export function ReferencePage({ kind }: { kind: "units" | "categories" }) {
         if (q) query.set("q", q);
         if (status) query.set("status", status);
         let response = await api<Result>(`/api/references/${kind}?${query}`);
+        if (sequence !== requestSequence.current) return;
         if (page > 1 && response.items.length === 0) {
           query.set("page", String(Math.max(1, Math.ceil(response.total / response.pageSize))));
           response = await api<Result>(`/api/references/${kind}?${query}`);
         }
-        setResult(response);
+        if (sequence === requestSequence.current) setResult(response);
       } catch (err) {
-        setError(errorMessage(err));
+        if (sequence === requestSequence.current) setError(errorMessage(err));
       } finally {
-        setLoading(false);
+        if (sequence === requestSequence.current) setLoading(false);
       }
     },
     [kind],
   );
   useEffect(() => {
     let live = true;
+    const sequence = ++requestSequence.current;
     api<Result>(`/api/references/${kind}`)
       .then((response) => {
-        if (live) setResult(response);
+        if (live && sequence === requestSequence.current) setResult(response);
       })
       .catch((err) => {
-        if (live) setError(errorMessage(err));
+        if (live && sequence === requestSequence.current) setError(errorMessage(err));
       })
       .finally(() => {
-        if (live) setLoading(false);
+        if (live && sequence === requestSequence.current) setLoading(false);
       });
     return () => {
       live = false;
+      invalidateRequests();
     };
-  }, [kind]);
+  }, [kind, invalidateRequests]);
   function openEditor(item?: ReferenceItem) {
     setFormError("");
     setEditing(item ? { id: item.id } : {});
@@ -132,13 +145,17 @@ export function ReferencePage({ kind }: { kind: "units" | "categories" }) {
     }
   }
   async function showHistory(item: ReferenceItem) {
-    setHistory({ title: item.name, entries: [] });
+    setHistory({ id: item.id, title: item.name, entries: [], nextCursor: null });
     setHistoryLoading(true);
     setHistoryError("");
     try {
-      const response = await api<{ history: AuditEntry[] }>(`/api/references/${kind}/${item.id}`);
+      const response = await api<{ history: AuditEntry[]; nextHistoryCursor: string | null }>(
+        `/api/references/${kind}/${item.id}`,
+      );
       setHistory((current) =>
-        current?.title === item.name ? { ...current, entries: response.history } : current,
+        current?.id === item.id
+          ? { ...current, entries: response.history, nextCursor: response.nextHistoryCursor }
+          : current,
       );
     } catch (err) {
       setHistoryError(errorMessage(err));
@@ -414,7 +431,11 @@ export function ReferencePage({ kind }: { kind: "units" | "categories" }) {
         ) : historyLoading ? (
           <Skeleton />
         ) : (
-          <AuditTable entries={history?.entries ?? []} />
+          <AuditTable
+            entries={history?.entries ?? []}
+            endpoint={history ? `/api/references/${kind}/${history.id}` : undefined}
+            nextCursor={history?.nextCursor}
+          />
         )}
       </Modal>
     </>
